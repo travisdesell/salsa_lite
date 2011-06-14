@@ -1,0 +1,1151 @@
+/*
+	Salsa 2.1 Grammar
+	
+	Authors: Carlos Varela, Travis Desell
+ */
+
+options {
+	JAVA_UNICODE_ESCAPE = true;
+	TRACK_TOKENS = true;
+	NODE_SCOPE_HOOK = true;
+	NODE_FACTORY = true;
+	NODE_PACKAGE = "salsa.compiler";
+}
+
+PARSER_BEGIN(SalsaParser)
+	package salsa.compiler;
+
+	import salsa.compiler.definitions.*;
+
+	import java.util.Vector;
+
+	public class SalsaParser {
+
+		public static void main(String args[]) {
+			SalsaParser parser;
+
+			if (args.length == 0) {
+				System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Reading from standard input . . .");
+
+				parser = new SalsaParser(System.in);
+			} else if (args.length == 1) {
+				System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Reading from file " + args[0] + " . . .");
+
+				try {
+					parser = new SalsaParser(new java.io.FileInputStream(args[0]));
+				} catch (java.io.FileNotFoundException e) {
+					System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  File " + args[0] + " not found.");
+					return;
+				}
+			} else {
+				System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Usage is one of:");
+				System.out.println("         java SalsaParser < inputfile");
+				System.out.println("OR");
+				System.out.println("         java SalsaParser inputfile");
+				return;
+			}
+
+			try {
+				CCompilationUnit cu = parser.CompilationUnit();
+				System.out.println("\n\nSTATE CODE:\n\n" + cu.getStateCode());
+				System.out.println("\n\nREFERENCE CODE:\n\n" + cu.getReferenceCode());
+				
+				System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Salsa program parsed successfully.");
+			} catch (ParseException e) {
+				System.out.println(e.getMessage());
+				System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Encountered errors during parse.");
+			}
+		}
+
+		static int depth = 0;
+		static String getDepth() {
+			String result = "";
+			for (int i = 0; i < depth; i++) result += " ";
+			return result;
+		}
+
+		static void jjtreeOpenNodeScope(SimpleNode n) {
+//			System.out.println(getDepth() + "Opening node: " + SalsaParserTreeConstants.jjtNodeName[n.id]);
+//			depth++;
+		}
+
+		static void jjtreeCloseNodeScope(SimpleNode n) {
+//			depth--;
+//			System.out.println(getDepth() + "Closing node: " + SalsaParserTreeConstants.jjtNodeName[n.id]);
+		}
+	}
+PARSER_END(SalsaParser)
+
+
+/* WHITE SPACE */
+
+SKIP : {
+	" " | "\t" | "\n" | "\r" | "\f"
+}
+
+/* COMMENTS */
+
+MORE : {
+	  "//" : IN_SINGLE_LINE_COMMENT
+	| <"/**" ~["/"]> { input_stream.backup(1); } : IN_FORMAL_COMMENT
+	| "/*" : IN_MULTI_LINE_COMMENT
+}
+
+<IN_SINGLE_LINE_COMMENT> SPECIAL_TOKEN : {
+  <SINGLE_LINE_COMMENT: "\n" | "\r" | "\r\n" > : DEFAULT
+}
+
+<IN_FORMAL_COMMENT> SPECIAL_TOKEN : {
+  <FORMAL_COMMENT: "*/" > : DEFAULT
+}
+
+<IN_MULTI_LINE_COMMENT> SPECIAL_TOKEN : {
+  <MULTI_LINE_COMMENT: "*/" > : DEFAULT
+}
+
+<IN_SINGLE_LINE_COMMENT,IN_FORMAL_COMMENT,IN_MULTI_LINE_COMMENT> MORE : {
+  < ~[] >
+}
+
+/* RESERVED WORDS AND LITERALS */
+
+TOKEN : {
+	  < ACK: "ack" >
+	| < AT: "at" >
+	| < BEHAVIOR: "behavior" >
+	| < BOOLEAN: "boolean" >
+	| < BREAK: "break" >
+	| < BYTE: "byte" >
+	| < CASE: "case" >
+	| < CHAR: "char" >
+	| < CONST: "const" >
+	| < _DEFAULT: "default" >
+	| < DELAY: "delay" >
+	| < DOUBLE: "double" >
+	| < ENUM: "enum" >
+	| < ELSE: "else" >
+	| < ENDIF: "endif" >
+	| < EXTENDS: "extends" >
+	| < FALSE: "false" >
+	| < FLOAT: "float" >
+	| < FOR: "for" >
+	| < IF: "if" >
+	| < IMMUTABLE: "immutable" >
+	| < IMPLEMENTS: "implements" >
+	| < IMPORT: "import" >
+	| < INSTANCEOF: "instanceof" >
+	| < INT: "int" >
+	| < INTERFACE: "interface" >
+	| < LONG: "long" >
+	| < MODULE: "module">
+	| < NEW: "new" >
+	| < NULL: "null" >
+	| < OBJECT: "object" >
+	| < PASS: "pass" >
+	| < PARENT: "parent" >
+	| < PUBLIC: "public" >
+	| < REFERENCE: "reference" >
+	| < REPEAT: "repeat" >
+	| < SELF: "self" >
+	| < SHORT: "short" >
+	| < SWITCH: "switch" >
+	| < _TOKEN: "token" >
+	| < TRUE: "true" >
+	| < VOID: "void" >
+	| < WAITFOR: "waitfor" >
+	| < WHILE: "while" >
+	| < BEGIN_JAVA: "begin_java" >
+	| < END_JAVA: "end_java" >
+}
+
+/* LITERALS */
+
+TOKEN : {
+	  < INTEGER_LITERAL:
+		  <DECIMAL_LITERAL> (["l","L"])?
+		| <HEX_LITERAL> (["l","L"])?
+		| <OCTAL_LITERAL> (["l","L"])?
+	  >
+	| < #DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* >
+	| < #HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
+	| < #OCTAL_LITERAL: "0" (["0"-"7"])* >
+	| < FLOATING_POINT_LITERAL:
+		  (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])?
+		| "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])?
+		| (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])?
+		| (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]
+	  >
+	| < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
+	| < CHARACTER_LITERAL:
+		"'"
+		(   (~["'","\\","\n","\r"])
+			| ("\\"
+				( ["n","t","b","r","f","\\","'","\""]
+				| ["0"-"7"] ( ["0"-"7"] )?
+            	| ["0"-"3"] ["0"-"7"] ["0"-"7"]
+			    )
+			  )
+		)
+		"'"
+	  >
+	| < STRING_LITERAL:
+		"\""
+		(   (~["\"","\\","\n","\r"])
+			| ("\\"
+				( ["n","t","b","r","f","\\","'","\""]
+				| ["0"-"7"] ( ["0"-"7"] )?
+				| ["0"-"3"] ["0"-"7"] ["0"-"7"]
+				)
+			  )
+		)*
+		"\""
+	  >
+}
+
+/* IDENTIFIERS */
+
+TOKEN : {
+	  < IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
+	| < #LETTER:
+		[
+			"\u0024",
+			"\u0041"-"\u005a",
+			"\u005f",
+			"\u0061"-"\u007a",
+			"\u00c0"-"\u00d6",
+			"\u00d8"-"\u00f6",
+			"\u00f8"-"\u00ff",
+			"\u0100"-"\u1fff",
+			"\u3040"-"\u318f",
+			"\u3300"-"\u337f",
+			"\u3400"-"\u3d2d",
+			"\u4e00"-"\u9fff",
+			"\uf900"-"\ufaff"
+		]
+	  >
+	| < #DIGIT:
+		[
+			"\u0030"-"\u0039",
+			"\u0660"-"\u0669",
+			"\u06f0"-"\u06f9",
+			"\u0966"-"\u096f",
+			"\u09e6"-"\u09ef",
+			"\u0a66"-"\u0a6f",
+			"\u0ae6"-"\u0aef",
+			"\u0b66"-"\u0b6f",
+			"\u0be7"-"\u0bef",
+			"\u0c66"-"\u0c6f",
+			"\u0ce6"-"\u0cef",
+			"\u0d66"-"\u0d6f",
+			"\u0e50"-"\u0e59",
+			"\u0ed0"-"\u0ed9",
+			"\u1040"-"\u1049"
+		]
+	  >
+}
+
+/* SEPARATORS */
+
+TOKEN : {
+	  < LPAREN: "(" >
+	| < RPAREN: ")" >
+	| < LBRACE: "{" >
+	| < RBRACE: "}" >
+	| < LBRACKET: "[" >
+	| < RBRACKET: "]" >
+	| < SEMICOLON: ";" >
+	| < COMMA: "," >
+	| < DOT: "." >
+	| < MSG: "<-" >
+}
+
+/* OPERATORS */
+
+TOKEN : {
+	  < ASSIGN: "=" >
+	| < GT: ">" >
+	| < LT: "<" >
+	| < BANG: "!" >
+	| < TILDE: "~" >
+	| < COLON: ":" >
+	| < EQ: "==" >
+	| < LE: "<=" >
+	| < GE: ">=" >
+	| < NE: "!=" >
+	| < SC_OR: "||" >
+	| < SC_AND: "&&" >
+	| < INCR: "++" >
+	| < DECR: "--" >
+	| < PLUS: "+" >
+	| < MINUS: "-" >
+	| < STAR: "*" >
+	| < SLASH: "/" >
+	| < BIT_AND: "&" >
+	| < BIT_OR: "|" >
+	| < XOR: "^" >
+	| < REM: "%" >
+	| < LSHIFT: "<<" >
+	| < RSIGNEDSHIFT: ">>" >
+	| < RUNSIGNEDSHIFT: ">>>" >
+	| < PLUSASSIGN: "+=" >
+	| < MINUSASSIGN: "-=" >
+	| < STARASSIGN: "*=" >
+	| < SLASHASSIGN: "/=" >
+	| < ANDASSIGN: "&=" >
+	| < ORASSIGN: "|=" >
+	| < XORASSIGN: "^=" >
+	| < REMASSIGN: "%=" >
+	| < LSHIFTASSIGN: "<<=" >
+	| < RSIGNEDSHIFTASSIGN: ">>=" >
+	| < RUNSIGNEDSHIFTASSIGN: ">>>=" >
+}
+
+
+/******************************************
+ * THE SALSA LANGUAGE GRAMMAR STARTS HERE *
+ ******************************************/
+
+/*
+ * Program structuring syntax follows.
+ */
+ 
+CCompilationUnit CompilationUnit() : {
+	CCompilationUnit compilation_unit = new CCompilationUnit();
+	CImportDeclaration import_declaration; 
+} {
+	[compilation_unit.module_string = ModuleDeclaration()]
+	(
+		import_declaration = ImportDeclaration()
+		{ compilation_unit.import_declarations.add(import_declaration); }
+	)* 
+
+	[ compilation_unit.java_statement = JavaStatement() ]
+
+	(LOOKAHEAD("behavior") compilation_unit.behavior_declaration = BehaviorDeclaration() | compilation_unit.interface_declaration = InterfaceDeclaration() )
+	<EOF>
+	
+	{ 
+		return compilation_unit; 
+	}
+}
+
+String ModuleDeclaration() : {
+	String module_name;
+} {
+	"module" module_name = Name() ";"
+	{ return module_name; }
+}
+
+String Name() : {
+	String name;
+	Token t;
+} {
+	t = <IDENTIFIER>
+	{ name = t.image; }
+
+	(
+		LOOKAHEAD(".") "."
+		t = <IDENTIFIER>
+		{ name += "." + t.image; }
+	)*
+	{ return name; }
+}
+
+CImportDeclaration ImportDeclaration() : {
+	CImportDeclaration import_declaration = new CImportDeclaration();
+	Token t;
+} {
+	"import"
+	[
+		"object"	{ import_declaration.is_object = true; }
+	] 
+	[
+		"enum"		{ import_declaration.is_enum = true; }
+	]
+	t = <IDENTIFIER> 	{ import_declaration.import_string = t.image; }
+
+	(
+		LOOKAHEAD(".") "." t = <IDENTIFIER>
+		{ import_declaration.import_string += "." + t.image; }
+	)*
+	["." "*" { import_declaration.import_string += ".*"; } ] ";"
+
+	{ return import_declaration; }
+}
+ 
+CInterfaceDeclaration InterfaceDeclaration() : {
+	CInterfaceDeclaration interface_declaration = new CInterfaceDeclaration();
+	CMessageHandler message_handler;
+	CLocalVariableDeclaration variable_declaration;
+	Token t;
+} {
+	"interface" t = <IDENTIFIER>													{ interface_declaration.interface_name = t.image; }
+	["extends" interface_declaration.extends_name = Name()]
+	"{"
+		(
+			  LOOKAHEAD(Type() <IDENTIFIER> FormalParameters()) message_handler = InterfaceMessageHandlerDeclaration()	{ interface_declaration.message_handlers.add(message_handler); }
+			| variable_declaration = StateVariableDeclaration()								{ interface_declaration.variable_declarations.add(variable_declaration); }
+		)*
+	"}"
+	{ return interface_declaration; }
+}
+
+CBehaviorDeclaration BehaviorDeclaration() : {
+	CBehaviorDeclaration behavior_declaration = new CBehaviorDeclaration();
+	Token t;
+	String name;
+	CConstructor constructor;
+	CMessageHandler message_handler;
+	CLocalVariableDeclaration variable_declaration;
+	CEnumeration enumeration;
+} {
+	"behavior" t = <IDENTIFIER>													{ behavior_declaration.behavior_name = t.image; }
+	[
+		"extends" name = Name() 												{ behavior_declaration.extends_name = name; }
+	]
+	[
+		"implements" name = Name()												{ behavior_declaration.implements_names.add(name); }
+		(
+			"," name = Name()												{ behavior_declaration.implements_names.add(name); }
+		)*
+	]
+
+	"{" 
+		[ behavior_declaration.java_statement = JavaStatement() ]
+		(
+		    LOOKAHEAD("enum") enumeration = Enumeration()									{ behavior_declaration.enumerations.add(enumeration); }
+		  | LOOKAHEAD(<IDENTIFIER> FormalParameters()) constructor = ConstructorDeclaration()					{ behavior_declaration.constructors.add(constructor); }
+		  | LOOKAHEAD(["immutable"] Type() <IDENTIFIER> "(") message_handler = MessageHandlerDeclaration()			{ behavior_declaration.message_handlers.add(message_handler); }
+		  | variable_declaration = StateVariableDeclaration() 									{ behavior_declaration.variable_declarations.add(variable_declaration); }
+		)* 
+	"}"
+	{ return behavior_declaration; }
+}
+
+CEnumeration Enumeration() : {
+	CEnumeration enumeration = new CEnumeration();
+	String name;
+	Token t;
+} {
+	"enum"
+	t = <IDENTIFIER>			{ enumeration.name = t.image; }
+	"{"
+		t = <IDENTIFIER>
+		(
+			"," t = <IDENTIFIER>	{ enumeration.fields.add(t.image); }
+		)*
+	"}"
+	
+	{ return enumeration; }
+}
+
+CLocalVariableDeclaration StateVariableDeclaration() : {
+	CLocalVariableDeclaration local_variable_declaration = new CLocalVariableDeclaration();
+	String type;
+	CVariableInit variable_init;
+} {
+	type = Type()						{ local_variable_declaration.type = type; }
+	variable_init = VariableInitialization()		{ local_variable_declaration.variables.add(variable_init); }
+
+	(	LOOKAHEAD(",") "," 
+		variable_init = VariableInitialization()	{ local_variable_declaration.variables.add(variable_init); }
+	)*
+	";"
+
+	{ return local_variable_declaration; }
+}
+
+String Type() : {
+	String type;
+} {
+	(
+		  type = PrimitiveType()
+		| type = Name()
+	) ( 
+		"[" "]" { type += "[]"; }
+	)*
+	{ return type; }
+}
+
+String PrimitiveType() : {
+	String type;
+} {
+	(
+		  "boolean"		{ type = "boolean"; }
+		| "char"		{ type = "char"; }
+		| "byte"		{ type = "byte"; }
+		| "short"		{ type = "short"; }
+		| "int"			{ type = "int"; }
+		| "long"		{ type = "long"; }
+		| "float"		{ type = "float"; }
+		| "double"		{ type = "double"; }
+		| "ack"			{ type = "ack"; }
+	)
+
+	{ return type; }
+}
+
+CMessageHandler InterfaceMessageHandlerDeclaration() : {
+	CMessageHandler message_handler = new CMessageHandler();
+	String pass_type;
+	String name;
+	Token t;
+	Vector<CFormalParameter> parameters;
+} {
+	pass_type = Type()
+	t = <IDENTIFIER>
+	parameters = FormalParameters() ";"
+	{
+		message_handler.pass_type = pass_type;
+		message_handler.name = t.image;
+		message_handler.parameters = parameters;
+		return message_handler;
+	}
+}
+
+CMessageHandler MessageHandlerDeclaration() : {
+	CMessageHandler message_handler = new CMessageHandler();
+	String pass_type;
+	String name;
+	Token t;
+	Vector<CFormalParameter> parameters;
+	CBlock block;
+} {
+	[ "immutable"	{ message_handler.is_immutable = true; } ]
+	pass_type = Type()
+	t = <IDENTIFIER>
+	parameters = FormalParameters()
+	block = Block()
+	{
+		message_handler.pass_type = pass_type;
+		message_handler.name = t.image;
+		message_handler.parameters = parameters;
+		message_handler.block = block;
+		return message_handler;
+	}
+}
+
+CConstructor ConstructorDeclaration() : {
+	CConstructor constructor = new CConstructor();
+	Token t;
+	Vector<CFormalParameter> parameters;
+	CBlock block;
+} {
+	t = <IDENTIFIER>
+	parameters = FormalParameters()
+	block = Block()
+	{
+		constructor.name = t.image;
+		constructor.parameters = parameters;
+		constructor.block = block;
+		return constructor;
+	}
+}
+
+Vector<CFormalParameter> FormalParameters() : {
+	Vector<CFormalParameter> parameters = new Vector<CFormalParameter>();
+	CVariable variable;
+	String type;
+	Token t;
+	CFormalParameter formal_parameter;
+} {
+	"(" [
+		formal_parameter = FormalParameter()			{ parameters.add(formal_parameter); }
+		(
+			"," formal_parameter = FormalParameter()	{ parameters.add(formal_parameter); }
+		)*
+	] ")"
+
+	{ return parameters; }
+}
+
+CFormalParameter FormalParameter() : {
+	CFormalParameter formal_parameter;
+	String type;
+	Token t;
+} {
+	type = Type() t = <IDENTIFIER>				{
+									formal_parameter = new CFormalParameter();
+									formal_parameter.type = type;
+									formal_parameter.name = t.image;
+								}
+
+	{ return formal_parameter; }
+}
+
+CBlock Block() : {
+	CBlock block = new CBlock();
+	CStatement statement;
+	Token t;
+} {
+	"{" (
+		statement = Statement()		{ block.statements.add(statement); }
+	)* "}"
+
+	{ return block; }
+}
+
+CStatement Statement() : {
+	CStatement statement;
+	Token t = null;
+} {
+	(
+		  statement = PassStatement()
+		| statement = JavaStatement()
+		| statement = ForStatement()
+		| statement = WhileStatement()
+		| statement = IfStatement()
+		| statement = SwitchStatement()
+		| statement = CaseStatement()
+		| statement = BreakStatement()
+		| statement = DefaultStatement()
+		| LOOKAHEAD(<IDENTIFIER> ":") statement = LabelStatement()
+		| statement = Block() [ t = "@" { statement.continues = true; } ]
+		| LOOKAHEAD(["token"] Type() <IDENTIFIER>) statement = LocalVariableDeclaration() ( t = "@" | t = ";" )
+		| statement = StatementExpression() ( t = "@" | t = ";" )
+	)
+
+	{ 
+		if (t != null && t.image.equals("@")) {
+			statement.continues = true;
+		} else {
+			statement.continues = false;
+		}
+		return statement;
+	}
+}	
+
+CPassStatement PassStatement() : {
+	CPassStatement pass_statement = new CPassStatement();
+} {
+	"pass" [pass_statement.expression = Expression()] ";"
+
+	{ return pass_statement; }
+}
+
+CJavaStatement JavaStatement() : {
+	CJavaStatement java_statement = new CJavaStatement();
+	Token t1, t2;
+} {
+	t1 = "begin_java" t2 = "end_java"
+
+	{
+		java_statement.t1 = t1;
+		java_statement.t2 = t2;
+		return java_statement;
+	}
+}
+
+CStatementExpression StatementExpression() : {
+	CStatementExpression statement_expression = new CStatementExpression();
+} {
+	statement_expression.expression = Expression()
+
+	{ return statement_expression; }
+}
+
+CLocalVariableDeclaration ForInit() : {
+	CLocalVariableDeclaration local_variable_declaration = new CLocalVariableDeclaration();
+	String type;
+	CVariableInit variable_init;
+} {
+	type = Type()						{ local_variable_declaration.type = type; }
+	variable_init = VariableInitialization()		{ local_variable_declaration.variables.add(variable_init); }
+
+	(	LOOKAHEAD(",") "," 
+		variable_init = VariableInitialization()	{ local_variable_declaration.variables.add(variable_init); }
+	)*
+
+	{ return local_variable_declaration; }
+}
+
+
+CLoopStatement LoopStatement() : {
+	"loop" 
+}
+
+CForStatement ForStatement() : {
+	CForStatement for_statement = new CForStatement();
+	CExpression init, increment;
+} {
+	"for" "("
+			[
+				  LOOKAHEAD(ForInit()) for_statement.init = ForInit()
+				| (
+					init = Expression()					{ for_statement.expression_inits.add(init); }
+					(
+						LOOKAHEAD(",") "," init = Expression()		{ for_statement.expression_inits.add(init); }
+					)*
+				  )
+			]
+		";"
+			for_statement.conditional = Expression()
+		";"
+			increment = Expression()						{ for_statement.increment_expressions.add(increment); }
+			(
+				LOOKAHEAD(",") "," increment = Expression()			{ for_statement.increment_expressions.add(increment); }
+			)*
+	")"
+	for_statement.statement = Statement()
+
+	{ return for_statement; }
+}
+
+CWhileStatement WhileStatement() : {
+	CWhileStatement while_statement = new CWhileStatement();
+} {
+	"while" "(" while_statement.conditional = Expression() ")" while_statement.block = Block()
+
+	{ return while_statement; }
+}
+
+CIfStatement IfStatement() : {
+	CIfStatement if_statement = new CIfStatement();
+} {
+	"if" "(" if_statement.expression = Expression() ")" if_statement.statement = Statement() [ LOOKAHEAD("else") "else" if_statement.else_statement = Statement() ]
+
+	{ return if_statement; }
+}
+
+CSwitchStatement SwitchStatement() : {
+	CSwitchStatement switch_statement = new CSwitchStatement();
+	CExpression expression;
+	CStatement statement;
+} {
+	"switch" "(" expression = Expression() ")" "{"			{ switch_statement.expression = expression; }
+		(
+			statement = Statement()				{ switch_statement.statements.add(statement); }
+		)*
+	"}"
+
+	{ return switch_statement; }
+}
+
+CCaseStatement CaseStatement() : {
+	CCaseStatement case_statement = new CCaseStatement();
+	CExpression expression;
+} {
+	"case" expression = Expression() ":"				{ case_statement.expression = expression; }
+
+	{ return case_statement; }
+}
+
+CDefaultStatement DefaultStatement() : {
+	CDefaultStatement default_statement = new CDefaultStatement();
+} {
+	"default" ":"
+
+	{ return default_statement; }
+}
+
+CLabelStatement LabelStatement() : {
+	CLabelStatement label_statement = new CLabelStatement();
+	Token t;
+} {
+	t = <IDENTIFIER> ":"						{ label_statement.label = t.image; }
+
+	{ return label_statement; }
+}
+
+CBreakStatement BreakStatement() : {
+	CBreakStatement break_statement = new CBreakStatement();
+} {
+	"break" ";"
+
+	{ return break_statement; }
+}
+
+CLocalVariableDeclaration LocalVariableDeclaration() : {
+	CLocalVariableDeclaration local_variable_declaration = new CLocalVariableDeclaration();
+	String type;
+	CVariableInit variable_init;
+} {
+	[	
+		"token"						{ local_variable_declaration.is_token = true; }
+	]
+	type = Type()						{ local_variable_declaration.type = type; }
+	variable_init = VariableInitialization()		{ local_variable_declaration.variables.add(variable_init); }
+
+	(	LOOKAHEAD(",") "," 
+		variable_init = VariableInitialization()	{ local_variable_declaration.variables.add(variable_init); }
+	)*
+
+	{ return local_variable_declaration; }
+}
+
+CVariableInit VariableInitialization() : {
+	Token t;
+	CVariableInit variable_init = new CVariableInit();
+	CExpression expression;
+} {
+	t = <IDENTIFIER>					{ variable_init.name = t.image; }
+	[
+		LOOKAHEAD("=") "=" expression = Expression()	{ variable_init.expression = expression; }
+	]	
+
+	{ return variable_init; }
+}
+
+CArrayInit ArrayInitialization() : {
+	CArrayInit array_init = new CArrayInit();
+	CArrayInit sub_array_init;
+	CExpression init;
+} {
+	"{" [
+		(	
+			  sub_array_init = ArrayInitialization()		{ array_init.inits.add(sub_array_init); }
+			| init = Expression()					{ array_init.inits.add(init); }
+		)
+
+		(","
+			(
+				  sub_array_init = ArrayInitialization()	{ array_init.inits.add(sub_array_init); }
+				| init = Expression()				{ array_init.inits.add(init); }
+			)
+		)*
+	] "}"
+
+	{ return array_init; }
+}
+
+CExpression Expression() : {
+	CExpression expression = new CExpression();
+	Token t;
+	Vector<String> prefixes = new Vector<String>();
+	Vector<Object> suffixes = new Vector<Object>();
+	String type;
+	CArrayAccess array_access;
+} {
+	(
+		  t = "++"								{ prefixes.add(t.image); }
+		| t = "--"								{ prefixes.add(t.image); }
+		| t = "!"								{ prefixes.add(t.image); }
+		| t = "-"								{ prefixes.add(t.image); }
+		| t = "~"								{ prefixes.add(t.image); }
+	)*
+
+	expression.value = Value()
+
+	(
+		  t = "++"								{ suffixes.add(t.image); }
+		| t = "--"								{ suffixes.add(t.image); }
+		| array_access = ArrayAccess()						{ suffixes.add(array_access); }
+	)*
+
+	[
+		(
+			  expression.operator = AssignmentOperator()
+			| expression.operator = Operator()
+		)
+		expression.assignment_expression = Expression()
+	]
+
+	{
+		expression.suffixes = suffixes;
+		expression.prefixes = prefixes;
+		return expression;
+	}
+}
+
+CArrayAccess ArrayAccess() : {
+	CArrayAccess array_access = new CArrayAccess();
+	CExpression expression;
+} {
+	(LOOKAHEAD("[") "["
+		expression = Expression()		{ array_access.expressions.add(expression); }
+	"]")+
+
+	{ return array_access; }
+}
+
+CValue Value() : {
+	CValue value = new CValue();
+	CAllocation allocation;
+	CExpression expression;
+	CMessageSend message_send;
+	String type;
+	Token t;
+} {
+	[
+		LOOKAHEAD( "(" type = Type() ")" )
+		"(" type = Type() ")"						{ value.cast_type = type; }
+	]
+	(
+		  value.literal = Literal()
+		| "self"							{ value.name = "self"; }
+		  ["." t = <IDENTIFIER>						{ value.self_field = t.image; } ]
+		| "parent"							{ value.name = "parent"; }
+		  ["." t = <IDENTIFIER>						{ value.parent_field = t.image; } ]
+		| t = <IDENTIFIER>						{ value.name = t.image; }
+		  ["." t = <IDENTIFIER>						{ value.enumeration_field = t.image; } ]
+		| "(" expression = Expression() ")"				{ value.expression = expression; }
+		| allocation = Allocation()					{ value.allocation = allocation; }
+	)
+	(
+		message_send = MessageSend()					{ value.message_sends.add(message_send); }
+	)*
+
+	{ return value; }
+}
+
+CMessageSend MessageSend() : {
+	CMessageSend message_send = new CMessageSend();
+	CMessageProperty message_property;
+	Vector<CExpression> arguments;
+	Token t;
+} {
+	(
+		  LOOKAHEAD("<-") "<-"
+		  t = <IDENTIFIER>
+		  arguments = Arguments()			{
+									message_send.message_name = t.image;
+									message_send.arguments = arguments;
+								}
+		| arguments = Arguments()			{
+									message_send.implicit_self_send = true;
+									message_send.arguments = arguments;
+								}
+	)
+//	[
+//		message_property = MessageProperty()			{	message_send.message_property = message_property; }
+//	]
+
+	{ return message_send; }
+}
+
+CMessageProperty MessageProperty() : {
+	CMessageProperty message_property = new CMessageProperty();
+	Vector<CExpression> arguments;
+} {
+	":"
+	(
+		  "delay" 				{ message_property.name = "delay"; }
+		| "waitfor"				{ message_property.name = "waitfor"; }
+	)
+	arguments = Arguments()				{ message_property.arguments = arguments; }
+
+	{ return message_property; }
+}
+
+Vector<CExpression> Arguments() : {
+	Vector<CExpression> arguments = new Vector<CExpression>();
+	CExpression expression;
+} {
+	"(" [
+		expression = Expression()		{ arguments.add(expression); }
+		(","
+			expression = Expression()	{ arguments.add(expression); }
+		)*
+	] ")"
+
+	{ return arguments; }
+}
+
+CAllocation Allocation() : {
+	CAllocation allocation = new CAllocation();
+} {
+	(
+		 LOOKAHEAD("new" Name() "(")
+		 (
+			"new"
+			allocation.type = Name()
+			allocation.arguments = Arguments()
+			[ BindDeclaration(allocation) ]
+		  )
+		| (	
+			"new"
+			(
+				  allocation.type = PrimitiveType()
+				| allocation.type = Name()
+			)
+			ArrayDimsAndInits(allocation)
+		  )
+		| (
+			"reference"						{allocation.remote_reference = true; }
+			allocation.type = Name()
+			BindDeclaration(allocation)
+		  )
+	)
+
+	{ return allocation; }
+}
+
+void BindDeclaration(CAllocation allocation) : {
+	CExpression expression;
+} {
+	"at" "("
+		expression = Expression()		{ allocation.first_expression = expression; }
+	[
+		"," expression = Expression()		{ allocation.second_expression = expression; }
+		"," expression = Expression()		{ allocation.third_expression = expression; }
+	] ")"
+}
+
+void ArrayDimsAndInits(CAllocation allocation) : {
+	CExpression expression;
+} {
+	(
+		  LOOKAHEAD("[" "]")
+		  (
+			(
+				LOOKAHEAD("[" "]")
+				"[" "]"					{ allocation.array_dimensions++; }
+			)+
+			[
+				allocation.array_init = ArrayInitialization()
+			]
+		  )
+		| (
+									{ allocation.array_arguments = new Vector<CExpression>(); }
+			(
+				LOOKAHEAD("[" Expression() "]")
+				"[" expression = Expression() "]"	{
+										allocation.array_arguments.add(expression);
+										allocation.array_dimensions++;
+									}
+			)+
+			(
+				LOOKAHEAD ("[" "]")
+				"[" "]"					{ allocation.array_dimensions++; }
+			)*
+		  )
+	)
+}
+
+CLiteral Literal() : {
+	CLiteral literal;
+} {
+	(
+		  literal = IntegerLiteral()
+		| literal = FloatingPointLiteral()
+		| literal = CharacterLiteral()
+		| literal = StringLiteral()
+		| literal = BooleanLiteral()
+		| literal = NullLiteral()
+		| literal = AcknowledgementLiteral()
+	)
+
+	{ return literal; }
+}
+
+CLiteral IntegerLiteral() : {
+	CLiteral literal = new CLiteral();
+	literal.type = "int";
+	Token t;
+} {
+	t  = <INTEGER_LITERAL>			{ literal.value = t.image; }
+
+	{ return literal; }
+}
+
+CLiteral FloatingPointLiteral() : {
+	CLiteral literal = new CLiteral();
+	literal.type = "double";
+	Token t;
+} {
+	t = <FLOATING_POINT_LITERAL>		{ literal.value = t.image; }
+
+	{ return literal; }
+}
+
+CLiteral CharacterLiteral() : {
+	CLiteral literal = new CLiteral();
+	literal.type = "char";
+	Token t;
+} {
+	t = <CHARACTER_LITERAL>			{ literal.value = t.image; }
+
+	{ return literal; }
+}
+
+CLiteral StringLiteral() : {
+	CLiteral literal = new CLiteral();
+	literal.type = "String";
+	Token t;
+} {
+	t = <STRING_LITERAL>			{ literal.value = t.image; }
+
+	{ return literal; }
+}
+
+CLiteral BooleanLiteral() : {
+	CLiteral literal = new CLiteral();
+	literal.type = "boolean";
+	Token t;
+} {
+	(
+		  t = "true"
+		| t = "false"
+	)					{ literal.value = t.image; }
+
+	{ return literal; }
+}
+
+CLiteral NullLiteral() : {
+	CLiteral literal = new CLiteral();
+	literal.type = "null";
+} {
+	"null"					{ literal.value = "null"; }
+
+	{ return literal; }
+}
+
+CLiteral AcknowledgementLiteral() : {
+	CLiteral literal = new CLiteral();
+	literal.type = "ack";
+} {
+	"ack"					{ literal.value = "null"; }
+
+	{ return literal; }
+}
+
+String AssignmentOperator() : {
+	Token t;
+} {
+	(
+		  t = "="
+		| t = "*="
+		| t = "/="
+		| t = "%="
+		| t = "+="
+		| t = "-="
+		| t = "<<="
+		| t = ">>="
+		| t = ">>>="
+		| t = "&="
+		| t = "^="
+		| t = "|="
+	)
+
+	{ return t.image; }
+}
+
+String Operator() : {
+	Token t;
+} {
+	(
+		  t = "||"
+		| t = "&&"
+		| t = "|"
+		| t = "^"
+		| t = "&"
+		| t = "=="
+		| t = "!="
+		| t = ">"
+		| t = "<"
+		| t = "<="
+		| t = ">="
+		| t = "<<"
+		| t = ">>"
+		| t = ">>>"
+		| t = "+"
+		| t = "-"
+		| t = "*"
+		| t = "/"
+		| t = "%"
+		| t = "instanceof"
+	)
+
+	{ return t.image; }
+}
+
