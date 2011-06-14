@@ -1,0 +1,124 @@
+package salsa.local_fcs.language;
+
+/****** SALSA LANGUAGE IMPORTS ******/
+import salsa.local_fcs.SynchronousMailboxStage;
+import salsa.local_fcs.LocalActor;
+import salsa.local_fcs.Message;
+import salsa.local_fcs.StageService;
+import salsa.local_fcs.language.JoinDirector;
+import salsa.local_fcs.language.MessageDirector;
+import salsa.local_fcs.language.ContinuationDirector;
+import salsa.local_fcs.language.TokenDirector;
+
+import salsa.local_fcs.language.exceptions.ContinuationPassException;
+import salsa.local_fcs.language.exceptions.TokenPassException;
+import salsa.local_fcs.language.exceptions.MessageHandlerNotFoundException;
+import salsa.local_fcs.language.exceptions.ConstructorNotFoundException;
+
+/****** END SALSA LANGUAGE IMPORTS ******/
+
+import java.util.LinkedList;
+
+
+public class TokenDirector extends ContinuationDirector {
+	LinkedList<MessageDirector> message_directors = new LinkedList<MessageDirector>();
+	LinkedList<Integer> positions = new LinkedList<Integer>();
+
+	Object value;
+
+
+	public Object invokeImmutableMessage(int messageId, Object[] arguments) throws ContinuationPassException, TokenPassException, MessageHandlerNotFoundException {
+		switch(messageId) {
+			default: throw new MessageHandlerNotFoundException(messageId, arguments);
+		}
+	}
+
+	public Object invokeMessage(int messageId, Object[] arguments) throws ContinuationPassException, TokenPassException, MessageHandlerNotFoundException {
+		switch(messageId) {
+			case 0: setValue( (Object)arguments[0] ); return null;
+			case 1: addMessageDirector( (MessageDirector)arguments[0], (Integer)arguments[1] ); return null;
+			default: throw new MessageHandlerNotFoundException(messageId, arguments);
+		}
+	}
+
+	public void invokeConstructor(int messageId, Object[] arguments) throws ConstructorNotFoundException {
+		switch(messageId) {
+			case 0: construct(); return;
+			default: throw new ConstructorNotFoundException(messageId, arguments);
+		}
+	}
+
+	public void construct() {
+	}
+
+
+
+	public void setValue(Object value) {
+		this.value = value;
+		MessageDirector message_director;
+		int position;
+		while ((message_director = message_directors.removeFirst()) != null) {
+		position = positions.removeFirst();
+		Message message = new Message(Message.SIMPLE_MESSAGE, message_director, 0, new Object[]{position, value});
+		StageService.sendMessage(message);
+		}
+
+	}
+
+	public void addMessageDirector(MessageDirector message_director, int position) {
+		if (value == null) {
+		message_directors.add(message_director);
+		positions.add(position);
+		} else {
+		Message message = new Message(Message.SIMPLE_MESSAGE, message_director, 0, new Object[]{position, value});
+		StageService.sendMessage(message);
+		}
+
+	}
+
+
+	public TokenDirector() { super(); }
+
+	public TokenDirector(SynchronousMailboxStage stage) { super(stage); }
+
+	public static TokenDirector getImmutableReference(SynchronousMailboxStage stage) {
+		return new TokenDirector(stage);
+	}
+
+	public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions) {
+		TokenDirector actor = new TokenDirector();
+		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);
+		Message input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(0, new Object[]{input_message, token_positions.length});
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, argument_token, 0 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+		return output_continuation;
+	}
+
+	public static TokenDirector construct(int constructor_id, Object[] arguments) {
+		TokenDirector actor = new TokenDirector();
+		StageService.sendMessage(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));
+		return actor;
+	}
+	public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, SynchronousMailboxStage target_stage) {
+		TokenDirector actor = new TokenDirector(target_stage);
+		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage);
+		Message input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(0, new Object[]{input_message, token_positions.length}, target_stage);
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 0 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+		return output_continuation;
+	}
+
+	public static TokenDirector construct(int constructor_id, Object[] arguments, SynchronousMailboxStage target_stage) {
+		TokenDirector actor = new TokenDirector(target_stage);
+		target_stage.putMessageInMailbox(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));
+		return actor;
+	}
+}

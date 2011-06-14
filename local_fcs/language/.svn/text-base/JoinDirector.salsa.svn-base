@@ -1,0 +1,30 @@
+module salsa.local_fcs.language;
+
+import java.lang.Object;
+
+behavior JoinDirector {
+
+	ContinuationDirector continuationDirector;
+	int valueCount = 0;
+	int requiredTokens = -1;
+
+	JoinDirector() { 
+	}
+
+	ack join() {
+		valueCount++;
+		if (requiredTokens > -1 && valueCount >= requiredTokens) {
+			continuationDirector<-resolve();
+		}
+	}
+
+	ack resolveAfter(int requiredTokens) {
+		self.requiredTokens = requiredTokens;
+		if (valueCount < requiredTokens) {
+			begin_java/*
+			this.continuationDirector = stage.message.continuationDirector;
+			*/end_java
+			pass later;
+		}
+	}
+}

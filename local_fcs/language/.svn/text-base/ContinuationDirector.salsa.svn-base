@@ -1,0 +1,31 @@
+module salsa.local_fcs.language;
+
+import java.util.LinkedList;
+
+behavior ContinuationDirector {
+
+	boolean unresolved = true;
+	Message message = null;
+
+	ContinuationDirector() {}
+
+	ack resolve() {
+		if (message != null) {
+			begin_java/*
+			StageService.sendMessage(message);
+			*/end_java
+		} else {
+			unresolved = false;
+		}
+	}
+
+	ack setMessage(Message message) {
+		if (unresolved) {
+			self.message = message;
+		} else {
+			begin_java/*
+			StageService.sendMessage(message);
+			*/end_java
+		}
+	}
+}

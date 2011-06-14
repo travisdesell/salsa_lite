@@ -1,0 +1,35 @@
+module salsa.local_fcs.language;
+
+behavior MessageDirector {
+
+	Message message;
+	int required_tokens;
+	ContinuationDirector continuation_token = null;
+
+	MessageDirector(Message message, int required_tokens) {
+		self.message = message;
+		self.required_tokens = required_tokens;
+	}
+
+	MessageDirector(Message message, int required_tokens, ContinuationDirector continuation_token) {
+		self.message = message;
+		self.required_tokens = required_tokens;
+	}
+
+	ack resolve(int position, Object value) {
+		begin_java/*
+		message.arguments[position] = value;
+		*/end_java
+
+		required_tokens--;
+		if (required_tokens <= 0) {
+			if (continuation_token == null) {
+				begin_java/*
+				StageService.sendMessage(message);
+				*/end_java
+			} else {
+				continuation_token<-setMessage(message);
+			}
+		}
+	}
+}

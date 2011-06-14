@@ -1,0 +1,67 @@
+package salsa.local_fcs.io;
+
+/****** SALSA LANGUAGE IMPORTS ******/
+import salsa.wwc.WWCActorReference;
+import salsa.wwc.WWCActorState;
+import salsa.wwc.Message;
+import salsa.wwc.StageService;
+import salsa.wwc.language.JoinDirector;
+import salsa.wwc.language.ContinuationDirector;
+import salsa.wwc.language.TokenDirector;
+
+import salsa.wwc.language.exceptions.ContinuationPassException;
+import salsa.wwc.language.exceptions.TokenPassException;
+import salsa.wwc.language.exceptions.MessageHandlerNotFoundException;
+import salsa.wwc.language.exceptions.ConstructorNotFoundException;
+
+/****** END SALSA LANGUAGE IMPORTS ******/
+
+
+public class StandardOutputState extends WWCActorState {
+
+
+	public Object invokeImmutableMessage(int messageId, Object[] arguments) throws ContinuationPassException, TokenPassException, MessageHandlerNotFoundException {
+		switch(messageId) {
+			case 0: StandardOutput.print( (String)arguments[0] ); return null;
+			case 1: StandardOutput.print( (Object)arguments[0] ); return null;
+			case 2: StandardOutput.print( (Boolean)arguments[0] ); return null;
+			case 3: StandardOutput.print( (Character)arguments[0] ); return null;
+			case 4: StandardOutput.print( (Byte)arguments[0] ); return null;
+			case 5: StandardOutput.print( (Short)arguments[0] ); return null;
+			case 6: StandardOutput.print( (Integer)arguments[0] ); return null;
+			case 7: StandardOutput.print( (Long)arguments[0] ); return null;
+			case 8: StandardOutput.print( (Float)arguments[0] ); return null;
+			case 9: StandardOutput.print( (Double)arguments[0] ); return null;
+			case 10: StandardOutput.println( (String)arguments[0] ); return null;
+			case 11: StandardOutput.println( (Object)arguments[0] ); return null;
+			case 12: StandardOutput.println( (Boolean)arguments[0] ); return null;
+			case 13: StandardOutput.println( (Character)arguments[0] ); return null;
+			case 14: StandardOutput.println( (Byte)arguments[0] ); return null;
+			case 15: StandardOutput.println( (Short)arguments[0] ); return null;
+			case 16: StandardOutput.println( (Integer)arguments[0] ); return null;
+			case 17: StandardOutput.println( (Long)arguments[0] ); return null;
+			case 18: StandardOutput.println( (Float)arguments[0] ); return null;
+			case 19: StandardOutput.println( (Double)arguments[0] ); return null;
+			case 20: StandardOutput.println(); return null;
+			default: throw new MessageHandlerNotFoundException(messageId, arguments);
+		}
+	}
+
+	public Object invokeMessage(int messageId, Object[] arguments) throws ContinuationPassException, TokenPassException, MessageHandlerNotFoundException {
+		switch(messageId) {
+			default: throw new MessageHandlerNotFoundException(messageId, arguments);
+		}
+	}
+
+	public void invokeConstructor(int messageId, Object[] arguments) throws ConstructorNotFoundException {
+		switch(messageId) {
+			default: throw new ConstructorNotFoundException(messageId, arguments);
+		}
+	}
+
+
+
+
+	public StandardOutputState(String identifier) { super(identifier); }
+
+}

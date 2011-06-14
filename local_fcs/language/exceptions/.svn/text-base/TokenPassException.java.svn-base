@@ -1,0 +1,10 @@
+package salsa.local_fcs.language.exceptions;
+
+import salsa.local_fcs.language.TokenDirector;
+import salsa.local_fcs.language.ImplicitTokenDirector;
+
+public class TokenPassException extends Exception {
+	public TokenPassException() {
+		super();
+	}
+}

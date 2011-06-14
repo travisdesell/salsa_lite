@@ -1,0 +1,67 @@
+module salsa_lite.local_fcs.util;
+
+
+behavior StringUtil {
+
+	immutable char charAt(String string, int position) {
+		begin_java/*
+		return string.charAt(position);
+		*/end_java
+	}
+
+	immutable String substring(String s, int start, int finish) {
+		begin_java/*
+		return s.substring(start, finish);
+		*/end_java
+	}
+
+	immutable int getNumericValue(char c) {
+		begin_java/*
+		return Character.getNumericValue(c);
+		*/end_java
+	}
+
+	immutable int lengthOf(String s) {
+		begin_java/*
+		return s.length();
+		*/end_java
+	}
+
+	immutable String valueOf(int i) {
+		begin_java/*
+		return String.valueOf(i);
+		*/end_java
+	}
+	immutable String valueOf(long l) {
+		begin_java/*
+		return String.valueOf(l);
+		*/end_java
+	}
+	immutable String valueOf(float f) {
+		begin_java/*
+		return String.valueOf(f);
+		*/end_java
+	}
+	immutable String valueOf(double d) {
+		begin_java/*
+		return String.valueOf(d);
+		*/end_java
+	}
+	immutable String valueOf(boolean b) {
+		begin_java/*
+		return String.valueOf(b);
+		*/end_java
+	}
+
+	immutable String valueOf(char[] data) {
+		begin_java/*
+		return String.valueOf(data);
+		*/end_java
+	}
+
+	immutable String valueOf(char[] data, int offset, int count) {
+		begin_java/*
+		return String.valueOf(data, offset, count);
+		*/end_java
+	}
+}

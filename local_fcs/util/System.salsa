@@ -1,0 +1,17 @@
+module salsa_lite.local_fcs.util;
+
+
+behavior System {
+
+	immutable ack exit(int status) {
+		begin_java/*
+			java.lang.System.exit(0);
+		*/end_java
+	}
+
+	immutable long currentTimeMillis() {
+		begin_java/*
+			return java.lang.System.currentTimeMillis();
+		*/end_java
+	}
+}

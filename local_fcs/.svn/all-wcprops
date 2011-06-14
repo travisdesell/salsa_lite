@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/wcl/!svn/ver/216/software/salsa_lite/src/salsa/local_fcs
+END
+BlockingQueueStage.java
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/wcl/!svn/ver/168/software/salsa_lite/src/salsa/local_fcs/BlockingQueueStage.java
+END
+LocalActor.java
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/wcl/!svn/ver/171/software/salsa_lite/src/salsa/local_fcs/LocalActor.java
+END
+Message.java
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/wcl/!svn/ver/158/software/salsa_lite/src/salsa/local_fcs/Message.java
+END
+StageService.java
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/wcl/!svn/ver/168/software/salsa_lite/src/salsa/local_fcs/StageService.java
+END
+BlockingQueueStage.class
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/wcl/!svn/ver/158/software/salsa_lite/src/salsa/local_fcs/BlockingQueueStage.class
+END
+LocalActor.class
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/wcl/!svn/ver/158/software/salsa_lite/src/salsa/local_fcs/LocalActor.class
+END
+Message.class
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/wcl/!svn/ver/158/software/salsa_lite/src/salsa/local_fcs/Message.class
+END
+StageService.class
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/wcl/!svn/ver/168/software/salsa_lite/src/salsa/local_fcs/StageService.class
+END
+SynchronousMailboxStage.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/wcl/!svn/ver/168/software/salsa_lite/src/salsa/local_fcs/SynchronousMailboxStage.java
+END
+SynchronousMailboxStage.class
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/wcl/!svn/ver/168/software/salsa_lite/src/salsa/local_fcs/SynchronousMailboxStage.class
+END

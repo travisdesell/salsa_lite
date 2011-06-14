@@ -1,0 +1,483 @@
+package salsa.local_fcs;
+
+import java.util.Hashtable;
+import java.util.Vector;
+
+import salsa.local_fcs.language.ContinuationDirector;
+import salsa.local_fcs.language.MessageDirector;
+import salsa.local_fcs.language.ImplicitTokenDirector;
+import salsa.local_fcs.language.TokenDirector;
+
+public class StageService {
+	public final static int number_stages;
+	public final static SynchronousMailboxStage[] stages;
+
+	static {
+		System.err.println("created local fcs stage service");
+
+		if (System.getProperty("nstages") != null)  number_stages = Integer.parseInt(System.getProperty("nstages"));
+		else number_stages = 1;
+	
+		stages = new SynchronousMailboxStage[number_stages];
+		for (int i = 0; i < number_stages; i++) {
+			stages[i] = new SynchronousMailboxStage(i);
+			stages[i].start();
+			System.err.println("created stage[" + i + "]");
+		}
+	}
+
+	public static SynchronousMailboxStage getStage(int stage) {
+		return stages[stage];
+	}
+
+	public static SynchronousMailboxStage getStage() {
+		return stages[Math.abs((int)Math.random() % stages.length)];
+	}
+
+	public static SynchronousMailboxStage getStage(LocalActor target) {
+		return target.stage;
+	}
+
+	public static SynchronousMailboxStage getNewStage() {
+		SynchronousMailboxStage newStage = new SynchronousMailboxStage(-1);
+		newStage.start();
+		return newStage;
+	}
+
+
+
+	/**
+	 *	Send a previously generated message.
+	 */
+	public static void sendMessage(Message message) {
+		message.target.stage.putMessageInMailbox(message);
+	}
+
+	/**
+	 *	Code for sending non-immutable messages.
+	 */
+
+	/**
+	 *	Create a message to be used in a pass statement (first class continuation)
+	 */
+
+//	public static ContinuationDirector getCurrentContinuationDirector(LocalActor currentActor) {
+//		return currentActor.stage.message.continuationDirector;
+//	}
+
+	public static void sendPassMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector currentContinuation) {
+		target.stage.putMessageInMailbox(new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation));
+	}
+
+	public static void sendPassMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector input_continuation, ContinuationDirector currentContinuation) {
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 1 /*setMessage()*/, new Object[]{new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation)}));
+	}
+
+	public static void sendPassMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector currentContinuation) {
+		//make MessageDirector
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
+		MessageDirector md = MessageDirector.construct(0, new Object[]{input_message, token_positions.length}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+	}
+
+	public static void sendPassMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation, ContinuationDirector currentContinuation) {
+		//make MessageDirector
+		//send setMessage message to input_continuation
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
+		MessageDirector md = MessageDirector.construct(1, new Object[]{input_message, token_positions.length, input_continuation}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+	}
+
+
+	public static void sendPassImmutableMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector currentContinuation) {
+		target.stage.putMessageInMailbox(new Message(Message.IMMUTABLE_TOKEN_MESSAGE, target, message_id, arguments, currentContinuation));
+	}
+
+	public static void sendPassImmutableMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector input_continuation, ContinuationDirector currentContinuation) {
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 1 /*setMessage()*/, new Object[]{new Message(Message.IMMUTABLE_TOKEN_MESSAGE, target, message_id, arguments, currentContinuation)}));
+	}
+
+	public static void sendPassImmutableMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector currentContinuation) {
+		//make MessageDirector
+		Message input_message = new Message(Message.IMMUTABLE_TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
+		MessageDirector md = MessageDirector.construct(0, new Object[]{input_message, token_positions.length}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+	}
+
+	public static void sendPassImmutableMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation, ContinuationDirector currentContinuation) {
+		//make MessageDirector
+		//send setMessage message to input_continuation
+		Message input_message = new Message(Message.IMMUTABLE_TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
+		MessageDirector md = MessageDirector.construct(1, new Object[]{input_message, token_positions.length, input_continuation}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+	}
+
+
+	/**
+	 *	Send messages which are not followed by a continuation and do not output a named token
+	 *	If token_positions are an argument, there are named (or implicit) tokens in the arguments
+	 *	If input_continuation is an argument, it is waiting for a continuation
+	 */
+	public static void sendMessage(LocalActor target, int message_id, Object[] arguments) {
+		target.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments));
+	}
+
+	public static void sendMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector input_continuation) {
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 1 /*setMessage()*/, new Object[]{new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments)}));
+	}
+
+	public static void sendMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions) {
+		//make MessageDirector
+		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
+		MessageDirector md = MessageDirector.construct(0, new Object[]{input_message, token_positions.length}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+	}
+
+	public static void sendMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation) {
+		//make MessageDirector
+		//send setMessage message to input_continuation
+		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
+		MessageDirector md = MessageDirector.construct(1, new Object[]{input_message, token_positions.length, input_continuation}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+	}
+
+	/**
+	 *	Send messages which are followed by a continuation
+	 *	If token_positions are an argument, there are named (or implicit) tokens in the arguments
+	 *	If input_continuation is an argument, it is waiting for a continuation
+	 */
+	public static ContinuationDirector sendContinuationMessage(LocalActor target, int message_id, Object[] arguments) {
+		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, target.stage);
+
+		Message input_message = new Message(Message.CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
+		target.stage.putMessageInMailbox(input_message);
+		return output_continuation;
+	}
+
+	public static ContinuationDirector sendContinuationMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector input_continuation) {
+		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, target.stage);
+
+		Message input_message = new Message(Message.CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 1 /*setMessage()*/, new Object[]{input_message}));
+
+		return output_continuation;
+	}
+
+	public static ContinuationDirector sendContinuationMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions) {
+		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, target.stage);
+		//make MessageDirector
+		Message input_message = new Message(Message.CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(0, new Object[]{input_message, token_positions.length}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+		return output_continuation;
+	}
+
+	public static ContinuationDirector sendContinuationMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation) {
+		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, target.stage);
+		//make MessageDirector
+		//send setMessage message to input_continuation
+		Message input_message = new Message(Message.CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(1, new Object[]{input_message, token_positions.length, input_continuation}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+		return output_continuation;
+	}
+
+	/**
+	 *	Send messages which output a named (or implicit) token
+	 *	If token_positions are an argument, there are named (or implicit) tokens in the arguments
+	 *	If input_continuation is an argument, it is waiting for a continuation
+	 */
+	public static TokenDirector sendTokenMessage(LocalActor target, int message_id, Object[] arguments) {
+		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target.stage);
+
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		target.stage.putMessageInMailbox(input_message);
+		return output_continuation;
+	}
+
+	public static TokenDirector sendTokenMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector input_continuation) {
+		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target.stage);
+
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 1 /*setMessage()*/, new Object[]{input_message}));
+
+		return output_continuation;
+	}
+
+	public static TokenDirector sendTokenMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions) {
+		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target.stage);
+		//make MessageDirector
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(0, new Object[]{input_message, token_positions.length}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+		return output_continuation;
+	}
+
+	public static TokenDirector sendTokenMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation) {
+		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target.stage);
+		//make MessageDirector
+		//send setMessage message to input_continuation
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(1, new Object[]{input_message, token_positions.length, input_continuation}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+		return output_continuation;
+	}
+
+	public static ImplicitTokenDirector sendImplicitTokenMessage(LocalActor target, int message_id, Object[] arguments) {
+		ImplicitTokenDirector output_continuation = ImplicitTokenDirector.construct(0 /*construct()*/, null, target.stage);
+
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		target.stage.putMessageInMailbox(input_message);
+		return output_continuation;
+	}
+
+	public static ImplicitTokenDirector sendImplicitTokenMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector input_continuation) {
+		ImplicitTokenDirector output_continuation = ImplicitTokenDirector.construct(0 /*construct()*/, null, target.stage);
+
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 1 /*setMessage()*/, new Object[]{input_message}));
+
+		return output_continuation;
+	}
+
+	public static ImplicitTokenDirector sendImplicitTokenMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions) {
+		ImplicitTokenDirector output_continuation = ImplicitTokenDirector.construct(0 /*construct()*/, null, target.stage);
+		//make MessageDirector
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(0, new Object[]{input_message, token_positions.length}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+		return output_continuation;
+	}
+	
+
+	/**
+	 *	Code for sending immutable messages.
+	 */
+
+	/**
+	 *	Send immutable messages which are not followed by a continuation and do not output a named token
+	 *	If token_positions are an argument, there are named (or implicit) tokens in the arguments
+	 *	If input_continuation is an argument, it is waiting for a continuation
+	 */
+	public static void sendImmutableMessage(LocalActor target, int message_id, Object[] arguments) {
+		target.stage.putMessageInMailbox(new Message(Message.IMMUTABLE_MESSAGE, target, message_id, arguments));
+	}
+
+	public static void sendImmutableMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector input_continuation) {
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 1 /*setMessage()*/, new Object[]{new Message(Message.IMMUTABLE_MESSAGE, target, message_id, arguments)}));
+	}
+
+	public static void sendImmutableMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions) {
+		//make MessageDirector
+		Message input_message = new Message(Message.IMMUTABLE_MESSAGE, target, message_id, arguments);
+		MessageDirector md = MessageDirector.construct(0, new Object[]{input_message, token_positions.length}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+	}
+
+	public static void sendImmutableMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation) {
+		//make MessageDirector
+		//send setMessage message to input_continuation
+		Message input_message = new Message(Message.IMMUTABLE_MESSAGE, target, message_id, arguments);
+		MessageDirector md = MessageDirector.construct(1, new Object[]{input_message, token_positions.length, input_continuation}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+	}
+
+
+	/**
+	 *	Send messages which are followed by a continuation
+	 *	If token_positions are an argument, there are named (or implicit) tokens in the arguments
+	 *	If input_continuation is an argument, it is waiting for a continuation
+	 */
+	public static ContinuationDirector sendContinuationImmutableMessage(LocalActor target, int message_id, Object[] arguments) {
+		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, target.stage);
+
+		Message input_message = new Message(Message.IMMUTABLE_CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
+		target.stage.putMessageInMailbox(input_message);
+		return output_continuation;
+	}
+
+	public static ContinuationDirector sendContinuationImmutableMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector input_continuation) {
+		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, target.stage);
+
+		Message input_message = new Message(Message.IMMUTABLE_CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 1 /*setMessage()*/, new Object[]{input_message}));
+
+		return output_continuation;
+	}
+
+	public static ContinuationDirector sendContinuationImmutableMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions) {
+		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, target.stage);
+		//make MessageDirector
+		Message input_message = new Message(Message.IMMUTABLE_CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(0, new Object[]{input_message, token_positions.length}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+		return output_continuation;
+	}
+
+	public static ContinuationDirector sendContinuationImmutableMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation) {
+		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, target.stage);
+		//make MessageDirector
+		//send setMessage message to input_continuation
+		Message input_message = new Message(Message.IMMUTABLE_CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(1, new Object[]{input_message, token_positions.length, input_continuation}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+		return output_continuation;
+	}
+
+	/**
+	 *	Send messages which output a named (or implicit) token
+	 *	If token_positions are an argument, there are named (or implicit) tokens in the arguments
+	 *	If input_continuation is an argument, it is waiting for a continuation
+	 */
+	public static TokenDirector sendTokenImmutableMessage(LocalActor target, int message_id, Object[] arguments) {
+		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target.stage);
+
+		Message input_message = new Message(Message.IMMUTABLE_TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		target.stage.putMessageInMailbox(input_message);
+		return output_continuation;
+	}
+
+	public static TokenDirector sendTokenImmutableMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector input_continuation) {
+		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target.stage);
+
+		Message input_message = new Message(Message.IMMUTABLE_TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 1 /*setMessage()*/, new Object[]{input_message}));
+
+		return output_continuation;
+	}
+
+	public static TokenDirector sendTokenImmutableMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions) {
+		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target.stage);
+		//make MessageDirector
+		Message input_message = new Message(Message.IMMUTABLE_TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(0, new Object[]{input_message, token_positions.length}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+		return output_continuation;
+	}
+
+	public static TokenDirector sendTokenImmutableMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation) {
+		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target.stage);
+		//make MessageDirector
+		//send setMessage message to input_continuation
+		Message input_message = new Message(Message.IMMUTABLE_TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(1, new Object[]{input_message, token_positions.length, input_continuation}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+		return output_continuation;
+	}
+
+	public static ImplicitTokenDirector sendImplicitTokenImmutableMessage(LocalActor target, int message_id, Object[] arguments) {
+		ImplicitTokenDirector output_continuation = ImplicitTokenDirector.construct(0 /*construct()*/, null, target.stage);
+
+		Message input_message = new Message(Message.IMMUTABLE_TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		target.stage.putMessageInMailbox(input_message);
+		return output_continuation;
+	}
+
+	public static ImplicitTokenDirector sendImplicitTokenImmutableMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector input_continuation) {
+		ImplicitTokenDirector output_continuation = ImplicitTokenDirector.construct(0 /*construct()*/, null, target.stage);
+
+		Message input_message = new Message(Message.IMMUTABLE_TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 1 /*setMessage()*/, new Object[]{input_message}));
+
+		return output_continuation;
+	}
+
+	public static ImplicitTokenDirector sendImplicitTokenImmutableMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions) {
+		ImplicitTokenDirector output_continuation = ImplicitTokenDirector.construct(0 /*construct()*/, null, target.stage);
+		//make MessageDirector
+		Message input_message = new Message(Message.IMMUTABLE_TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(0, new Object[]{input_message, token_positions.length}, target.stage);
+		//send addMessageDirector messages to TokenDirectors
+		TokenDirector argument_token;
+		for (int i = 0; i < token_positions.length; i++) {
+			argument_token = (TokenDirector)arguments[token_positions[i]];
+			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 1 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
+		}
+		return output_continuation;
+	}
+}

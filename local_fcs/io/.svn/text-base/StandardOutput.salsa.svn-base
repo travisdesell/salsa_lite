@@ -1,0 +1,26 @@
+module salsa.local_fcs.io;
+
+behavior StandardOutput {
+	immutable ack print(String s)		{ begin_java/* System.out.print(s); */end_java }
+	immutable ack print(Object p)		{ begin_java/* System.out.print(p); */end_java }
+	immutable ack print(boolean p)		{ begin_java/* System.out.print(p); */end_java }
+	immutable ack print(char p)		{ begin_java/* System.out.print(p); */end_java }
+	immutable ack print(byte p)		{ begin_java/* System.out.print(p); */end_java }
+	immutable ack print(short p)		{ begin_java/* System.out.print(p); */end_java }
+	immutable ack print(int p)		{ begin_java/* System.out.print(p); */end_java }
+	immutable ack print(long p)		{ begin_java/* System.out.print(p); */end_java }
+	immutable ack print(float p)		{ begin_java/* System.out.print(p); */end_java }
+	immutable ack print(double p)		{ begin_java/* System.out.print(p); */end_java }
+
+	immutable ack println(String s)		{ begin_java/* System.out.println(s); */end_java }
+	immutable ack println(Object p)		{ begin_java/* System.out.println(p); */end_java }
+	immutable ack println(boolean p)	{ begin_java/* System.out.println(p); */end_java }
+	immutable ack println(char p)		{ begin_java/* System.out.println(p); */end_java }
+	immutable ack println(byte p)		{ begin_java/* System.out.println(p); */end_java }
+	immutable ack println(short p)		{ begin_java/* System.out.println(p); */end_java }
+	immutable ack println(int p)		{ begin_java/* System.out.println(p); */end_java }
+	immutable ack println(long p)		{ begin_java/* System.out.println(p); */end_java }
+	immutable ack println(float p)		{ begin_java/* System.out.println(p); */end_java }
+	immutable ack println(double p)		{ begin_java/* System.out.println(p); */end_java }
+	immutable ack println()			{ begin_java/* System.out.println(); */end_java }
+}
