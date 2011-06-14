@@ -1,0 +1,119 @@
+module salsa.tests.distributed_random_fibonacci;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
+behavior DRFibonacci {
+	String[] hosts;
+	int[] ports;
+	String name_server;
+
+	int n;
+	long initial_time;
+
+	public DRFibonacci(String[] hosts, int[] ports, int n) {
+		this.hosts = hosts;
+		this.ports = ports;
+		this.n = n;
+
+//		System.err.println("Created new fibonacci<" + n + ">: " + getUAN());
+	}
+
+	int generated = 0;
+	public UAN generateUAN() {
+		generated++;
+		UAN newUAN = null;
+		try {
+			newUAN = new UAN( getUAN().toString() + "/" + generated );
+		} catch (Exception e) {
+			System.err.println("Exception generating new UAN: " + e);
+		}
+		return newUAN;
+	}
+
+	public int add(int x, int y) {
+		return x + y;
+	}
+
+	public int compute() {
+		if (n == 0)             return 0;
+		else if (n <= 2)        return 1;
+		else {
+			int random_target = (int)(Math.random()*hosts.length);
+			DRFibonacci fib1 = new DRFibonacci(hosts, ports, new Integer(n-1)) at (this.generateUAN(), hosts[random_target], ports[random_target]);
+
+			random_target = (int)(Math.random()*hosts.length);
+			DRFibonacci fib2 = new DRFibonacci(hosts, ports, new Integer(n-2)) at (this.generateUAN(), hosts[random_target], ports[random_target]);
+
+			token x = fib1<-compute();
+			token y = fib2<-compute();
+
+			add(x, y) @ currentContinuation;
+		}
+	}
+
+	void act(String args[]) {
+		if (args.length != 2) {
+			System.err.println("Incorrect arguments.");
+			System.err.println("Usage:");
+			System.err.println("\tjava salsa.tests.distributed_random_fibonacci.DRFibonacci <theaters & nameserver file> <N>");
+			System.exit(0);
+		}
+
+		String theaters_file = args[0];
+		this.getTheaters(theaters_file);
+
+		System.err.println("Parsed theaters, initializing.");
+		int n = Integer.parseInt(args[1]);
+		System.err.println("beginning computation at: " + System.currentTimeMillis());
+		initial_time = System.currentTimeMillis();
+
+		int random_target = (int)(Math.random() * hosts.length);
+		UAN generated_uan = null;
+		try {
+			generated_uan = new UAN(name_server + "initial");
+		} catch (Exception e) {
+			System.err.println("Exception generating new UAN: " + e);
+		}
+
+		DRFibonacci worker = new DRFibonacci(hosts, ports, n) at (generated_uan, hosts[random_target], ports[random_target]);
+		worker<-compute() @
+		finish(token);
+	}
+
+	public void finish(int result) {
+		System.err.println("Distributed Random Fibonacci took: " + (System.currentTimeMillis() - initial_time));
+		System.err.println("result: " + result);
+	}
+
+	public void getTheaters(String theater_file) {
+		try {   
+			BufferedReader in = new BufferedReader(new FileReader(theater_file));
+			String line = in.readLine();
+
+			name_server = "uan://" + line + "/";
+			line = in.readLine();
+
+			Vector theaters_vector = new Vector();
+			while (line != null) {
+				theaters_vector.add(line);
+				line = in.readLine();
+			}
+			hosts = new String[theaters_vector.size()];
+			ports = new int[theaters_vector.size()];
+
+			for (int j = 0; j < theaters_vector.size(); j++) {
+				StringTokenizer st = new StringTokenizer( (String)theaters_vector.get(j), ":");
+				hosts[j] = st.nextToken();
+				ports[j] = Integer.parseInt(st.nextToken());
+
+			}
+		} catch (Exception e) {
+			System.err.println("Error reading theaters file: " + e);
+			e.printStackTrace();
+		}       
+	}        
+}
+

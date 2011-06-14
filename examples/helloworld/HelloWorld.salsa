@@ -1,0 +1,17 @@
+module examples.helloworld;
+
+behavior HelloWorld {
+    void hello(){
+        standardOutput <- print("Hello ");
+    }
+    void world(){
+        standardOutput <- println("World!");
+    }
+       
+    void act(String arguments[]){
+	standardOutput <- println("Hello World!");
+
+	hello();
+	world();
+    }
+}

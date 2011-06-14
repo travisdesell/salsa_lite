@@ -1,0 +1,138 @@
+module examples.trap;
+
+import java.io.*;
+import java.util.*;
+
+
+/* Trap.salsa -- Parallel Trapezoidal Rule
+ *
+ * Input: 	Optinal. a and b, the left and right endpoints of the integral.n the number of trapezoids.
+ * Output:  Estimate of the integral from a to b of f(x)
+ *    using the trapezoidal rule and n trapezoids.
+ *
+ * Algorithm:
+ *    1.  Each actor calculates "its" interval of
+ *        integration.
+ *    2.  Each actor estimates the integral of f(x)
+ *        over its interval using the trapezoidal rule.
+ *    3a. Each actor sends its results to the main actor.
+ *    3b. The main actor sums the calculations received from
+ *        the individual actors and prints the result.
+ *
+ * Note:  f(x) is hardwired.
+ *
+ */
+behavior Trap{
+
+    	int         noActors = 2;         				// The number of actors   
+    	double       a = 0.0;   					// Left endpoint             
+    	double       b = 1.0;   					// Right endpoint            
+    	int          n = 1024;  					// Number of trapezoids      
+    	long initialTime;							// Starting Time
+	String nameServer = "jupiter.wcl.cs.rpi.edu";		// Name Server
+    	String theatersFile = "theaters.txt";				// File containing the theaters
+	            
+ void act(String args[]){
+
+      int argc = args.length;
+
+      if(argc>=1) a=Double.valueOf(args[0]).doubleValue();
+      if(argc>=2) b=Double.valueOf(args[1]).doubleValue();
+      if(argc>=3) n=Integer.parseInt(args[2]);
+      if(argc>=4) noActors=Integer.parseInt(args[3]);
+      if(argc>=5) nameServer=args[4];
+      if(argc>=6) theatersFile = args[5];
+      
+	 
+	DistributeWork()@displayResults(token)@endTimer();
+
+  }
+        
+double[][] DistributeWork(){
+	   
+	
+	Double h = new Double((b-a)/n);    // Trapezoid base length    
+    	Integer local_n = new Integer((int) (n/noActors));   /* Number of trapezoids for  */
+                           	/* my calculation            */
+
+	Double       local_a;   /* Left endpoint my process  */
+    	Double       local_b;   /* Right endpoint my process */
+
+
+	//create actors and assign data
+	TrapWorker[] workers = new TrapWorker[noActors];
+
+	for (int i=0; i<noActors; i++){	    		    
+    		
+		workers[i] = new TrapWorker();
+	}
+
+	// read available theaters
+	Vector theaters = new Vector();
+	String theater;
+
+	try {
+	    BufferedReader in = new BufferedReader(new FileReader(theatersFile));
+	    while ((theater = in.readLine())!= null){
+		theaters.add(theater);
+	    }
+	    in.close(); 
+	} catch (IOException ioe){
+	    standardOutput<-println("[error] Can't open the file "+theatersFile+" for reading.");
+	}
+
+	// migrate actors to theaters
+	for (int i=0; i<noActors; i++){
+	    standardOutput<-println("Sending actor "+
+				    "uan://"+nameServer+":3030/a"+i+" to "+
+				    "rmsp://"+theaters.get(i%theaters.size())+"/a"+i);
+	    workers[i]<-bind("uan://"+nameServer+":3030/a"+i,
+			     "rmsp://"+theaters.get(i%theaters.size())+"/a"+i);
+	}
+
+	//start computation
+	standardOutput<-println(">>>>>>Starting the computation");
+      initialTime = System.currentTimeMillis();	
+
+	join{ 		
+		for (int i=0;i<noActors;i++){
+			/* Length of each actor's interval of
+                	* integration = local_n*h.  So my interval
+       			* starts at: */
+			System.out.println("sending work to worker "+i);
+      
+                	local_a = new Double(a + i*local_n.doubleValue()*h.doubleValue());
+                	local_b = new Double(local_a.doubleValue() + local_n.doubleValue()*h.doubleValue());
+			workers[i]<-trap(local_a, local_b, local_n, h);
+		}		
+	}@addUpIntegrals(token)@currentContinuation;
+
+}
+
+void endTimer(){
+	long finalTime = System.currentTimeMillis();
+	long runningTime = finalTime - initialTime;
+	standardOutput<-println("Running time for Trapezoidal approximation is "+runningTime+" ms.");
+}
+
+Double addUpIntegrals(Object[] results){
+	//rceives the integral calculated from each actor's work
+	
+	double total = 0.0;
+	for (int i = 0; i<results.length; i++){
+		total += ((Double) results[i]).doubleValue();
+	}
+
+	return new Double(total);	
+}
+
+void displayResults(Double result)
+{
+	standardOutput<-println("With n = "+n+" trapezoids, our estimate of the integral on ("+a+","+b+") ="
+			+result.doubleValue()+ "with error "
+			+ (result.doubleValue() - 1.0e0));
+}
+
+
+}
+

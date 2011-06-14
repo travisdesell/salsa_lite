@@ -1,0 +1,45 @@
+module salsa_lite.examples.fibonacci;
+
+behavior FibonacciSimple {
+	int n;
+	int result = 0;
+	int received = 0;
+
+	FibonacciSimple sender;
+
+	FibonacciSimple(FibonacciSimple sender, int n) {
+		self.sender = sender;
+		self.n = n;
+	}
+
+	FibonacciSimple(String[] arguments) {
+		self.n = Integer.parseInt(arguments[0]);
+
+		self<-compute();
+	}
+
+	ack setResult(int value) {
+		received++;
+		result += value;
+
+		if (received == 2) {
+			if (sender == null) {
+				System.out.println(result);
+				System.exit(0);
+			} else {
+				sender<-setResult(result);
+			}
+		}
+	}
+	
+	ack compute() {
+		if (n == 0) {
+	 		sender<-setResult(0);
+		} else if (n <= 2) {
+			sender<-setResult(1);
+		} else {
+			new FibonacciSimple(self, n-1)<-compute();
+			new FibonacciSimple(self, n-2)<-compute();
+		}
+	}
+}

@@ -1,0 +1,27 @@
+module examples.migration;
+
+/**
+ * This program assumes that an agent has been started with migration.Agent
+ * It receives a new Universal Actor Location (UAL) and migrates the
+ * agent to such location.
+ */
+
+behavior Migrate {
+
+    public void act(String[] args){
+	try {
+		Agent a = reference Agent(new UAN(args[0]));
+
+		a<-addLocation(args[1]) @
+		a<-migrate(args[1]) @ 
+		a<-printItinerary() @
+		a<-printTime();
+		
+	} catch (ArrayIndexOutOfBoundsException e) {
+		standardOutput<-println("Usage: java migration.Migrate <uan> <UAL>");
+		standardOutput<-println(e);
+	} catch (MalformedUANException e) {
+		standardError<-println("Error creating UAN: " + e);
+	}
+    }
+}

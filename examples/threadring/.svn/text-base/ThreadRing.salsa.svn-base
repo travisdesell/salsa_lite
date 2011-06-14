@@ -1,0 +1,59 @@
+module salsa.examples.threadring;
+
+import salsa.language.JoinDirector;
+import salsa.io.StandardOutput;
+import salsa.util.System;
+
+behavior ThreadRing {
+	ThreadRing next;
+	int id;
+	
+	ThreadRing(int id) {
+		self.id = id;
+//		StandardOutput<-println("created threadring: " + id);
+	}
+
+	ThreadRing(String[] args) {
+		if (args<-length() != 2) {
+			StandardOutput<-println("Usage: java ThreadRing <hopCount>");
+			pass;
+		}
+
+		int threadCount = Integer<-parseInt(args[0]);
+		int hopCount = Integer<-parseInt(args[1]);
+
+		ThreadRing first;
+
+		first = new ThreadRing(1);
+
+		JoinDirector jd = new JoinDirector();
+		loop(int i = 1, int threadCount = threadCount, JoinDirector jd = jd, ThreadRing first = first, ThreadRing previous = first) {
+			if (i < threadCount) {
+				ThreadRing next = new ThreadRing(i + 1);
+				previous<-setNextThread(next) @ jd<-join();
+
+				repeat(++i, threadCount, jd, first, next);
+			} else {
+				previous<-setNextThread(first) @ jd<-join();
+			}
+		}
+
+		jd<-resolveAfter(threadCount) @
+		first<-forwardMessage(hopCount);
+	}
+
+	ack setNextThread(ThreadRing next) {
+		self.next = next;
+	}
+	
+	ack forwardMessage(int value) {
+		if (value == 0) {
+			StandardOutput<-println(id) @
+			System<-exit(0);
+		} else {
+//			StandardOutput<-println("hop: " + value);
+			value--;
+			next<-forwardMessage(value);
+		}
+	}
+}

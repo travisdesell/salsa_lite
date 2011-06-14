@@ -1,0 +1,25 @@
+module examples.migration;
+
+behavior LargeAgent extends Agent {
+
+    byte[] largeData;
+
+    void setSize (int size){
+	largeData = new byte[size];
+    }
+
+    void act(String[] args){
+	try {
+	    setSize(new Integer(args[0]))@
+	    addLocation(args[2])@
+		bind(args[1], args[2]) @ 
+		startTime()@
+// 		printItinerary() @
+		go(args,"3");
+	} catch (Exception e){
+	    standardOutput<-println(e);
+	    standardOutput<-println("Usage: java migration.LargeAgent size UAN UAL (<UAL>)*");
+	}
+    }
+
+}

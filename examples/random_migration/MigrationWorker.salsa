@@ -1,0 +1,17 @@
+module salsa.tests.migration;
+
+import salsa.io.StandardOutput;
+
+import object salsa.wwc.NamingService;
+
+
+behavior MigrationWorker {
+
+	MigrationWorker() {
+		StandardOutput<-println("created migration worker: " + NamingService<-getUAN(self) + " - " + NamingService<-getUAL(self));
+	}
+
+	ack completedMigration() {
+		StandardOutput<-println(NamingService<-getUAN(self) + " completed migration!");
+	}
+}

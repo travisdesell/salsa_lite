@@ -1,0 +1,173 @@
+module examples.mergesort;
+
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Vector;
+
+behavior Mergesort {
+	long start_time;
+
+	public void act(String[] arguments) {
+		if (!(arguments.length == 5) && !(arguments.length == 3)) {
+			System.err.println("Usage:");
+			System.err.println("\tjava examples.mergesort.Mergesort <#workers> <#elements> <iterations> [theater file] [nameserver]");
+			System.exit(0);
+		}
+
+		if (arguments.length == 5) distributed_start(arguments);
+		else local_start(arguments);
+	}
+
+	public void distributed_start(String[] arguments) {
+		int number_workers = Integer.parseInt(arguments[0]);
+		int number_elements = Integer.parseInt(arguments[1]);
+		int iterations = Integer.parseInt(arguments[2]);
+		String theaters_file = arguments[3];
+		String nameserver = arguments[4];
+
+                // read available theaters
+		Vector theaters = new Vector();
+		try {
+			BufferedReader in = new BufferedReader(new FileReader(theaters_file));
+			String theater = in.readLine();
+			while (theater != null) {
+				if (!theater.equals("")) theaters.add(theater);
+				theater = in.readLine();
+			}
+			in.close();
+		} catch (IOException ioe){
+			System.err.println("[error] Can't open the file "+theaters_file+" for writing.");
+		}
+
+		int workers_per_theater = (number_workers/theaters.size())+1;
+		int elements_per_worker = number_elements/number_workers;
+		Mergesort[] workers = new Mergesort[number_workers];
+
+		int target_theater = 0;
+		int sent_to_theater = 0;
+
+		System.err.println("workers per theater: " + workers_per_theater);
+		System.err.println("total workers: " + number_workers);
+
+		for (int i = 0; i < number_workers; i++) {
+			try {
+				UAN uan = new UAN("uan://"+nameserver+"/worker_"+i);
+				UAL ual = new UAL("rmsp://"+theaters.get(i%theaters.size())+"/worker_"+i);
+				workers[i] = new Mergesort() at (uan, ual.getHost(), ual.getPort() );
+			} catch (Exception e) {
+				System.err.println("Error generating UAN and UAL: " + e);
+				e.printStackTrace();
+				System.exit(0);
+			}
+//			sent_to_theater++;
+//			if (sent_to_theater >= workers_per_theater) {
+//				target_theater++;
+//				sent_to_theater = 0;
+//			}
+		}
+
+		mergesort(0, number_workers, elements_per_worker, workers) @
+		token x = finish();
+
+		for (int i = 0; i < iterations-1; i++) {
+			mergesort(0, number_workers, elements_per_worker, workers) : waitfor(x) @
+			x = finish();
+		}
+		start_time = System.currentTimeMillis();
+	}
+
+	public void local_start(String[] arguments) {
+		int number_workers = Integer.parseInt(arguments[0]);
+		int number_elements = Integer.parseInt(arguments[1]);
+		int iterations = Integer.parseInt(arguments[2]);
+
+		int elements_per_worker = number_elements/number_workers;
+		Mergesort[] workers = new Mergesort[number_workers];
+
+		for (int i = 0; i < number_workers; i++) {
+			workers[i] = new Mergesort();
+		}
+
+		mergesort(0, number_workers, elements_per_worker, workers) @
+		token x = finish();
+
+		for (int i = 0; i < iterations-1; i++) {
+			mergesort(0, number_workers, elements_per_worker, workers) : waitfor(x) @
+			x = finish();
+		}
+		start_time = System.currentTimeMillis();
+	}
+
+	double[] mergesort(int worker_num, int max_workers, int elements_per_worker, Mergesort[] workers) {
+		if ((2*worker_num)+1 < max_workers && (2*worker_num)+2 < max_workers) {
+			token x = workers[ (2*worker_num)+1 ]<-mergesort( (2*worker_num)+1, max_workers, elements_per_worker, workers );
+			token y = workers[ (2*worker_num)+2 ]<-mergesort( (2*worker_num)+2, max_workers, elements_per_worker, workers );
+			merge(x, y) @ currentContinuation;
+		} else if ((2*worker_num)+2 < max_workers) {
+			workers[ (2*worker_num)+1 ]<-sort(elements_per_worker) @
+			currentContinuation;
+		} else {
+			sort(elements_per_worker) @
+			currentContinuation;
+		}
+	}
+
+	double[] merge(double[] x, double[] y) {
+		int x_position = 0;
+		int y_position = 0;
+
+		double[] result = new double[x.length + y.length];
+		for (int i = 0; i < result.length; i++) {
+			if (x_position >= x.length) {
+				result[i] = y[y_position];
+				y_position++;
+			} else if (y_position >= y.length) {
+				result[i] = x[x_position];
+				x_position++;
+			} else if (x[x_position] < y[y_position]) {
+				result[i] = x[x_position];
+				x_position++;
+			} else {
+				result[i] = y[y_position];
+				y_position++;
+			}
+		}
+		return result;
+	}
+
+
+	double[] sort(int elements_per_worker) {
+		double [] elements = new double[elements_per_worker];
+		for (int j = 0; j < elements_per_worker; j++) {
+			elements[j] = Math.random();
+		}
+
+		for (int i = 0; i < elements.length; i++) {
+			for (int j = i; j < elements.length; j++) {
+				if (elements[j] < elements[i]) {
+					double temp = elements[j];
+					elements[j] = elements[i];
+					elements[i] = temp;
+				}
+			}
+		}
+		return elements;
+	}
+
+	void printResults(double[] results) {
+		for (int i = 0; i < results.length; i++) {
+			System.err.println(results[i]);
+		}
+	}
+
+	void finish() {
+		long finish_time = System.currentTimeMillis();
+//		System.err.println("start time: " + start_time);
+//		System.err.println("finish time: " + finish_time);
+//		System.err.println("Finished in: " + (finish_time-start_time) + "ms");
+
+		System.err.println((finish_time-start_time));
+		start_time = System.currentTimeMillis();
+	}
+}

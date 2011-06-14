@@ -1,0 +1,163 @@
+module salsa.examples.chameneos;
+
+//import salsa.language.StringActor;
+import salsa.io.StandardOutput;
+import salsa.util.StringUtil;
+import salsa.util.Timer;
+
+behavior MeetingPlace {
+	boolean did_evens = false;
+	int max_meetings;
+	int meetings;
+ 
+	Chameneos[] chameneoses;
+	Chameneos first = null;
+	Colour first_colour;
+
+	MeetingPlace(String[] arguments) {
+		max_meetings = Integer<-parseInt(arguments[0]);
+		meetings = max_meetings;
+
+		MeetingPlace<-printCompliments() @
+		odds();
+	}
+
+	String[] numbers = new String[]{ "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
+
+	ack spell(int value) {
+		loop(String nStr = StringUtil<-valueOf(value)) {
+			if (StringUtil<-lengthOf(nStr) > 0) {
+				StandardOutput<-print(" " + numbers[Character<-getNumericValue( StringUtil<-charAt(nStr, 0) )]) @
+				repeat(StringUtil<-substring(nStr, 1, StringUtil<-lengthOf(nStr))) @
+				pass;
+			} else {
+				StandardOutput<-println() @
+				pass;
+			}
+		} @
+//		StandardOutput<-println("OUT OF LOOP!") @
+		pass;
+	}
+
+	immutable ack printCompliments() {
+		MeetingPlace<-printCompliment(Colour.blue, Colour.blue);
+		MeetingPlace<-printCompliment(Colour.blue, Colour.red);
+		MeetingPlace<-printCompliment(Colour.blue, Colour.yellow);
+		MeetingPlace<-printCompliment(Colour.red, Colour.blue);
+		MeetingPlace<-printCompliment(Colour.red, Colour.red);
+		MeetingPlace<-printCompliment(Colour.red, Colour.yellow);
+		MeetingPlace<-printCompliment(Colour.yellow, Colour.blue);
+		MeetingPlace<-printCompliment(Colour.yellow, Colour.red);
+		MeetingPlace<-printCompliment(Colour.yellow, Colour.yellow);
+	}
+
+	immutable ack printCompliment(Colour c1, Colour c2) {
+		StandardOutput<-println(c1 + " + " + c2 + " -> " + MeetingPlace<-doCompliment(c1, c2));
+	}
+
+	immutable Colour doCompliment(Colour c1, Colour c2) {
+		switch (c1) {
+			case blue:
+				switch (c2) {
+					case blue:	pass Colour.blue;
+					case red:	pass Colour.yellow;
+					case yellow:	pass Colour.red;
+				}
+			case red:
+				switch (c2) {
+					case blue:	pass Colour.yellow;
+					case red:	pass Colour.red;
+					case yellow:	pass Colour.blue;
+				}
+			case yellow:
+				switch (c2) {
+					case blue:	pass Colour.red;
+					case red:	pass Colour.blue;
+					case yellow:	pass Colour.yellow;
+				}
+		}
+		StandardOutput<-println("Cannot do compliment for unknown colours: " + c1 + ", " + c2);
+		System<-exit(0);
+		pass c1;
+	}
+
+	ack odds() {
+		StandardOutput<-println("\nblue red yellow");
+
+		chameneoses = new Chameneos[3];
+		chameneoses[0] = new Chameneos(Colour.blue, self);
+		chameneoses[1] = new Chameneos(Colour.red, self);
+		chameneoses[2] = new Chameneos(Colour.yellow, self);
+	}
+
+	ack evens() {
+		meetings = max_meetings;
+		first = null;
+
+		StandardOutput<-println("\nblue red yellow red yellow blue red yellow red blue");
+		chameneoses = new Chameneos[10];
+		chameneoses[0] = new Chameneos(Colour.blue, self);
+		chameneoses[1] = new Chameneos(Colour.red, self);
+		chameneoses[2] = new Chameneos(Colour.yellow, self);
+		chameneoses[3] = new Chameneos(Colour.red, self);
+		chameneoses[4] = new Chameneos(Colour.yellow, self);
+		chameneoses[5] = new Chameneos(Colour.blue, self);
+		chameneoses[6] = new Chameneos(Colour.red, self);
+		chameneoses[7] = new Chameneos(Colour.yellow, self);
+		chameneoses[8] = new Chameneos(Colour.red, self);
+		chameneoses[9] = new Chameneos(Colour.blue, self);
+	}
+
+	ack meet(Chameneos chameneos, Colour colour) {
+		if (meetings == 0) pass;
+
+		if (first == null) {
+			first = chameneos;
+			first_colour = colour;
+		} else {
+			if (first == chameneos) {
+				first<-left_self( MeetingPlace<-doCompliment(first_colour, colour) );
+				chameneos<-left_self( MeetingPlace<-doCompliment(first_colour, colour) );
+				first = null;
+			} else {
+				first<-left_other( MeetingPlace<-doCompliment(first_colour, colour) );
+				chameneos<-left_other( MeetingPlace<-doCompliment(first_colour, colour) );
+				first = null;
+			}
+			meetings--;
+			if (meetings == 0) finished();
+		}
+	}
+
+	ack finished() {
+		if (!did_evens) {
+			did_evens = true;
+
+			loop (int i = 0) {
+//				StandardOutput<-println("LOOPING " + i + " IN FINISHED FIRST");
+				if (i >= chameneoses<-length()) pass;
+
+				(chameneoses[i])<-output_meetings() @
+				repeat(++i) @
+				pass;
+			} @
+			self<-spell(max_meetings * 2) @
+			evens();
+		} else {
+			loop (int i = 0) {
+//				StandardOutput<-println("LOOPING " + i + " IN FINISHED SECOND");
+				if (i >= chameneoses<-length()) pass;
+
+				(chameneoses[i])<-output_meetings() @
+				repeat(++i) @
+				pass;
+			} @
+			self<-spell(max_meetings * 2) @
+			end();
+		}
+	}
+
+	ack end() {
+		System<-exit(0);
+	}
+}
