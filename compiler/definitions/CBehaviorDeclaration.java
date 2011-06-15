@@ -56,6 +56,7 @@ public class CBehaviorDeclaration extends CErrorInformation {
 		return code;
 	}
 
+    /*
 	public String getInvokeMessageCode() {
 		String code = "";
 
@@ -101,7 +102,7 @@ public class CBehaviorDeclaration extends CErrorInformation {
 		code += CIndent.getIndent() + "}\n";
 		return code;
 	}
-
+*/
 	public int getActConstructor() {
 		for (int i = 0; i < constructors.size(); i++) {
 			CConstructor con = constructors.get(i);

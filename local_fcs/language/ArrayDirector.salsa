@@ -4,14 +4,14 @@ import object java.util.ArrayList;
 
 behavior ArrayDirector<T> {
 
-	ArrayList<ContinuationDirector> continuationDirectors = new ArrayList<ContinuationDirector>();
-    ArrayList<Integer> requiredTokens = new ArrayList<Integer>();
 	int valueCount = 0;
-
     T[] values;
 
+	ArrayList<ContinuationDirector> continuationDirectors = new ArrayList<ContinuationDirector>();
+    ArrayList<Integer> requiredTokens = new ArrayList<Integer>();
+
 	ArrayDirector(T[] values) { 
-        this.values = values;
+        self.values = values;
 
         for (int i = 0; i < values.length; i++) {
             if (values[i] instanceof ContinuationDirector) {
@@ -25,7 +25,7 @@ behavior ArrayDirector<T> {
 		    valueCount++;
         } else {
             System.err.println("WARNING: resetting value of ArrayDirector.");
-            System.err.println("WARNING: " + self.toString() + "[" + position + "] is already '" + values[position] + "' trying ro set it to '" + value);
+            System.err.println("WARNING: " + self + "[" + position + "] is already '" + values[position] + "' trying ro set it to '" + value);
             System.err.println("WARNING: ArrayDirectors are single-assignment, previous value will not be overwritten.");
         }
 
@@ -34,8 +34,12 @@ behavior ArrayDirector<T> {
             int reqTokens = (Integer)(requiredTokens.get(i));
 
             if (valueCount >= reqTokens) {
-                ContinuationDirector continuationDirector = (ContinuationDirector)(continuationDirectors.get(i));
-                continuationDirector<-resolve(values);
+                ContinuationDirector continuationDirector = continuationDirectors.get(i);
+                if (continuationDirector instanceof TokenDirector) {
+                    ((TokenDirector)continuationDirector)<-setValue(values);
+                } else {
+                    continuationDirector<-resolve();
+                }
 
                 requiredTokens.remove(i);
                 continuationDirectors.remove(i);
@@ -49,7 +53,9 @@ behavior ArrayDirector<T> {
             self.continuationDirectors.add(stage.message.continuationDirector);
             self.requiredTokens.add(reqTokens);
 			pass later;
-		}
+		} else {
+            pass values;
+        }
     }
 
 	T[] resolveAfter(int reqTokens) {
@@ -57,6 +63,8 @@ behavior ArrayDirector<T> {
             self.continuationDirectors.add(stage.message.continuationDirector);
             self.requiredTokens.add(reqTokens);
 			pass later;
-		}
+		} else {
+            pass values;
+        }
 	}
 }

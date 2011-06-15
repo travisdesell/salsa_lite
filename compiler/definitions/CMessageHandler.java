@@ -1,6 +1,7 @@
 package salsa_lite.compiler.definitions;
 
 import salsa_lite.compiler.symbol_table.SymbolTable;
+import salsa_lite.compiler.symbol_table.TypeSymbol;
 import salsa_lite.compiler.symbol_table.SalsaNotFoundException;
 
 import salsa_lite.compiler.SalsaParser;
@@ -10,12 +11,16 @@ import java.util.Vector;
 
 public class CMessageHandler extends CErrorInformation {
 
-	public String pass_type;
+	public CType pass_type;
 	public String name;
 
 	public Vector<CFormalParameter> parameters;
 
 	public CBlock block;
+
+    public CType getArgument(int i) {
+        return parameters.get(i).type;
+    }
 	
 	public void addContainedMessageHandlers(Vector<CMessageHandler> containedMessageHandlers) {
 		block.addContainedMessageHandlers(containedMessageHandlers);
@@ -23,16 +28,20 @@ public class CMessageHandler extends CErrorInformation {
 
 	public String[] getArgumentTypes() {
 		String[] argument_types = new String[parameters.size()];
-		for (int i = 0; i < argument_types.length; i++) argument_types[i] = parameters.get(i).type;
+		for (int i = 0; i < argument_types.length; i++) argument_types[i] = parameters.get(i).type.name;
 		return argument_types;
 	}
 
+    /*
 	public String getCaseInvocation() {
 		String code = name + "(";
 		for (int i = 0; i < parameters.size(); i++) {
 			CFormalParameter parameter = parameters.get(i);
             try {
-    			code += "(" + SymbolTable.getTypeSymbol(parameter.type).toNonPrimitiveString() + ")arguments[" + i +"]";
+                TypeSymbol ts = SymbolTable.getTypeSymbol(parameter.type.name);
+                System.err.println("getting type symbol: " + parameter.type.name + " got " + ts.getSignature());
+
+    			code += "(" + SymbolTable.getTypeSymbol(parameter.type.name).toNonPrimitiveString() + ")arguments[" + i +"]";
             } catch (SalsaNotFoundException snfe) {
                 CompilerErrors.printErrorMessage("[CMessageHandler.getCaseInvocation] Could not find parameter type. " + snfe.toString(), parameter);
                 throw new RuntimeException(snfe);
@@ -42,20 +51,21 @@ public class CMessageHandler extends CErrorInformation {
 		}
 		code += ");";
 
-		if (pass_type.equals("ack")) {
+		if (pass_type.name.equals("ack")) {
 			code += " return null;";
 		} else {
             code = "return " + code;
 		}
 		return code;
 	}
+*/
 
 	public String toJavaCode() {
 		SymbolTable.currentMessageName = name;
 
 		String definition_code = CIndent.getIndent() + "public ";
-		if (pass_type.equals("ack")) definition_code += "void";
-		else definition_code += pass_type;
+		if (pass_type.name.equals("ack")) definition_code += "void";
+		else definition_code += pass_type.name;
 		definition_code += " " + name + "(";
 
 		SymbolTable.newMessageHandler();
@@ -67,7 +77,7 @@ public class CMessageHandler extends CErrorInformation {
 			definition_code += p.toJavaCode();
 
             try {
-    			SymbolTable.addVariableType(p.name, p.type, false, false);
+    			SymbolTable.addVariableType(p.name, p.type.name, false, false);
             } catch (SalsaNotFoundException snfe) {
                 CompilerErrors.printErrorMessage("[CMessageHandler.toJavaCode] Could not find parameter type. " + snfe.toString(), p);
                 throw new RuntimeException(snfe);

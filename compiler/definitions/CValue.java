@@ -16,7 +16,7 @@ public class CValue extends CErrorInformation {
 
 	public CLiteral literal;
 
-	public String cast_type = null;
+	public CType cast_type = null;
 	public CVariableName variable_name;
 
 	public CExpression expression;
@@ -60,7 +60,7 @@ public class CValue extends CErrorInformation {
 
 	public TypeSymbol getType() {
         try {
-    		if (cast_type != null)  return SymbolTable.getTypeSymbol(cast_type);
+    		if (cast_type != null)  return SymbolTable.getTypeSymbol(cast_type.name);
         } catch (SalsaNotFoundException snfe) {
             CompilerErrors.printErrorMessage("[CValue.getType]: Could not determine type for cast. " + snfe.toString(), this);
             throw new RuntimeException(snfe);
@@ -222,7 +222,7 @@ public class CValue extends CErrorInformation {
 		}
 
         if (cast_type != null) {
-            code = "(" + cast_type + ")" + code;
+            code = "(" + cast_type.name + ")" + code;
         }
 
         if (currentType == null) currentType = getValueType();

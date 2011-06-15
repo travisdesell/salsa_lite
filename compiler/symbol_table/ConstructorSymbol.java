@@ -3,6 +3,7 @@ package salsa_lite.compiler.symbol_table;
 import java.lang.reflect.Constructor;
 
 import salsa_lite.compiler.definitions.CConstructor;
+import salsa_lite.compiler.definitions.CompilerErrors;
 
 public class ConstructorSymbol extends Invokable {
 
@@ -18,7 +19,7 @@ public class ConstructorSymbol extends Invokable {
         }
     }
 
-    public ConstructorSymbol(int id, TypeSymbol enclosingType, CConstructor constructor) throws SalsaNotFoundException {
+    public ConstructorSymbol(int id, TypeSymbol enclosingType, CConstructor constructor) {
         super(id, enclosingType);
 
         String[] argumentTypes = constructor.getArgumentTypes();
@@ -26,7 +27,12 @@ public class ConstructorSymbol extends Invokable {
 
         int i = 0;
         for (String s : argumentTypes) {
-            parameterTypes[i++] = SymbolTable.getTypeSymbol( s );
+            try {
+                parameterTypes[i++] = SymbolTable.getTypeSymbol( s );
+            } catch (SalsaNotFoundException snfe) {
+                CompilerErrors.printErrorMessage("Could not find argument type for constructor.", constructor.getArgument(i - 1));
+                throw new RuntimeException(snfe);
+            }
         }
     }
 }

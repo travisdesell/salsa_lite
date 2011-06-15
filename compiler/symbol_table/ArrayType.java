@@ -18,9 +18,6 @@ public class ArrayType extends TypeSymbol {
     public TypeSymbol getSubtype() { return subtype; }
 
 	public ArrayType(String name) throws SalsaNotFoundException {
-        this.module = "";
-        this.name = name;
-
         if (name.charAt(0) == '[') {
             if (name.charAt(1) == 'L') {
                 subtype = SymbolTable.getTypeSymbol(name.substring(2, name.length() - 1));
@@ -46,7 +43,8 @@ public class ArrayType extends TypeSymbol {
 //        System.out.println("New ArrayType -- [" + this.module + "] " + this.name + " -- subtype: " + subtype.getLongSignature());
 
         this.superType = SymbolTable.getTypeSymbol("java.lang.Object");
-        this.name = subtype.getLongSignature() + "[]";
+        this.module = subtype.getModule();
+        this.name = subtype.getName() + "[]";
 
         FieldSymbol fs = new FieldSymbol(this, "length", SymbolTable.getTypeSymbol("int"));
         fields.put( fs.getLongSignature(), fs );

@@ -1,10 +1,8 @@
 package salsa_lite.compiler.definitions;
 
 
-public class CPrimitiveType extends CErrorInformation {
-    public String name;
-
+public class CPrimitiveType extends CName {
     public CPrimitiveType(String name) {
-        this.name = name;
+        super(name);
     }
 }

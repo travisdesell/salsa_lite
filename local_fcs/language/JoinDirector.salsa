@@ -5,7 +5,7 @@ import object java.util.ArrayList;
 behavior JoinDirector {
 
 	ArrayList<ContinuationDirector> continuationDirectors = new ArrayList<ContinuationDirector>();
-    ArrayList<ContinuationDirector> requiredTokens = new ArrayList<ContinuationDirector>();
+    ArrayList<Integer> requiredTokens = new ArrayList<Integer>();
 	int valueCount = 0;
 
 	JoinDirector() { 
@@ -15,7 +15,7 @@ behavior JoinDirector {
 		valueCount++;
 
         for (int i = requiredTokens.size() - 1; i >= 0; i--) {
-            int reqTokens = (Integer)(requiredTokens.get(i));
+            int reqTokens = requiredTokens.get(i);
 
             if (valueCount >= reqTokens) {
                 ContinuationDirector continuationDirector = continuationDirectors.get(i);

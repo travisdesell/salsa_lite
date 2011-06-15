@@ -6,6 +6,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 
+import salsa_lite.compiler.definitions.CompilerErrors;
 import salsa_lite.compiler.definitions.CLocalVariableDeclaration;
 import salsa_lite.compiler.definitions.CVariableInit;
 
@@ -37,11 +38,16 @@ public class FieldSymbol {
         */
     }
 
-    public FieldSymbol(TypeSymbol enclosingType, CLocalVariableDeclaration variableDeclaration, CVariableInit variableInit) throws SalsaNotFoundException {
+    public FieldSymbol(TypeSymbol enclosingType, CLocalVariableDeclaration variableDeclaration, CVariableInit variableInit) {
         this.enclosingType = enclosingType;
 
         this.name = variableInit.name;
-        this.type = SymbolTable.getTypeSymbol( variableDeclaration.type );
+        try {
+            this.type = SymbolTable.getTypeSymbol( variableDeclaration.type.name );
+        } catch (SalsaNotFoundException snfe) {
+            CompilerErrors.printErrorMessage("Could not find type for field. " + snfe.toString(), variableDeclaration);
+            throw new RuntimeException(snfe);
+        }
     }
 
     public FieldSymbol(TypeSymbol enclosingType, String name, TypeSymbol type) {

@@ -20,12 +20,17 @@ public class CConstructor extends CErrorInformation {
 		block.addContainedMessageHandlers(containedMessageHandlers);
 	}
 
+    public CType getArgument(int i) {
+        return parameters.get(i).type;
+    }
+
 	public String[] getArgumentTypes() {
 		String[] argument_types = new String[parameters.size()];
-		for (int i = 0; i < argument_types.length; i++) argument_types[i] = parameters.get(i).type;
+		for (int i = 0; i < argument_types.length; i++) argument_types[i] = parameters.get(i).type.name;
 		return argument_types;
 	}   
 
+    /*
 	public String getCaseInvocation() {
 		String code = "construct(";
 		for (int i = 0; i < parameters.size(); i++) {
@@ -33,7 +38,10 @@ public class CConstructor extends CErrorInformation {
 
             String parameter_type = "";
             try {
-                parameter_type = SymbolTable.getTypeSymbol(parameter.type).toNonPrimitiveString();
+                TypeSymbol ts = SymbolTable.getTypeSymbol(parameter.type.name);
+                System.err.println("getting type symbol: " + parameter.type.name + " got " + ts.getSignature());
+
+                parameter_type = SymbolTable.getTypeSymbol(parameter.type.name).toNonPrimitiveString();
             } catch (SalsaNotFoundException snfe) {
                 CompilerErrors.printErrorMessage("[CConstructor.getCaseInvocation]: Could not find parameter type. " + snfe.toString(), parameter);
                 throw new RuntimeException(snfe);
@@ -46,7 +54,7 @@ public class CConstructor extends CErrorInformation {
 		code += ");";
 		return code;
 	}
-
+*/
 
 	public String toJavaCode() {
 		//Check if name == class name
@@ -59,7 +67,7 @@ public class CConstructor extends CErrorInformation {
 			code += p.toJavaCode();
 
             try {
-			    SymbolTable.addVariableType(p.name, p.type, false, false);
+			    SymbolTable.addVariableType(p.name, p.type.name, false, false);
             } catch (SalsaNotFoundException snfe) {
                 CompilerErrors.printErrorMessage("[CConstructor.toJavaCode]: Could not find parameter type. " + snfe.toString(), p);
                 throw new RuntimeException(snfe);

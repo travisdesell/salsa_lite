@@ -7,7 +7,7 @@ import java.util.Vector;
 
 public class CLocalVariableDeclaration extends CStatement {
 	public boolean is_token, is_block;
-	public String type;
+	public CType type;
 
 	public Vector<CVariableInit> variables = new Vector<CVariableInit>();
 
@@ -30,7 +30,7 @@ public class CLocalVariableDeclaration extends CStatement {
 				code += variables.get(i).toJavaCodeAsToken();
 
                 try {
-    				SymbolTable.addVariableType(variables.get(i).name, type, true, false);
+    				SymbolTable.addVariableType(variables.get(i).name, type.name, true, false);
                 } catch (SalsaNotFoundException snfe) {
                     CompilerErrors.printErrorMessage("[CLocalVariableDeclaration.toJavaCode] Could not find parameter type. " + snfe.toString(), variables.get(i));
                     throw new RuntimeException(snfe);
@@ -42,11 +42,11 @@ public class CLocalVariableDeclaration extends CStatement {
 			}
 		} else {
 			for (int i = 0; i < variables.size(); i++) {
-				code += type + " ";
+				code += type.name + " ";
 				code += variables.get(i).toJavaCode();
 
                 try {
-				    SymbolTable.addVariableType(variables.get(i).name, type, false, false);
+				    SymbolTable.addVariableType(variables.get(i).name, type.name, false, false);
                 } catch (SalsaNotFoundException snfe) {
                     CompilerErrors.printErrorMessage("[CLocalVariableDeclaration.toJavaCode] Could not find parameter type. " + snfe.toString(), variables.get(i));
                     throw new RuntimeException(snfe);

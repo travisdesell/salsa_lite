@@ -2,23 +2,23 @@ module salsa_lite.local_fcs.language;
 
 import object java.util.LinkedList;
 
-behavior TokenDirector<T> extends ContinuationDirector {
+behavior TokenDirector extends ContinuationDirector {
 
 	LinkedList<MessageDirector> message_directors = new LinkedList<MessageDirector>();
-	LinkedList<Integer> positions = new LinkedList<Intger>();
+	LinkedList<Integer> positions = new LinkedList<Integer>();
 
-	T value;
+	Object value;
     boolean unresolved = true;
 
 	TokenDirector() {
 	}
 
-    TokenDirector(T value) {
+    TokenDirector(Object value) {
         self.value = value;
         self.unresolved = false;
     }
 
-	ack setValue(T value) {
+	ack setValue(Object value) {
 //        System.err.println("set value for token director: " + value + ", message_directors.size(): " + message_directors.size() + ", positions.size(): " + positions.size());
 
         self.unresolved = false;

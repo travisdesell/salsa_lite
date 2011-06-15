@@ -11,6 +11,6 @@ public class SalsaNotFoundException extends Exception {
     }
 
     public String toString() {
-        return type + " could not be found, package: '" + module + "', name: '" + name + "'";
+        return "SalsaNotFoundException: " + type + " could not be found, package: '" + module + "', name: '" + name + "'";
     }
 }

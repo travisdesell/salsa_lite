@@ -17,6 +17,7 @@ import salsa_lite.compiler.definitions.CompilerErrors;
 import salsa_lite.compiler.definitions.CCompilationUnit;
 import salsa_lite.compiler.definitions.CConstructor;
 import salsa_lite.compiler.definitions.CExpression;
+import salsa_lite.compiler.definitions.CGenericType;
 import salsa_lite.compiler.definitions.CMessageHandler;
 import salsa_lite.compiler.definitions.CLocalVariableDeclaration;
 import salsa_lite.compiler.definitions.CVariableInit;
@@ -79,11 +80,13 @@ public class ActorType extends TypeSymbol {
         String oldModule;
         CCompilationUnit cu;
         try {
-            String filename = findSalsaFile(getLongSignature());
+            String longSignature = getLongSignature();
+            if (longSignature.contains("<")) longSignature = longSignature.substring(0, longSignature.indexOf("<"));
+            String filename = findSalsaFile(longSignature);
 
 //            System.err.println("Getting new compilation unit to read new Actor: "+ filename);
 
-            FileInputStream fis = new FileInputStream( findSalsaFile(getLongSignature()) );
+            FileInputStream fis = new FileInputStream( filename );
             SalsaParser.ReInit(fis);
             cu = SalsaParser.CompilationUnit();
 
@@ -110,39 +113,38 @@ public class ActorType extends TypeSymbol {
         int i;
 		this.superType = SymbolTable.getTypeSymbol(cu.getExtendsName().name);
 
+        for (CGenericType generic_type : cu.getName().generic_types) {
+            ObjectType ot;
+            if (generic_type.name.equals("?")) {
+                ot = new ObjectType(SymbolTable.getCurrentModule() + generic_type.extends_type);
+            } else if (generic_type.extends_type != null) {
+                ot = new ObjectType(SymbolTable.getCurrentModule() + generic_type.name, SymbolTable.getTypeSymbol(generic_type.extends_type));
+            } else {
+                ot = new ObjectType(SymbolTable.getCurrentModule() + generic_type.name, SymbolTable.getTypeSymbol("Object"));
+            }
+            SymbolTable.knownTypes.put(ot.getLongSignature(), ot);
+            SymbolTable.namespace.put(ot.getName(), ot.getLongSignature());
+        }
+
+
 		Vector<CConstructor> cv = cu.getConstructors();
 		for (i = 0; i < cv.size(); i++) {
-            try {
-                ConstructorSymbol cs = new ConstructorSymbol(i, this, cv.get(i));
-                constructors.put( cs.getLongSignature(), cs );
-            } catch (SalsaNotFoundException snfe) {
-                CompilerErrors.printErrorMessage("Could not find type in constructor declaration. " + snfe.toString(), cv.get(i));
-                throw new RuntimeException(snfe);
-            }
+            ConstructorSymbol cs = new ConstructorSymbol(i, this, cv.get(i));
+            constructors.put( cs.getLongSignature(), cs );
         }
 
         Vector<CMessageHandler> mv = cu.getMessageHandlers();
 		for (i = 0; i < mv.size(); i++) {
-            try {
-                MessageSymbol ms = new MessageSymbol(i, this, mv.get(i));
-                message_handlers.put( ms.getLongSignature(), ms );
-            } catch (SalsaNotFoundException snfe) {
-                CompilerErrors.printErrorMessage("Could not find type in message handler declaration. " + snfe.toString(), mv.get(i));
-                throw new RuntimeException(snfe);
-            }
+            MessageSymbol ms = new MessageSymbol(i, this, mv.get(i));
+            message_handlers.put( ms.getLongSignature(), ms );
         }
 
 		Vector<CLocalVariableDeclaration> fv = cu.getFields();
 		for (i = 0; i < fv.size(); i++) {
-            try {
-                Vector<CVariableInit> vv = fv.get(i).variables;
-                for (int j = 0; j < vv.size(); j++) {
-                    FieldSymbol fs = new FieldSymbol(this, fv.get(i), vv.get(j));
-                    fields.put( fs.getLongSignature(), fs );
-                }
-            } catch (SalsaNotFoundException snfe) {
-                CompilerErrors.printErrorMessage("Could not find type for field. " + snfe.toString(), fv.get(i));
-                throw new RuntimeException(snfe);
+            Vector<CVariableInit> vv = fv.get(i).variables;
+            for (int j = 0; j < vv.size(); j++) {
+                FieldSymbol fs = new FieldSymbol(this, fv.get(i), vv.get(j));
+                fields.put( fs.getLongSignature(), fs );
             }
 		}
 

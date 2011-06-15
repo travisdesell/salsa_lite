@@ -1,6 +1,7 @@
 package salsa_lite.compiler.definitions;
 
 import salsa_lite.compiler.symbol_table.SymbolTable;
+import salsa_lite.compiler.symbol_table.TypeSymbol;
 
 
 public class CPassStatement extends CStatement {
@@ -36,7 +37,8 @@ public class CPassStatement extends CStatement {
 		} else {
 			String code = "return";
 			if (expression != null) {
-                if (SymbolTable.isMutableObject( expression.getType() )) {
+                TypeSymbol expressionType = expression.getType();
+                if (SymbolTable.isMutableObject( expressionType )) {
                     code += " SalsaSystem.deepCopy( " + expression.toJavaCode() + " )";
                 } else {
                     code += " " + expression.toJavaCode();

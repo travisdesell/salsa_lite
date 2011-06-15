@@ -1,7 +1,5 @@
 module salsa_lite.local_fcs.language;
 
-import object java.util.LinkedList;
-
 behavior ContinuationDirector {
 
 	boolean unresolved = true;

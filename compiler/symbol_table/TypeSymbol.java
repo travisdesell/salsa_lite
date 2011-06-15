@@ -82,6 +82,6 @@ public class TypeSymbol implements Comparable<TypeSymbol> {
 		else if (name.equals("boolean")) return "Boolean";
 		else if (name.equals("char")) return "Character";
 		else if (name.equals("byte")) return "Byte";
-		else return getLongSignature();
+		else return getSignature();
     }
 }

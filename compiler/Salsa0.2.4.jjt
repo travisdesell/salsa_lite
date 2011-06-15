@@ -342,10 +342,10 @@ CGenericType GenericType() : {
 
     {
         if (t2 == null) {
-            generic_type = new GenericType(t1.image);
+            generic_type = new CGenericType(t1.image);
             generic_type.initLineAndColumn(t1, t1);
         } else {
-            generic_type = new GenericType(t1.image + " extends " + t2.image);
+            generic_type = new CGenericType(t1.image, t2.image);
             generic_type.initLineAndColumn(t1, t2);
         }
         return generic_type;
@@ -354,13 +354,18 @@ CGenericType GenericType() : {
 
 String GenericDeclaration(CName name) : {
     CGenericType generic_type;
+    Token t;
 } {
         "<"
-        generic_type = GenericType()        { name.generic_types.add(generic_type); name.name += "<" + generic_type.toString(); }
+        generic_type = GenericType()                { name.generic_types.add(generic_type); name.name += "<" + generic_type.toString(); }
         (
-            "," generic_type = <IDENTIFIER> { name.generic_types.add(generic_type); name.name += "," + generic_type.toString(); }
+            "," generic_type = GenericType()        { name.generic_types.add(generic_type); name.name += "," + generic_type.toString(); }
         )*
-        t = ">"                             { name.name += ">"; name.initLineAndColumnEnd(t); }
+        t = ">"                                     { name.name += ">"; name.initLineAndColumnEnd(t); }
+
+    {
+        return generic_type.toString();
+    }
 }
 
 CName Name() : {
@@ -534,7 +539,7 @@ CMessageHandler InterfaceMessageHandlerDeclaration() : {
     parameters = FormalParameters()
    t2 = ";"
     {
-        message_handler.pass_type = pass_type.name;
+        message_handler.pass_type = pass_type;
         message_handler.name = t.image;
         message_handler.parameters = parameters;
       message_handler.initLineAndColumn(pass_type, t2);
@@ -555,7 +560,7 @@ CMessageHandler MessageHandlerDeclaration() : {
     parameters = FormalParameters()
     block = Block()
     {
-        message_handler.pass_type = pass_type.name;
+        message_handler.pass_type = pass_type;
         message_handler.name = t.image;
         message_handler.parameters = parameters;
         message_handler.block = block;
@@ -606,7 +611,7 @@ CFormalParameter FormalParameter() : {
 } {
     type = Type() t = <IDENTIFIER>     {
                                           formal_parameter = new CFormalParameter();
-                                          formal_parameter.type = type.name;
+                                          formal_parameter.type = type;
                                           formal_parameter.name = t.image;
                                       }
 
@@ -667,7 +672,10 @@ CPassStatement PassStatement() : {
     "pass" [t = "later" | pass_statement.expression = Expression()] ";"
 
     {
-        if (t != null) pass_statement.will_pass_later = true;
+        if (t != null) {
+            System.err.println("pass statement on line " + t.beginLine + " will pass later");
+            pass_statement.will_pass_later = true;
+        }
         return pass_statement;
     }
 }
@@ -686,7 +694,7 @@ CLocalVariableDeclaration ForInit() : {
     CType type;
     CVariableInit variable_init;
 } {
-    type = Type()                        { local_variable_declaration.type = type.name; }
+    type = Type()                                   { local_variable_declaration.type = type; }
     variable_init = VariableInitialization()        { local_variable_declaration.variables.add(variable_init); }
 
     (    LOOKAHEAD(",") "," 
@@ -794,9 +802,9 @@ CLocalVariableDeclaration LocalVariableDeclaration() : {
    Token t = null;
 } {
     [    
-        t = "token"                         { local_variable_declaration.is_token = true; }
+        t = "token"                                 { local_variable_declaration.is_token = true; }
     ]
-    type = Type()                           { local_variable_declaration.type = type.name; }
+    type = Type()                                   { local_variable_declaration.type = type; }
     variable_init = VariableInitialization()        { local_variable_declaration.variables.add(variable_init); }
 
     (    LOOKAHEAD(",") "," 
@@ -909,7 +917,7 @@ CValue Value() : {
 } {
     [
         LOOKAHEAD( "(" type = Type() ")" )
-        beginToken = "(" type = Type() ")"                             { value.cast_type = type.name; value.initLineAndColumnBegin(beginToken); hasBegin = true;}
+        beginToken = "(" type = Type() ")"                             { value.cast_type = type; value.initLineAndColumnBegin(beginToken); hasBegin = true;}
     ]
     (
           value.literal = Literal()                               { value.initLineAndColumnEnd( value.literal );                          if (!hasBegin) value.initLineAndColumnBegin( value.literal ); }
@@ -1032,31 +1040,31 @@ CArguments Arguments() : {
 
 CAllocation Allocation() : {
     CAllocation allocation = new CAllocation();
-   CArguments arguments;
-   CName type;
-   CPrimitiveType ptype;
-   Token t;
+    CArguments arguments;
+    CName type;
+    CPrimitiveType ptype;
+    Token t;
 } {
     (
          LOOKAHEAD("new" Name() "(")
          (
             t = "new"
             type = Name()
-            arguments = Arguments()                   { allocation.arguments = arguments.arguments; }
-            [ BindDeclaration(allocation) ]             { allocation.type = type.name; }
+            arguments = Arguments()                 { allocation.arguments = arguments.arguments; }
+            [ BindDeclaration(allocation) ]         { allocation.type = type; }
           )
         | (    
-            t = "new"                              { allocation.initLineAndColumn(t); }
+            t = "new"                               { allocation.initLineAndColumn(t); }
             (
-                  ptype = PrimitiveType()               { allocation.type = ptype.name; }
-                | type = Name()                      { allocation.type = type.name; }
+                  ptype = PrimitiveType()           { allocation.type = ptype; }
+                | type = Name()                     { allocation.type = type; }
             )
             ArrayDimsAndInits(allocation)
           )
         | (
             t = "reference"                         { allocation.remote_reference = true; }
             type = Name()
-            BindDeclaration(allocation)                { allocation.type = type.name; }
+            BindDeclaration(allocation)             { allocation.type = type; }
           )
     )
 

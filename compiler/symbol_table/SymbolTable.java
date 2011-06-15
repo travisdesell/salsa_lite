@@ -27,8 +27,8 @@ public class SymbolTable {
 	public static String getWorkingDirectory() { return workingDirectory; }
 
 
-    private static HashMap<String,TypeSymbol> knownTypes = new HashMap<String,TypeSymbol>();
-    private static TreeMap<String,String> namespace = new TreeMap<String,String>();
+    public static HashMap<String,TypeSymbol> knownTypes = new HashMap<String,TypeSymbol>();
+    public static TreeMap<String,String> namespace = new TreeMap<String,String>();
 
     public static boolean isExpressionContinuation = false;
 
@@ -90,14 +90,27 @@ public class SymbolTable {
         }
 
         if (knownType == null) {
-            return load(name);
-        } else {
-            return knownType;
+            knownType = load(name);
         }
+
+        return knownType;
     }
 
     public static TypeSymbol load(String name) throws SalsaNotFoundException {
         TypeSymbol st;
+
+        if (name.contains("<")) {
+            System.err.println("loading generic: " + name);
+            TypeSymbol baseType = getTypeSymbol(name.substring(0, name.indexOf("<")));
+
+            if (baseType == null) {
+                throw new SalsaNotFoundException("", name, "generic base type");
+            }
+            System.err.println("base type is: " + baseType.getLongSignature());
+            name = baseType.module + name;
+        }
+        
+
         if (name.charAt(0) == '[' || name.charAt(name.length() - 1) == ']') {
             st = loadArray(name);
         } else if (ActorType.findSalsaFile(name) != null) {

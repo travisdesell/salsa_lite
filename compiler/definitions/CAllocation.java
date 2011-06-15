@@ -10,7 +10,7 @@ public class CAllocation extends CVariableInit {
 
 	public boolean remote_reference = false;
 
-	public String type;
+	public CName type;
 
 	public int array_dimensions = 0;
 
@@ -43,10 +43,10 @@ public class CAllocation extends CVariableInit {
 
 	public TypeSymbol getType() {
         try {
-            TypeSymbol t = SymbolTable.getTypeSymbol(type);
+            TypeSymbol t = SymbolTable.getTypeSymbol(type.name);
             return t;
         } catch (SalsaNotFoundException snfe) {
-            CompilerErrors.printErrorMessage("[CAllication.getType]: " + snfe.toString(), this);
+            CompilerErrors.printErrorMessage("[CAllocation.getType]: " + snfe.toString(), type);
             throw new RuntimeException(snfe);
         }
 
@@ -57,8 +57,8 @@ public class CAllocation extends CVariableInit {
 
         try {
             if (arguments != null) {
-                if (SymbolTable.isActor(type)) {
-                    code += type +".construct(" + SymbolTable.getTypeSymbol(type).getConstructor(arguments).getId() + ", ";
+                if (SymbolTable.isActor(type.name)) {
+                    code += type.name +".construct(" + SymbolTable.getTypeSymbol(type.name).getConstructor(arguments).getId() + ", ";
 
                     String argument_code = "";
                     for (int i = 0; i < arguments.size(); i++) {
@@ -93,7 +93,7 @@ public class CAllocation extends CVariableInit {
                     
                     code += ")";
                 } else {
-                    code += "new " + type + "( ";
+                    code += "new " + type.name + "( ";
                     for (CExpression argument : arguments) {
                         code += argument.toJavaCode();
 
@@ -102,7 +102,7 @@ public class CAllocation extends CVariableInit {
                     code += " )";
                 }
             } else {
-                code += "new " + type;
+                code += "new " + type.name;
 
                 for (int i = 0; i < array_dimensions; i++) {
                     code += "[";
@@ -113,7 +113,7 @@ public class CAllocation extends CVariableInit {
                 if (array_init != null) code += array_init.toJavaCode();
             }
         } catch (SalsaNotFoundException snfe) {
-            CompilerErrors.printErrorMessage("[CAllication.getType]: " + snfe.toString(), this);
+            CompilerErrors.printErrorMessage("[CAllocation.getType]: " + snfe.toString(), type);
             throw new RuntimeException(snfe);
         }
 
