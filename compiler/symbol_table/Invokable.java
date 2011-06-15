@@ -131,9 +131,11 @@ public class Invokable {
 
         if (match == null) {
             System.err.println("COMPILER ERROR [Invokable.matchParameterTypes]: could not find matching targetArguments for '" + targetArguments.getLongSignature() + "'.");
-            System.err.println("known potential invokables:");
+            System.err.println("potential matches:");
             i = 0;
             for (Invokable current : new LinkedList<Invokable>(invokableMap.values())) {
+                if (!current.getName().equals(targetArguments.getName())) continue;
+                if (targetArguments.parameterTypes.length != current.parameterTypes.length) continue;
                 System.err.println("\t" + current.getLongSignature());
             }
         }

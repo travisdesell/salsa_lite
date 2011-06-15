@@ -30,7 +30,7 @@ public class CExpression extends CVariableInit {
 		if (operator == null) {
 			return value_type;
 		} else if (operator.equals("=")) {
-			if (value_type.canMatch(operator_expression.getType()) < 0) {
+			if (operator_expression.getType().canMatch(value_type) < 0) {
                 CompilerErrors.printErrorMessage("Conflicting types.  Cannot assign '" + operator_expression.getType().getLongSignature() + "' to '" + value_type.getLongSignature() + "'", operator_expression);
 			}
 

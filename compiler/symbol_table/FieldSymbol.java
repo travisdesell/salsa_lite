@@ -6,6 +6,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 
+import java.util.ArrayList;
+
 import salsa_lite.compiler.definitions.CompilerErrors;
 import salsa_lite.compiler.definitions.CLocalVariableDeclaration;
 import salsa_lite.compiler.definitions.CVariableInit;
@@ -19,23 +21,22 @@ public class FieldSymbol {
     public String getName()         { return name; }
     public TypeSymbol getType()     { return type; }
 
+    public FieldSymbol(TypeSymbol enclosingType, Field f, ArrayList<String> declaredGenericTypes, ArrayList<TypeSymbol> instantiatedGenericTypes) throws SalsaNotFoundException {
+        this.enclosingType = enclosingType;
+        this.name = f.getName();
+
+        Type t = f.getGenericType();
+        int generic_index = declaredGenericTypes.indexOf(t.toString());
+        this.type = instantiatedGenericTypes.get(generic_index);
+
+        System.out.println("GENERIC FIELD TYPE: " + getLongSignature());
+    }
+
     public FieldSymbol(TypeSymbol enclosingType, Field f) throws SalsaNotFoundException {
         this.enclosingType = enclosingType;
 
         this.name = f.getName();
         this.type = SymbolTable.getTypeSymbol( f.getType().getName() );
-
-        /*
-        Type t = f.getGenericType();
-
-        if (t instanceof TypeVariable) {
-            System.out.println("FIELD TYPE IS GENERIC: " + t);
-        } else if (t instanceof GenericArrayType) {
-            System.out.println("FIELD TYPE IS GENERIC ARRAY: " + t);
-        } else if (t instanceof ParameterizedType) {
-            System.out.println("FIELD TYPE IS PARAMETERIZED: " + t);
-        }
-        */
     }
 
     public FieldSymbol(TypeSymbol enclosingType, CLocalVariableDeclaration variableDeclaration, CVariableInit variableInit) {

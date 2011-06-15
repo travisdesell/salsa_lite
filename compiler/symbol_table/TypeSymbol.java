@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Vector;
+import java.util.StringTokenizer;
 
 public class TypeSymbol implements Comparable<TypeSymbol> {
     TypeSymbol superType = null;
@@ -76,12 +77,25 @@ public class TypeSymbol implements Comparable<TypeSymbol> {
             else return distance; // null can match any actor, array or object
         }
 
-        if (this instanceof PrimitiveType && !(target instanceof PrimitiveType)) {
+        if (!(target instanceof PrimitiveType) && this instanceof PrimitiveType) {
             try {
-                TypeSymbol nonPrimitive = SymbolTable.getTypeSymbol( toNonPrimitiveString() );
+                if (this.getName().equals("null")) return distance;
+
+                TypeSymbol nonPrimitive = SymbolTable.getTypeSymbol( this.toNonPrimitiveString() );
                 return nonPrimitive.canMatch(target, distance + 1);
             } catch (SalsaNotFoundException snfe) {
                 System.err.println("Could not find TypeSymbol for non-primivite version of primitive type '" + toNonPrimitiveString() + "'.");
+                System.err.println("This should never happen.");
+                throw new RuntimeException();
+            }
+        }
+
+        if (target instanceof PrimitiveType && !(this instanceof PrimitiveType)) {
+            try {
+                TypeSymbol nonPrimitive = SymbolTable.getTypeSymbol( target.toNonPrimitiveString() );
+                return this.canMatch(nonPrimitive, distance + 1);
+            } catch (SalsaNotFoundException snfe) {
+                System.err.println("Could not find TypeSymbol for non-primivite version of primitive type '" + target.toNonPrimitiveString() + "'.");
                 System.err.println("This should never happen.");
                 throw new RuntimeException();
             }
@@ -97,6 +111,27 @@ public class TypeSymbol implements Comparable<TypeSymbol> {
             if (temp_distance >= 0) return temp_distance;
         }
         return -1;
+    }
+
+    public static String replaceGenerics(String name, ArrayList<String> declaredGenericTypes, ArrayList<TypeSymbol> instantiatedGenericTypes) {
+        if (!name.contains("<")) return name;
+
+        StringTokenizer st = new StringTokenizer(name.substring(name.indexOf("<") + 1, name.length() - 1), ", ");
+
+        String newname = name.substring(0, name.indexOf("<"));
+        newname += "<";
+        while (st.hasMoreTokens()) {
+            String current = st.nextToken();
+            int current_index = declaredGenericTypes.indexOf(current);
+            if (current_index >= 0) {
+                newname += instantiatedGenericTypes.get(current_index).getSignature();
+            } else {
+                newname += current;
+            }
+            if (st.hasMoreTokens()) newname += ",";
+        }
+        newname += ">";
+        return newname;
     }
 
     public String toNonPrimitiveString() {

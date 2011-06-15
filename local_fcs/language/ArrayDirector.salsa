@@ -2,15 +2,15 @@ module salsa_lite.local_fcs.language;
 
 import object java.util.ArrayList;
 
-behavior ArrayDirector<T> implements Director {
+behavior ArrayDirector<O> implements Director {
 
 	int valueCount = 0;
-    T[] values;
+    O[] values;
 
 	ArrayList<ContinuationDirector> continuationDirectors = new ArrayList<ContinuationDirector>();
     ArrayList<Integer> requiredTokens = new ArrayList<Integer>();
 
-	ArrayDirector(T[] values) { 
+	ArrayDirector(O[] values) { 
         self.values = values;
 
         for (int i = 0; i < values.length; i++) {
@@ -24,7 +24,7 @@ behavior ArrayDirector<T> implements Director {
 
 	ack setValue(int position, Object value) {
         if (values[position] != null) {
-            values[position] = (T)value;
+            values[position] = (O)value;
 		    valueCount++;
         } else {
             System.err.println("WARNING: resetting value of ArrayDirector.");
@@ -50,7 +50,7 @@ behavior ArrayDirector<T> implements Director {
         }
 	}
 
-    T[] resolve() {
+    O[] resolve() {
         int reqTokens = values.length;
    		if (valueCount < reqTokens) {
             self.continuationDirectors.add(stage.message.continuationDirector);
@@ -61,7 +61,7 @@ behavior ArrayDirector<T> implements Director {
         }
     }
 
-	T[] resolveAfter(int reqTokens) {
+	O[] resolveAfter(int reqTokens) {
 		if (valueCount < reqTokens) {
             self.continuationDirectors.add(stage.message.continuationDirector);
             self.requiredTokens.add(reqTokens);

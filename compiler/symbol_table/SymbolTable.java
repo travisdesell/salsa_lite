@@ -100,17 +100,14 @@ public class SymbolTable {
         TypeSymbol st;
 
         if (name.contains("<")) {
-            System.err.println("loading generic: " + name);
             TypeSymbol baseType = getTypeSymbol(name.substring(0, name.indexOf("<")));
 
             if (baseType == null) {
                 throw new SalsaNotFoundException("", name, "generic base type");
             }
-            System.err.println("base type is: " + baseType.getLongSignature());
-            name = baseType.module + name;
+            if (!name.contains(".")) name = baseType.module + name;
         }
         
-
         if (name.charAt(0) == '[' || name.charAt(name.length() - 1) == ']') {
             st = loadArray(name);
         } else if (ActorType.findSalsaFile(name) != null) {
