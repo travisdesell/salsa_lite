@@ -12,6 +12,8 @@ import java.io.FileNotFoundException;
 import salsa_lite.compiler.SalsaParser;
 import salsa_lite.compiler.ParseException;
 
+import salsa_lite.compiler.definitions.CompilerErrors;
+
 import salsa_lite.compiler.definitions.CCompilationUnit;
 import salsa_lite.compiler.definitions.CConstructor;
 import salsa_lite.compiler.definitions.CExpression;
@@ -106,26 +108,41 @@ public class ActorType extends TypeSymbol {
 
     public void load(CCompilationUnit cu, String oldModule) throws SalsaNotFoundException {
         int i;
-		this.superType = SymbolTable.getTypeSymbol(cu.getExtendsName());
+		this.superType = SymbolTable.getTypeSymbol(cu.getExtendsName().name);
 
 		Vector<CConstructor> cv = cu.getConstructors();
 		for (i = 0; i < cv.size(); i++) {
-            ConstructorSymbol cs = new ConstructorSymbol(i, this, cv.get(i));
-            constructors.put( cs.getLongSignature(), cs );
+            try {
+                ConstructorSymbol cs = new ConstructorSymbol(i, this, cv.get(i));
+                constructors.put( cs.getLongSignature(), cs );
+            } catch (SalsaNotFoundException snfe) {
+                CompilerErrors.printErrorMessage("Could not find type in constructor declaration. " + snfe.toString(), cv.get(i));
+                throw new RuntimeException(snfe);
+            }
         }
 
         Vector<CMessageHandler> mv = cu.getMessageHandlers();
 		for (i = 0; i < mv.size(); i++) {
-            MessageSymbol ms = new MessageSymbol(i, this, mv.get(i));
-            message_handlers.put( ms.getLongSignature(), ms );
+            try {
+                MessageSymbol ms = new MessageSymbol(i, this, mv.get(i));
+                message_handlers.put( ms.getLongSignature(), ms );
+            } catch (SalsaNotFoundException snfe) {
+                CompilerErrors.printErrorMessage("Could not find type in message handler declaration. " + snfe.toString(), mv.get(i));
+                throw new RuntimeException(snfe);
+            }
         }
 
 		Vector<CLocalVariableDeclaration> fv = cu.getFields();
 		for (i = 0; i < fv.size(); i++) {
-            Vector<CVariableInit> vv = fv.get(i).variables;
-            for (int j = 0; j < vv.size(); j++) {
-                FieldSymbol fs = new FieldSymbol(this, fv.get(i), vv.get(j));
-                fields.put( fs.getLongSignature(), fs );
+            try {
+                Vector<CVariableInit> vv = fv.get(i).variables;
+                for (int j = 0; j < vv.size(); j++) {
+                    FieldSymbol fs = new FieldSymbol(this, fv.get(i), vv.get(j));
+                    fields.put( fs.getLongSignature(), fs );
+                }
+            } catch (SalsaNotFoundException snfe) {
+                CompilerErrors.printErrorMessage("Could not find type for field. " + snfe.toString(), fv.get(i));
+                throw new RuntimeException(snfe);
             }
 		}
 

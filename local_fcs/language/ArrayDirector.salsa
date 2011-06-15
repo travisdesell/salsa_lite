@@ -25,7 +25,7 @@ behavior ArrayDirector<T> {
 		    valueCount++;
         } else {
             System.err.println("WARNING: resetting value of ArrayDirector.");
-            System.err.println("WARNING: " + toString() + "[" + position + "] is already '" + values[position] + "' trying ro set it to '" + value);
+            System.err.println("WARNING: " + self.toString() + "[" + position + "] is already '" + values[position] + "' trying ro set it to '" + value);
             System.err.println("WARNING: ArrayDirectors are single-assignment, previous value will not be overwritten.");
         }
 

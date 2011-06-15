@@ -341,6 +341,7 @@ public interface SalsaParserConstants {
     "\"<<=\"",
     "\">>=\"",
     "\">>>=\"",
+    "\"?\"",
     "\"@\"",
   };
 

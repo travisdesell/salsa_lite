@@ -332,27 +332,49 @@ String ModuleDeclaration() : {
     { return module_name.name; }
 }
 
+CGenericType GenericType() : {
+    CGenericType generic_type;
+    Token t1 = null, t2 = null;
+} {
+        t1 = "?" "extends" t2 = <IDENTIFIER>
+    |   LOOKAHEAD(<IDENTIFIER> "extends") t1 = <IDENTIFIER> "extends" t2 = <IDENTIFIER>
+    |   t1 = <IDENTIFIER>
+
+    {
+        if (t2 == null) {
+            generic_type = new GenericType(t1.image);
+            generic_type.initLineAndColumn(t1, t1);
+        } else {
+            generic_type = new GenericType(t1.image + " extends " + t2.image);
+            generic_type.initLineAndColumn(t1, t2);
+        }
+        return generic_type;
+    }
+}
+
+String GenericDeclaration(CName name) : {
+    CGenericType generic_type;
+} {
+        "<"
+        generic_type = GenericType()        { name.generic_types.add(generic_type); name.name += "<" + generic_type.toString(); }
+        (
+            "," generic_type = <IDENTIFIER> { name.generic_types.add(generic_type); name.name += "," + generic_type.toString(); }
+        )*
+        t = ">"                             { name.name += ">"; name.initLineAndColumnEnd(t); }
+}
+
 CName Name() : {
     CName name = new CName();
     Token t;
 } {
-    t = <IDENTIFIER>                    { name.name = t.image; name.initLineAndColumnBegin(t); }
+    t = <IDENTIFIER>                        { name.name = t.image; name.initLineAndColumn(t, t); }
     (
         LOOKAHEAD(".") "."
-        t = <IDENTIFIER>
-        { name.name += "." + t.image; }
+        t = <IDENTIFIER>                    { name.name += "." + t.image; name.initLineAndColumnEnd(t); }
     )*
 
-    [
-        "<"
-        t = <IDENTIFIER>                { name.name += "<" + t.image; name.initLineAndColumnEnd(t); }
-        (
-            "," t = <IDENTIFIER>        { name.name += "," + t.image; name.initLineAndColumnEnd(t); }
-        )*
-        ">"
-    ]
+    [ GenericDeclaration(name) ]
     {
-        name.name += ">";
         return name;
     }
 }
@@ -390,8 +412,8 @@ CInterfaceDeclaration InterfaceDeclaration() : {
     Token t;
    CName name;
 } {
-    "interface" name = Name()                                                      { interface_declaration.interface_name = name; }
-    ["extends" name = Name()                                          { interface_declaration.extends_name = name; } ]
+    "interface" name = Name()                                                       { interface_declaration.interface_name = name; }
+    ["extends" name = Name()                                                        { interface_declaration.extends_name = name; } ]
     "{"
         (
               LOOKAHEAD(Type() <IDENTIFIER> FormalParameters()) message_handler = InterfaceMessageHandlerDeclaration()    { interface_declaration.message_handlers.add(message_handler); }

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.TreeMap;
 
 import salsa_lite.compiler.definitions.CCompilationUnit;
+import salsa_lite.compiler.definitions.CompilerErrors;
 
 public class SymbolTable {
 
@@ -332,18 +333,6 @@ public class SymbolTable {
 		else if (System.getProperty("wwc") != null) runtimeModule += "wwc";
 		languageModule = runtimeModule + ".language.";
 
-        
-        String module = cu.getModule();
-        if (module == null) module = "";
-        else module += ".";
-
-        setCurrentModule(module);
-
-        String currentFile = ActorType.findSalsaFile(module + cu.getName());
-        if (currentFile == null) {
-            System.err.println("COMPILER ERROR [SymbolTable.resetSymbolTable]: SALSA behavior '" + cu.getName() + "' is not in it's specfied package '" + module + "'");
-            System.exit(0);
-        }
 
         try {
 
@@ -473,6 +462,23 @@ public class SymbolTable {
             loadDefaultObject("java.lang.UnsupportedClassVersionError", false);
             loadDefaultObject("java.lang.VerifyError", false);
             loadDefaultObject("java.lang.VirtualMachineError", false);
+        
+            /**
+             *  Make sure the actor is in the correct file
+             */
+            String module = cu.getModule();
+            String name = cu.getName().toNonGenericName();
+
+            if (module == null) module = "";
+            else module += ".";
+
+            setCurrentModule(module);
+
+            String currentFile = ActorType.findSalsaFile(module + name);
+            if (currentFile == null) {
+                CompilerErrors.printErrorMessage("COMPILER ERROR [SymbolTable.resetSymbolTable]: SALSA behavior '" + module + name + "' is not in it's specfied package '" + module + "'", cu.getName());
+                throw new RuntimeException();
+            }
 
             /**
              * Load basic salsa_lite objects

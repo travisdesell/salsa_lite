@@ -175,8 +175,10 @@ static private int jjMoveStringLiteralDfa0_0()
       case 62:
          jjmatchedKind = 78;
          return jjMoveStringLiteralDfa1_0(0x0L, 0x1803000200000L);
-      case 64:
+      case 63:
          return jjStopAtPos(0, 113);
+      case 64:
+         return jjStopAtPos(0, 114);
       case 91:
          return jjStopAtPos(0, 71);
       case 93:
@@ -1338,7 +1340,7 @@ null, null, null, null, null, null, null, null, null, null, null, "\50", "\51",
 "\41", "\176", "\72", "\75\75", "\74\75", "\76\75", "\41\75", "\174\174", "\46\46", 
 "\53\53", "\55\55", "\53", "\55", "\52", "\57", "\46", "\174", "\136", "\45", "\74\74", 
 "\76\76", "\76\76\76", "\53\75", "\55\75", "\52\75", "\57\75", "\46\75", "\174\75", 
-"\136\75", "\45\75", "\74\74\75", "\76\76\75", "\76\76\76\75", "\100", };
+"\136\75", "\45\75", "\74\74\75", "\76\76\75", "\76\76\76\75", "\77", "\100", };
 
 /** Lexer state names. */
 public static final String[] lexStateNames = {
@@ -1354,10 +1356,10 @@ public static final int[] jjnewLexState = {
    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
-   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
 };
 static final long[] jjtoToken = {
-   0xd1ffffffffffe001L, 0x3fffffffffff9L, 
+   0xd1ffffffffffe001L, 0x7fffffffffff9L, 
 };
 static final long[] jjtoSkip = {
    0xe3eL, 0x0L, 

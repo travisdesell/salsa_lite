@@ -31,7 +31,7 @@ public class CCompilationUnit {
 	}
 
 	public CName getExtendsName() {
-		if (behavior_declaration != null) return behavior_declaration.extends_name;
+		if (behavior_declaration != null) return behavior_declaration.getExtendsName();
 		else return interface_declaration.extends_name;
 	}
 
