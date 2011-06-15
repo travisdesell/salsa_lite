@@ -25,14 +25,14 @@ public class CCompilationUnit {
 
 	public CJavaStatement java_statement;
 
-	public String getName() {
-		if (behavior_declaration != null) return behavior_declaration.getBehaviorName();
-		else return interface_declaration.getInterfaceName();
+	public CName getName() {
+		if (behavior_declaration != null) return behavior_declaration.behavior_name;
+		else return interface_declaration.interface_name;
 	}
 
-	public String getExtendsName() {
-		if (behavior_declaration != null) return behavior_declaration.getExtendsName();
-		else return interface_declaration.getExtendsName();
+	public CName getExtendsName() {
+		if (behavior_declaration != null) return behavior_declaration.extends_name;
+		else return interface_declaration.extends_name;
 	}
 
 	public Vector<CEnumeration> getEnumerations() {
@@ -142,9 +142,10 @@ public class CCompilationUnit {
 
 		TypeSymbol typeSymbol = null;
         try {
-            typeSymbol = SymbolTable.getTypeSymbol(getName());
+            CName name = getName();
+            typeSymbol = SymbolTable.getTypeSymbol(getName().name);
             if (!(typeSymbol instanceof ActorType)) {
-                System.err.println("VERY BAD COMPILER ERROR [CCompilationUnit.getInvokeMessageCode]: Compiler thinks current actor is not an actor, thinks it is: " + typeSymbol.getLongSignature());
+                CompilerErrors.printErrorMessage("VERY BAD COMPILER ERROR [CCompilationUnit.getInvokeMessageCode]: Compiler thinks current actor is not an actor, thinks it is: " + typeSymbol.getLongSignature(), name);
             }
         } catch (SalsaNotFoundException snfe) {
             CompilerErrors.printErrorMessage("VERY BAD ERROR. Could not get type for actor being compiled. This should never happen.", behavior_declaration);
@@ -196,9 +197,10 @@ public class CCompilationUnit {
 
 		TypeSymbol typeSymbol = null;
         try {
-            typeSymbol = SymbolTable.getTypeSymbol(getName());
+            CName name = getName();
+            typeSymbol = SymbolTable.getTypeSymbol(name.name);
             if (!(typeSymbol instanceof ActorType)) {
-                System.err.println("VERY BAD COMPILER ERROR [CCompilationUnit.getInvokeMessageCode]: Compiler thinks current actor is not an actor, thinks it is: " + typeSymbol.getLongSignature());
+                CompilerErrors.printErrorMessage("VERY BAD COMPILER ERROR [CCompilationUnit.getInvokeMessageCode]: Compiler thinks current actor is not an actor, thinks it is: " + typeSymbol.getLongSignature(), name);
             }
         } catch (SalsaNotFoundException snfe) {
             CompilerErrors.printErrorMessage("VERY BAD ERROR. Could not get type for actor being compiled. This should never happen.", behavior_declaration);
@@ -272,7 +274,7 @@ public class CCompilationUnit {
 
 		code += getImportDeclarationCode();
 
-		String actor_name = getName();
+		String actor_name = getName().name;
         try {
             if (module_string == null) {
                 SymbolTable.loadActor(actor_name);
@@ -284,7 +286,7 @@ public class CCompilationUnit {
             throw new RuntimeException(snfe);
         }
 
-		String extendsName = getExtendsName();
+		String extendsName = getExtendsName().name;
 		if (System.getProperty("local") != null || System.getProperty("wwc") != null) {
 			if (extendsName.equals("LocalActor") || extendsName.equals("WWCActor")) {
 				extendsName += "Reference";
@@ -359,41 +361,7 @@ public class CCompilationUnit {
 		}
 
 		code += "/****** SALSA LANGUAGE IMPORTS ******/\n";
-		if (System.getProperty("local") != null) {
-			code += "import salsa_lite.local.LocalActorReference;\n";
-			code += "import salsa_lite.local.LocalActorState;\n";
-			code += "import salsa_lite.local.Message;\n";
-			code += "import salsa_lite.local.StageService;\n";
-            if (!module_string.equals("salsa_lite.local.language.")) {
-                code += "import salsa_lite.local.language.JoinDirector;\n";
-                code += "import salsa_lite.local.language.ContinuationDirector;\n";
-                code += "import salsa_lite.local.language.TokenDirector;\n";
-            }
-			code += "import salsa_lite.local.language.exceptions.ContinuationPassException;\n";
-			code += "import salsa_lite.local.language.exceptions.TokenPassException;\n";
-			code += "\n";
-			code += "import salsa_lite.local.language.exceptions.MessageHandlerNotFoundException;\n";
-			code += "import salsa_lite.local.language.exceptions.ConstructorNotFoundException;\n";
-			code += "\n";
-
-		} else if (System.getProperty("local_noref") != null) {
-			code += "import salsa_lite.local_noref.LocalActor;\n";
-			code += "import salsa_lite.local_noref.Message;\n";
-			code += "import salsa_lite.local_noref.StageService;\n";
-            if (!module_string.equals("salsa_lite.local_noref.language.")) {
-                code += "import salsa_lite.local_noref.language.JoinDirector;\n";
-                code += "import salsa_lite.local_noref.language.MessageDirector;\n";
-                code += "import salsa_lite.local_noref.language.ContinuationDirector;\n";
-                code += "import salsa_lite.local_noref.language.TokenDirector;\n";
-            }
-			code += "\n";
-			code += "import salsa_lite.local_noref.language.exceptions.ContinuationPassException;\n";
-			code += "import salsa_lite.local_noref.language.exceptions.TokenPassException;\n";
-			code += "import salsa_lite.local_noref.language.exceptions.MessageHandlerNotFoundException;\n";
-			code += "import salsa_lite.local_noref.language.exceptions.ConstructorNotFoundException;\n";
-			code += "\n";
-
-		} else if (System.getProperty("local_fcs") != null) {
+		if (System.getProperty("local_fcs") != null) {
 			code += "import salsa_lite.local_fcs.Acknowledgement;\n";
 			code += "import salsa_lite.local_fcs.SynchronousMailboxStage;\n";
 			code += "import salsa_lite.local_fcs.LocalActor;\n";
@@ -436,9 +404,9 @@ public class CCompilationUnit {
 
 		code += getImportDeclarationCode() + "\n";
 
-		String extendsName = getExtendsName();
+		String extendsName = getExtendsName().name;
 
-        String actor_name = getName();
+        String actor_name = getName().name;
         try {
             if (module_string == null) {
                 SymbolTable.loadActor(actor_name);

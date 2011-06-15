@@ -12,9 +12,9 @@ public class CBehaviorDeclaration extends CErrorInformation {
 	int added_message_handlers = 0;
 	int added_constructors = 0;
 
-	public String behavior_name;
-	public String extends_name;
-	public Vector<String> implements_names = new Vector<String>();
+	public CName behavior_name;
+	public CName extends_name;
+	public Vector<CName> implements_names = new Vector<CName>();
 
 	public Vector<CEnumeration> enumerations = new Vector<CEnumeration>();
 	public Vector<CConstructor> constructors = new Vector<CConstructor>();
@@ -23,17 +23,11 @@ public class CBehaviorDeclaration extends CErrorInformation {
 
 	public CJavaStatement java_statement;
 
-	public String getBehaviorName() {
-		return behavior_name;
-	}
-
-	public String getExtendsName() {
+	public CName getExtendsName() {
 		if (this.extends_name == null) {
-			if (System.getProperty("local") != null) return "salsa_lite.local.LocalActor";
-			else if (System.getProperty("local_noref") != null) return "salsa_lite.local_noref.LocalActor";
-			else if (System.getProperty("local_fcs") != null) return "salsa_lite.local_fcs.LocalActor";
-			else if (System.getProperty("wwc") != null) return "salsa_lite.wwc.WWCActor";
-			else return "";
+			if (System.getProperty("local_fcs") != null) return new CName("salsa_lite.local_fcs.LocalActor");
+			else if (System.getProperty("wwc") != null) return new CName("salsa_lite.wwc.WWCActor");
+			else return new CName("");
 		} else {
 			return extends_name;
 		}

@@ -1,95 +1,95 @@
 /*
-	Salsa 2.1 Grammar
-	
-	Authors: Carlos Varela, Travis Desell
+    Salsa 2.1 Grammar
+    
+    Authors: Carlos Varela, Travis Desell
  */
 
 options {
-	JAVA_UNICODE_ESCAPE = true;
-	TRACK_TOKENS = true;
-	NODE_SCOPE_HOOK = true;
-	NODE_FACTORY = true;
-	NODE_PACKAGE = "salsa_lite.compiler";
+    JAVA_UNICODE_ESCAPE = true;
+    TRACK_TOKENS = true;
+    NODE_SCOPE_HOOK = true;
+    NODE_FACTORY = true;
+    NODE_PACKAGE = "salsa_lite.compiler";
 }
 
 PARSER_BEGIN(SalsaParser)
-	package salsa_lite.compiler;
+    package salsa_lite.compiler;
 
-	import salsa_lite.compiler.definitions.*;
+    import salsa_lite.compiler.definitions.*;
 
-	import java.util.Vector;
+    import java.util.Vector;
     import java.util.LinkedList;
 
-	public class SalsaParser {
+    public class SalsaParser {
 
-		public static void main(String args[]) {
-			SalsaParser parser;
+        public static void main(String args[]) {
+            SalsaParser parser;
 
-			if (args.length == 0) {
-				System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Reading from standard input . . .");
+            if (args.length == 0) {
+                System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Reading from standard input . . .");
 
-				parser = new SalsaParser(System.in);
-			} else if (args.length == 1) {
-				System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Reading from file " + args[0] + " . . .");
+                parser = new SalsaParser(System.in);
+            } else if (args.length == 1) {
+                System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Reading from file " + args[0] + " . . .");
 
-				try {
-					parser = new SalsaParser(new java.io.FileInputStream(args[0]));
-				} catch (java.io.FileNotFoundException e) {
-					System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  File " + args[0] + " not found.");
-					return;
-				}
-			} else {
-				System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Usage is one of:");
-				System.out.println("         java SalsaParser < inputfile");
-				System.out.println("OR");
-				System.out.println("         java SalsaParser inputfile");
-				return;
-			}
+                try {
+                    parser = new SalsaParser(new java.io.FileInputStream(args[0]));
+                } catch (java.io.FileNotFoundException e) {
+                    System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  File " + args[0] + " not found.");
+                    return;
+                }
+            } else {
+                System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Usage is one of:");
+                System.out.println("       java SalsaParser < inputfile");
+                System.out.println("OR");
+                System.out.println("       java SalsaParser inputfile");
+                return;
+            }
 
-			try {
-				CCompilationUnit cu = parser.CompilationUnit();
-				System.out.println("\n\nSTATE CODE:\n\n" + cu.getStateCode());
-				System.out.println("\n\nREFERENCE CODE:\n\n" + cu.getReferenceCode());
-				
-				System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Salsa program parsed successfully.");
-			} catch (ParseException e) {
-				System.out.println(e.getMessage());
-				System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Encountered errors during parse.");
-			}
-		}
+            try {
+                CCompilationUnit cu = parser.CompilationUnit();
+                System.out.println("\n\nSTATE CODE:\n\n" + cu.getStateCode());
+                System.out.println("\n\nREFERENCE CODE:\n\n" + cu.getReferenceCode());
+                
+                System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Salsa program parsed successfully.");
+            } catch (ParseException e) {
+                System.out.println(e.getMessage());
+                System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Encountered errors during parse.");
+            }
+        }
 
-		static int depth = 0;
-		static String getDepth() {
-			String result = "";
-			for (int i = 0; i < depth; i++) result += " ";
-			return result;
-		}
+        static int depth = 0;
+        static String getDepth() {
+            String result = "";
+            for (int i = 0; i < depth; i++) result += " ";
+            return result;
+        }
 
-		static void jjtreeOpenNodeScope(SimpleNode n) {
-//			System.out.println(getDepth() + "Opening node: " + SalsaParserTreeConstants.jjtNodeName[n.id]);
-//			depth++;
-		}
+        static void jjtreeOpenNodeScope(SimpleNode n) {
+//            System.out.println(getDepth() + "Opening node: " + SalsaParserTreeConstants.jjtNodeName[n.id]);
+//            depth++;
+        }
 
-		static void jjtreeCloseNodeScope(SimpleNode n) {
-//			depth--;
-//			System.out.println(getDepth() + "Closing node: " + SalsaParserTreeConstants.jjtNodeName[n.id]);
-		}
-	}
+        static void jjtreeCloseNodeScope(SimpleNode n) {
+//            depth--;
+//            System.out.println(getDepth() + "Closing node: " + SalsaParserTreeConstants.jjtNodeName[n.id]);
+        }
+    }
 PARSER_END(SalsaParser)
 
 
 /* WHITE SPACE */
 
 SKIP : {
-	" " | "\t" | "\n" | "\r" | "\f"
+    " " | "\t" | "\n" | "\r" | "\f"
 }
 
 /* COMMENTS */
 
 MORE : {
-	  "//" : IN_SINGLE_LINE_COMMENT
-	| <"/**" ~["/"]> { input_stream.backup(1); } : IN_FORMAL_COMMENT
-	| "/*" : IN_MULTI_LINE_COMMENT
+      "//" : IN_SINGLE_LINE_COMMENT
+    | <"/**" ~["/"]> { input_stream.backup(1); } : IN_FORMAL_COMMENT
+    | "/*" : IN_MULTI_LINE_COMMENT
 }
 
 <IN_SINGLE_LINE_COMMENT> SPECIAL_TOKEN : {
@@ -111,191 +111,191 @@ MORE : {
 /* RESERVED WORDS AND LITERALS */
 
 TOKEN : {
-	  < ACK: "ack" >
-	| < AT: "at" >
-	| < BEHAVIOR: "behavior" >
-	| < BOOLEAN: "boolean" >
-	| < BREAK: "break" >
-	| < BYTE: "byte" >
-	| < CASE: "case" >
-	| < CHAR: "char" >
-	| < CONST: "const" >
-	| < _DEFAULT: "default" >
-	| < DELAY: "delay" >
-	| < DOUBLE: "double" >
-	| < ENUM: "enum" >
-	| < ELSE: "else" >
-	| < ENDIF: "endif" >
-	| < EXTENDS: "extends" >
-	| < FALSE: "false" >
-	| < FLOAT: "float" >
-    | < FOR: "for" >
-	| < IF: "if" >
-	| < IMPLEMENTS: "implements" >
-	| < IMPORT: "import" >
-	| < INSTANCEOF: "instanceof" >
-	| < INT: "int" >
-	| < INTERFACE: "interface" >
-	| < LATER: "later" >
-	| < LONG: "long" >
-	| < LOOP: "loop" >
-	| < MODULE: "module">
-	| < NEW: "new" >
-	| < NULL: "null" >
-	| < OBJECT: "object" >
-	| < PASS: "pass" >
-	| < PARENT: "parent" >
-	| < PUBLIC: "public" >
-	| < REFERENCE: "reference" >
-	| < SELF: "self" >
-	| < SHORT: "short" >
-	| < SWITCH: "switch" >
-	| < _TOKEN: "token" >
-	| < TRUE: "true" >
-	| < WAITFOR: "waitfor" >
-    | < WHILE: "while" >
+      < ACK: "ack" >
+    | < AT: "at" >
+    | < BEHAVIOR: "behavior" >
+    | < BOOLEAN: "boolean" >
+    | < BREAK: "break" >
+    | < BYTE: "byte" >
+    | < CASE: "case" >
+    | < CHAR: "char" >
+    | < CONST: "const" >
+    | < _DEFAULT: "default" >
+    | < DELAY: "delay" >
+    | < DOUBLE: "double" >
+    | < ENUM: "enum" >
+    | < ELSE: "else" >
+    | < ENDIF: "endif" >
+    | < EXTENDS: "extends" >
+    | < FALSE: "false" >
+    | < FLOAT: "float" >
+   | < FOR: "for" >
+    | < IF: "if" >
+    | < IMPLEMENTS: "implements" >
+    | < IMPORT: "import" >
+    | < INSTANCEOF: "instanceof" >
+    | < INT: "int" >
+    | < INTERFACE: "interface" >
+    | < LATER: "later" >
+    | < LONG: "long" >
+    | < LOOP: "loop" >
+    | < MODULE: "module">
+    | < NEW: "new" >
+    | < NULL: "null" >
+    | < OBJECT: "object" >
+    | < PASS: "pass" >
+    | < PARENT: "parent" >
+    | < PUBLIC: "public" >
+    | < REFERENCE: "reference" >
+    | < SELF: "self" >
+    | < SHORT: "short" >
+    | < SWITCH: "switch" >
+    | < _TOKEN: "token" >
+    | < TRUE: "true" >
+    | < WAITFOR: "waitfor" >
+   | < WHILE: "while" >
 }
 
 /* LITERALS */
 
 TOKEN : {
-	  < INTEGER_LITERAL:
-		  <DECIMAL_LITERAL> (["l","L"])?
-		| <HEX_LITERAL> (["l","L"])?
-		| <OCTAL_LITERAL> (["l","L"])?
-	  >
-	| < #DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* >
-	| < #HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
-	| < #OCTAL_LITERAL: "0" (["0"-"7"])* >
-	| < FLOATING_POINT_LITERAL:
-		  (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])?
-		| "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])?
-		| (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])?
-		| (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]
-	  >
-	| < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
-	| < CHARACTER_LITERAL:
-		"'"
-		(   (~["'","\\","\n","\r"])
-			| ("\\"
-				( ["n","t","b","r","f","\\","'","\""]
-				| ["0"-"7"] ( ["0"-"7"] )?
-            	| ["0"-"3"] ["0"-"7"] ["0"-"7"]
-			    )
-			  )
-		)
-		"'"
-	  >
-	| < STRING_LITERAL:
-		"\""
-		(   (~["\"","\\","\n","\r"])
-			| ("\\"
-				( ["n","t","b","r","f","\\","'","\""]
-				| ["0"-"7"] ( ["0"-"7"] )?
-				| ["0"-"3"] ["0"-"7"] ["0"-"7"]
-				)
-			  )
-		)*
-		"\""
-	  >
+      < INTEGER_LITERAL:
+          <DECIMAL_LITERAL> (["l","L"])?
+        | <HEX_LITERAL> (["l","L"])?
+        | <OCTAL_LITERAL> (["l","L"])?
+      >
+    | < #DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* >
+    | < #HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
+    | < #OCTAL_LITERAL: "0" (["0"-"7"])* >
+    | < FLOATING_POINT_LITERAL:
+          (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])?
+        | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])?
+        | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])?
+        | (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]
+      >
+    | < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
+    | < CHARACTER_LITERAL:
+        "'"
+        (   (~["'","\\","\n","\r"])
+            | ("\\"
+                ( ["n","t","b","r","f","\\","'","\""]
+                | ["0"-"7"] ( ["0"-"7"] )?
+             | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+               )
+              )
+        )
+        "'"
+      >
+    | < STRING_LITERAL:
+        "\""
+        (   (~["\"","\\","\n","\r"])
+            | ("\\"
+                ( ["n","t","b","r","f","\\","'","\""]
+                | ["0"-"7"] ( ["0"-"7"] )?
+                | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+                )
+              )
+        )*
+        "\""
+      >
 }
 
 /* IDENTIFIERS */
 
 TOKEN : {
-	  < IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
-	| < #LETTER:
-		[
-			"\u0024",
-			"\u0041"-"\u005a",
-			"\u005f",
-			"\u0061"-"\u007a",
-			"\u00c0"-"\u00d6",
-			"\u00d8"-"\u00f6",
-			"\u00f8"-"\u00ff",
-			"\u0100"-"\u1fff",
-			"\u3040"-"\u318f",
-			"\u3300"-"\u337f",
-			"\u3400"-"\u3d2d",
-			"\u4e00"-"\u9fff",
-			"\uf900"-"\ufaff"
-		]
-	  >
-	| < #DIGIT:
-		[
-			"\u0030"-"\u0039",
-			"\u0660"-"\u0669",
-			"\u06f0"-"\u06f9",
-			"\u0966"-"\u096f",
-			"\u09e6"-"\u09ef",
-			"\u0a66"-"\u0a6f",
-			"\u0ae6"-"\u0aef",
-			"\u0b66"-"\u0b6f",
-			"\u0be7"-"\u0bef",
-			"\u0c66"-"\u0c6f",
-			"\u0ce6"-"\u0cef",
-			"\u0d66"-"\u0d6f",
-			"\u0e50"-"\u0e59",
-			"\u0ed0"-"\u0ed9",
-			"\u1040"-"\u1049"
-		]
-	  >
+      < IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>)* >
+    | < #LETTER:
+        [
+            "\u0024",
+            "\u0041"-"\u005a",
+            "\u005f",
+            "\u0061"-"\u007a",
+            "\u00c0"-"\u00d6",
+            "\u00d8"-"\u00f6",
+            "\u00f8"-"\u00ff",
+            "\u0100"-"\u1fff",
+            "\u3040"-"\u318f",
+            "\u3300"-"\u337f",
+            "\u3400"-"\u3d2d",
+            "\u4e00"-"\u9fff",
+            "\uf900"-"\ufaff"
+        ]
+      >
+    | < #DIGIT:
+        [
+            "\u0030"-"\u0039",
+            "\u0660"-"\u0669",
+            "\u06f0"-"\u06f9",
+            "\u0966"-"\u096f",
+            "\u09e6"-"\u09ef",
+            "\u0a66"-"\u0a6f",
+            "\u0ae6"-"\u0aef",
+            "\u0b66"-"\u0b6f",
+            "\u0be7"-"\u0bef",
+            "\u0c66"-"\u0c6f",
+            "\u0ce6"-"\u0cef",
+            "\u0d66"-"\u0d6f",
+            "\u0e50"-"\u0e59",
+            "\u0ed0"-"\u0ed9",
+            "\u1040"-"\u1049"
+        ]
+      >
 }
 
 /* SEPARATORS */
 
 TOKEN : {
-	  < LPAREN: "(" >
-	| < RPAREN: ")" >
-	| < LBRACE: "{" >
-	| < RBRACE: "}" >
-	| < LBRACKET: "[" >
-	| < RBRACKET: "]" >
-	| < SEMICOLON: ";" >
-	| < COMMA: "," >
-	| < DOT: "." >
-	| < MSG: "<-" >
+      < LPAREN: "(" >
+    | < RPAREN: ")" >
+    | < LBRACE: "{" >
+    | < RBRACE: "}" >
+    | < LBRACKET: "[" >
+    | < RBRACKET: "]" >
+    | < SEMICOLON: ";" >
+    | < COMMA: "," >
+    | < DOT: "." >
+    | < MSG: "<-" >
 }
 
 /* OPERATORS */
 
 TOKEN : {
-	  < ASSIGN: "=" >
-	| < GT: ">" >
-	| < LT: "<" >
-	| < BANG: "!" >
-	| < TILDE: "~" >
-	| < COLON: ":" >
-	| < EQ: "==" >
-	| < LE: "<=" >
-	| < GE: ">=" >
-	| < NE: "!=" >
-	| < SC_OR: "||" >
-	| < SC_AND: "&&" >
-	| < INCR: "++" >
-	| < DECR: "--" >
-	| < PLUS: "+" >
-	| < MINUS: "-" >
-	| < STAR: "*" >
-	| < SLASH: "/" >
-	| < BIT_AND: "&" >
-	| < BIT_OR: "|" >
-	| < XOR: "^" >
-	| < REM: "%" >
-	| < LSHIFT: "<<" >
-	| < RSIGNEDSHIFT: ">>" >
-	| < RUNSIGNEDSHIFT: ">>>" >
-	| < PLUSASSIGN: "+=" >
-	| < MINUSASSIGN: "-=" >
-	| < STARASSIGN: "*=" >
-	| < SLASHASSIGN: "/=" >
-	| < ANDASSIGN: "&=" >
-	| < ORASSIGN: "|=" >
-	| < XORASSIGN: "^=" >
-	| < REMASSIGN: "%=" >
-	| < LSHIFTASSIGN: "<<=" >
-	| < RSIGNEDSHIFTASSIGN: ">>=" >
-	| < RUNSIGNEDSHIFTASSIGN: ">>>=" >
+      < ASSIGN: "=" >
+    | < GT: ">" >
+    | < LT: "<" >
+    | < BANG: "!" >
+    | < TILDE: "~" >
+    | < COLON: ":" >
+    | < EQ: "==" >
+    | < LE: "<=" >
+    | < GE: ">=" >
+    | < NE: "!=" >
+    | < SC_OR: "||" >
+    | < SC_AND: "&&" >
+    | < INCR: "++" >
+    | < DECR: "--" >
+    | < PLUS: "+" >
+    | < MINUS: "-" >
+    | < STAR: "*" >
+    | < SLASH: "/" >
+    | < BIT_AND: "&" >
+    | < BIT_OR: "|" >
+    | < XOR: "^" >
+    | < REM: "%" >
+    | < LSHIFT: "<<" >
+    | < RSIGNEDSHIFT: ">>" >
+    | < RUNSIGNEDSHIFT: ">>>" >
+    | < PLUSASSIGN: "+=" >
+    | < MINUSASSIGN: "-=" >
+    | < STARASSIGN: "*=" >
+    | < SLASHASSIGN: "/=" >
+    | < ANDASSIGN: "&=" >
+    | < ORASSIGN: "|=" >
+    | < XORASSIGN: "^=" >
+    | < REMASSIGN: "%=" >
+    | < LSHIFTASSIGN: "<<=" >
+    | < RSIGNEDSHIFTASSIGN: ">>=" >
+    | < RUNSIGNEDSHIFTASSIGN: ">>>=" >
 }
 
 
@@ -308,962 +308,970 @@ TOKEN : {
  */
  
 CCompilationUnit CompilationUnit() : {
-	CCompilationUnit compilation_unit = new CCompilationUnit();
-	CImportDeclaration import_declaration; 
+    CCompilationUnit compilation_unit = new CCompilationUnit();
+    CImportDeclaration import_declaration; 
 } {
-	[compilation_unit.module_string = ModuleDeclaration()]
-	(
-		import_declaration = ImportDeclaration()
-		{ compilation_unit.import_declarations.add(import_declaration); }
-	)* 
+    [compilation_unit.module_string = ModuleDeclaration()]
+    (
+        import_declaration = ImportDeclaration()
+        { compilation_unit.import_declarations.add(import_declaration); }
+    )* 
 
-	(LOOKAHEAD("behavior") compilation_unit.behavior_declaration = BehaviorDeclaration() | compilation_unit.interface_declaration = InterfaceDeclaration() )
-	<EOF>
-	
-	{ 
-		return compilation_unit; 
-	}
+    (LOOKAHEAD("behavior") compilation_unit.behavior_declaration = BehaviorDeclaration() | compilation_unit.interface_declaration = InterfaceDeclaration() )
+    <EOF>
+    
+    { 
+        return compilation_unit; 
+    }
 }
 
 String ModuleDeclaration() : {
-	CName module_name;
+    CName module_name;
 } {
-	"module" module_name = Name() ";"
-	{ return module_name.name; }
+    "module" module_name = Name() ";"
+    { return module_name.name; }
 }
 
 CName Name() : {
-	CName name = new CName();
-	Token t;
+    CName name = new CName();
+    Token t;
 } {
-	t = <IDENTIFIER>
-    {
-        name.initLineAndColumn(t);
-        name.name = t.image;
-    }
+    t = <IDENTIFIER>                    { name.name = t.image; name.initLineAndColumnBegin(t); }
+    (
+        LOOKAHEAD(".") "."
+        t = <IDENTIFIER>
+        { name.name += "." + t.image; }
+    )*
 
-	(
-		LOOKAHEAD(".") "."
-		t = <IDENTIFIER>
-		{ name.name += "." + t.image; }
-	)*
-	{ return name; }
+    [
+        "<"
+        t = <IDENTIFIER>                { name.name += "<" + t.image; name.initLineAndColumnEnd(t); }
+        (
+            "," t = <IDENTIFIER>        { name.name += "," + t.image; name.initLineAndColumnEnd(t); }
+        )*
+        ">"
+    ]
+    {
+        name.name += ">";
+        return name;
+    }
 }
 
 CImportDeclaration ImportDeclaration() : {
-	CImportDeclaration import_declaration = new CImportDeclaration();
-	Token t;
-    Token beginToken, endToken;
+    CImportDeclaration import_declaration = new CImportDeclaration();
+    Token t;
+   Token beginToken, endToken;
 } {
-	beginToken = "import"
-	[
-		"object"	{ import_declaration.is_object = true; }
-	] 
-	[
-		"enum"		{ import_declaration.is_enum = true; }
-	]
-	t = <IDENTIFIER> 	{ import_declaration.import_string = t.image; }
+    beginToken = "import"
+    [
+        "object"    { import_declaration.is_object = true; }
+    ] 
+    [
+        "enum"        { import_declaration.is_enum = true; }
+    ]
+    t = <IDENTIFIER>     { import_declaration.import_string = t.image; }
 
-	(
-		LOOKAHEAD(".") "." t = <IDENTIFIER>
-		{ import_declaration.import_string += "." + t.image; }
-	)*
-	["." "*" { import_declaration.import_string += ".*"; } ] endToken = ";"
+    (
+        LOOKAHEAD(".") "." t = <IDENTIFIER>
+        { import_declaration.import_string += "." + t.image; }
+    )*
+    ["." "*" { import_declaration.import_string += ".*"; } ] endToken = ";"
 
-	{ 
-        import_declaration.initLineAndColumn(beginToken, endToken);
-        return import_declaration; 
-    }
+    { 
+      import_declaration.initLineAndColumn(beginToken, endToken);
+      return import_declaration; 
+   }
 }
  
 CInterfaceDeclaration InterfaceDeclaration() : {
-	CInterfaceDeclaration interface_declaration = new CInterfaceDeclaration();
-	CMessageHandler message_handler;
-	CLocalVariableDeclaration variable_declaration;
-	Token t;
-    CName name;
+    CInterfaceDeclaration interface_declaration = new CInterfaceDeclaration();
+    CMessageHandler message_handler;
+    CLocalVariableDeclaration variable_declaration;
+    Token t;
+   CName name;
 } {
-	"interface" t = <IDENTIFIER>													{ interface_declaration.interface_name = t.image; }
-	["extends" name = Name()                                                        { interface_declaration.extends_name = name.name; } ]
-	"{"
-		(
-			  LOOKAHEAD(Type() <IDENTIFIER> FormalParameters()) message_handler = InterfaceMessageHandlerDeclaration()	{ interface_declaration.message_handlers.add(message_handler); }
-			| variable_declaration = LocalVariableDeclaration() ";"          				                            { interface_declaration.variable_declarations.add(variable_declaration); }
-		)*
-	"}"
-	{ return interface_declaration; }
+    "interface" name = Name()                                                      { interface_declaration.interface_name = name; }
+    ["extends" name = Name()                                          { interface_declaration.extends_name = name; } ]
+    "{"
+        (
+              LOOKAHEAD(Type() <IDENTIFIER> FormalParameters()) message_handler = InterfaceMessageHandlerDeclaration()    { interface_declaration.message_handlers.add(message_handler); }
+            | variable_declaration = LocalVariableDeclaration() ";"                                             { interface_declaration.variable_declarations.add(variable_declaration); }
+        )*
+    "}"
+    { return interface_declaration; }
 }
 
 CBehaviorDeclaration BehaviorDeclaration() : {
-	CBehaviorDeclaration behavior_declaration = new CBehaviorDeclaration();
-	Token t, t2;
-	CName name;
-	CConstructor constructor;
-	CMessageHandler message_handler;
-	CLocalVariableDeclaration variable_declaration;
-	CEnumeration enumeration;
+    CBehaviorDeclaration behavior_declaration = new CBehaviorDeclaration();
+    Token t, t2;
+    CName name, behavior_name;
+    CConstructor constructor;
+    CMessageHandler message_handler;
+    CLocalVariableDeclaration variable_declaration;
+    CEnumeration enumeration;
 } {
-	"behavior" t = <IDENTIFIER>													{ behavior_declaration.behavior_name = t.image; }
-	[
-		"extends" name = Name() 												{ behavior_declaration.extends_name = name.name; }
-	]
-	[
-		"implements" name = Name()												{ behavior_declaration.implements_names.add(name.name); }
-		(
-			"," name = Name()												{ behavior_declaration.implements_names.add(name.name); }
-		)*
-	]
+    "behavior" behavior_name = Name()                                                           { behavior_declaration.behavior_name = behavior_name; }
+    [
+        "extends" name = Name()                                                                 { behavior_declaration.extends_name = name; }
+    ]
+    [
+        "implements" name = Name()                                                              { behavior_declaration.implements_names.add(name); }
+        (
+            "," name = Name()                                                                   { behavior_declaration.implements_names.add(name); }
+        )*
+    ]
 
-	"{" 
-		(
-		    LOOKAHEAD("enum") enumeration = Enumeration()									{ behavior_declaration.enumerations.add(enumeration); }
-		  | LOOKAHEAD(<IDENTIFIER> FormalParameters()) constructor = ConstructorDeclaration()					{ behavior_declaration.constructors.add(constructor); }
-		  | LOOKAHEAD(Type() <IDENTIFIER> "(") message_handler = MessageHandlerDeclaration()			{ behavior_declaration.message_handlers.add(message_handler); }
-		  | variable_declaration = LocalVariableDeclaration() ";" 									{ behavior_declaration.variable_declarations.add(variable_declaration); }
-		)* 
-	t2 = "}"
-	{ 
-        behavior_declaration.initLineAndColumn(t, t2);
+    "{" 
+        (
+           LOOKAHEAD("enum") enumeration = Enumeration()                                        { behavior_declaration.enumerations.add(enumeration); }
+          | LOOKAHEAD(<IDENTIFIER> FormalParameters()) constructor = ConstructorDeclaration()   { behavior_declaration.constructors.add(constructor); }
+          | LOOKAHEAD(Type() <IDENTIFIER> "(") message_handler = MessageHandlerDeclaration()    { behavior_declaration.message_handlers.add(message_handler); }
+          | variable_declaration = LocalVariableDeclaration() ";"                               { behavior_declaration.variable_declarations.add(variable_declaration); }
+        )* 
+    t2 = "}"
+
+    { 
+        behavior_declaration.initLineAndColumn(behavior_name, t2);
         return behavior_declaration;
     }
 }
 
 CEnumeration Enumeration() : {
-	CEnumeration enumeration = new CEnumeration();
-	String name;
-	Token t;
+    CEnumeration enumeration = new CEnumeration();
+    String name;
+    Token t;
 } {
-	"enum"
-	t = <IDENTIFIER>			{ enumeration.name = t.image; }
-	"{"
-		t = <IDENTIFIER>
-		(
-			"," t = <IDENTIFIER>	{ enumeration.fields.add(t.image); }
-		)*
-	"}"
-	
-	{ return enumeration; }
+    "enum"
+    t = <IDENTIFIER>            { enumeration.name = t.image; }
+    "{"
+        t = <IDENTIFIER>
+        (
+            "," t = <IDENTIFIER>    { enumeration.fields.add(t.image); }
+        )*
+    "}"
+    
+    { return enumeration; }
 }
 
 CType Type() : {
-	CType type;
-    CPrimitiveType primitiveType = null;
-    CName name = null;
-    String arraySize = "";
+    CType type;
+   CPrimitiveType primitiveType = null;
+   CName name = null;
+   String arraySize = "";
 } {
-	(
-		  primitiveType = PrimitiveType()
-		| name = Name()
-	) ( 
-		"[" "]" { arraySize += "[]"; }
-	)*
-	{
-        if (primitiveType != null) {
-            type = new CType(primitiveType.name + arraySize);
-            type.initLineAndColumn(primitiveType);
-        } else {
-            type = new CType(name.name + arraySize);
-            type.initLineAndColumn(name);
-        }
-        return type;
-    }
+    (
+          primitiveType = PrimitiveType()
+        | name = Name()
+    ) ( 
+        "[" "]" { arraySize += "[]"; }
+    )*
+    {
+      if (primitiveType != null) {
+         type = new CType(primitiveType.name + arraySize);
+         type.initLineAndColumn(primitiveType);
+      } else {
+         type = new CType(name.name + arraySize);
+         type.initLineAndColumn(name);
+      }
+      return type;
+   }
 }
 
 CPrimitiveType PrimitiveType() : {
-	CPrimitiveType type;
-    Token t;
+    CPrimitiveType type;
+   Token t;
 } {
-	(
-		  t = "boolean"
-		| t = "char"
-		| t = "byte"
-		| t = "short"
-		| t = "int"
-		| t = "long"
-		| t = "float"
-		| t = "double"
-		| t = "ack"
-	)
+    (
+          t = "boolean"
+        | t = "char"
+        | t = "byte"
+        | t = "short"
+        | t = "int"
+        | t = "long"
+        | t = "float"
+        | t = "double"
+        | t = "ack"
+    )
 
-	{
-        type = new CPrimitiveType(t.image);
-        type.initLineAndColumn(t); 
-        return type;
-    }
+    {
+      type = new CPrimitiveType(t.image);
+      type.initLineAndColumn(t); 
+      return type;
+   }
 }
 
 CMessageHandler InterfaceMessageHandlerDeclaration() : {
-	CMessageHandler message_handler = new CMessageHandler();
-	CType pass_type;
-	String name;
-	Token t, t2;
-	Vector<CFormalParameter> parameters;
+    CMessageHandler message_handler = new CMessageHandler();
+    CType pass_type;
+    String name;
+    Token t, t2;
+    Vector<CFormalParameter> parameters;
 } {
-	pass_type = Type()
-	t = <IDENTIFIER>
-	parameters = FormalParameters()
-    t2 = ";"
-	{
-		message_handler.pass_type = pass_type.name;
-		message_handler.name = t.image;
-		message_handler.parameters = parameters;
-        message_handler.initLineAndColumn(pass_type, t2);
-		return message_handler;
-	}
+    pass_type = Type()
+    t = <IDENTIFIER>
+    parameters = FormalParameters()
+   t2 = ";"
+    {
+        message_handler.pass_type = pass_type.name;
+        message_handler.name = t.image;
+        message_handler.parameters = parameters;
+      message_handler.initLineAndColumn(pass_type, t2);
+        return message_handler;
+    }
 }
 
 CMessageHandler MessageHandlerDeclaration() : {
-	CMessageHandler message_handler = new CMessageHandler();
-	CType pass_type;
-	String name;
-	Token t;
-	Vector<CFormalParameter> parameters;
-	CBlock block;
+    CMessageHandler message_handler = new CMessageHandler();
+    CType pass_type;
+    String name;
+    Token t;
+    Vector<CFormalParameter> parameters;
+    CBlock block;
 } {
-	pass_type = Type()
-	t = <IDENTIFIER>
-	parameters = FormalParameters()
-	block = Block()
-	{
-		message_handler.pass_type = pass_type.name;
-		message_handler.name = t.image;
-		message_handler.parameters = parameters;
-		message_handler.block = block;
-        message_handler.initLineAndColumn(pass_type, block);
-		return message_handler;
-	}
+    pass_type = Type()
+    t = <IDENTIFIER>
+    parameters = FormalParameters()
+    block = Block()
+    {
+        message_handler.pass_type = pass_type.name;
+        message_handler.name = t.image;
+        message_handler.parameters = parameters;
+        message_handler.block = block;
+      message_handler.initLineAndColumn(pass_type, block);
+        return message_handler;
+    }
 }
 
 CConstructor ConstructorDeclaration() : {
-	CConstructor constructor = new CConstructor();
-	Token t;
-	Vector<CFormalParameter> parameters;
-	CBlock block;
+    CConstructor constructor = new CConstructor();
+    Token t;
+    Vector<CFormalParameter> parameters;
+    CBlock block;
 } {
-	t = <IDENTIFIER>
-	parameters = FormalParameters()
-	block = Block()
-	{
-		constructor.name = t.image;
-		constructor.parameters = parameters;
-		constructor.block = block;
-        constructor.initLineAndColumn(t, block);
-		return constructor;
-	}
+    t = <IDENTIFIER>
+    parameters = FormalParameters()
+    block = Block()
+    {
+        constructor.name = t.image;
+        constructor.parameters = parameters;
+        constructor.block = block;
+      constructor.initLineAndColumn(t, block);
+        return constructor;
+    }
 }
 
 Vector<CFormalParameter> FormalParameters() : {
-	Vector<CFormalParameter> parameters = new Vector<CFormalParameter>();
-	CVariable variable;
-	String type;
-	Token t;
-	CFormalParameter formal_parameter;
+    Vector<CFormalParameter> parameters = new Vector<CFormalParameter>();
+    CVariable variable;
+    String type;
+    Token t;
+    CFormalParameter formal_parameter;
 } {
-	"(" [
-		formal_parameter = FormalParameter()			{ parameters.add(formal_parameter); }
-		(
-			"," formal_parameter = FormalParameter()	{ parameters.add(formal_parameter); }
-		)*
-	] ")"
+    "(" [
+        formal_parameter = FormalParameter()            { parameters.add(formal_parameter); }
+        (
+            "," formal_parameter = FormalParameter()    { parameters.add(formal_parameter); }
+        )*
+    ] ")"
 
-	{ return parameters; }
+    { return parameters; }
 }
 
 CFormalParameter FormalParameter() : {
-	CFormalParameter formal_parameter;
-	CType type;
-	Token t;
+    CFormalParameter formal_parameter;
+    CType type;
+    Token t;
 } {
-	type = Type() t = <IDENTIFIER>      {
-									        formal_parameter = new CFormalParameter();
-									        formal_parameter.type = type.name;
-									        formal_parameter.name = t.image;
-							        	}
+    type = Type() t = <IDENTIFIER>     {
+                                          formal_parameter = new CFormalParameter();
+                                          formal_parameter.type = type.name;
+                                          formal_parameter.name = t.image;
+                                      }
 
-	{
-        formal_parameter.initLineAndColumn(type, t);
-        return formal_parameter;
-    }
+    {
+      formal_parameter.initLineAndColumn(type, t);
+      return formal_parameter;
+   }
 }
 
 CBlock Block() : {
-	CBlock block = new CBlock();
-	CStatement statement;
-	Token t1, t2;
+    CBlock block = new CBlock();
+    CStatement statement;
+    Token t1, t2;
 } {
-	t1 = "{" (
-		statement = Statement()		{ block.statements.add(statement); }
-	)* t2 = "}"
+    t1 = "{" (
+        statement = Statement()        { block.statements.add(statement); }
+    )* t2 = "}"
 
-	{
-        block.initLineAndColumn(t1, t2);
-        return block;
-    }
+    {
+      block.initLineAndColumn(t1, t2);
+      return block;
+   }
 }
 
 CStatement Statement() : {
-	CStatement statement;
-	Token t = null;
+    CStatement statement;
+    Token t = null;
 } {
-	(
-		  statement = PassStatement()
-		| statement = IfStatement()
-		| statement = SwitchStatement()
-		| statement = Block()
-		| statement = ForStatement()
-		| statement = WhileStatement()
-		| statement = CaseStatement()
-		| statement = BreakStatement()
-		| statement = DefaultStatement()
-		| LOOKAHEAD(<IDENTIFIER> ":") statement = LabelStatement()
-		| LOOKAHEAD(["token"] Type() <IDENTIFIER>) statement = LocalVariableDeclaration()	( t = "@" | t = ";" )
-		| statement = StatementExpression()							( t = "@" | t = ";" )
-	)
+    (
+          statement = PassStatement()
+        | statement = IfStatement()
+        | statement = SwitchStatement()
+        | statement = Block()
+        | statement = ForStatement()
+        | statement = WhileStatement()
+        | statement = CaseStatement()
+        | statement = BreakStatement()
+        | statement = DefaultStatement()
+        | LOOKAHEAD(<IDENTIFIER> ":") statement = LabelStatement()
+        | LOOKAHEAD(["token"] Type() <IDENTIFIER>) statement = LocalVariableDeclaration()    ( t = "@" | t = ";" )
+        | statement = StatementExpression()                            ( t = "@" | t = ";" )
+    )
 
-	{ 
-		if (t != null && t.image.equals("@")) {
-			statement.continues = true;
-		} else {
-			statement.continues = false;
-		}
-		return statement;
-	}
-}	
+    { 
+        if (t != null && t.image.equals("@")) {
+            statement.continues = true;
+        } else {
+            statement.continues = false;
+        }
+        return statement;
+    }
+}    
 
 CPassStatement PassStatement() : {
-	CPassStatement pass_statement = new CPassStatement();
-	Token t = null;
+    CPassStatement pass_statement = new CPassStatement();
+    Token t = null;
 } {
-	"pass" [t = "later" | pass_statement.expression = Expression()] ";"
+    "pass" [t = "later" | pass_statement.expression = Expression()] ";"
 
-	{
-		if (t != null) pass_statement.will_pass_later = true;
-		return pass_statement;
-	}
+    {
+        if (t != null) pass_statement.will_pass_later = true;
+        return pass_statement;
+    }
 }
 
 CStatementExpression StatementExpression() : {
-	CStatementExpression statement_expression = new CStatementExpression();
+    CStatementExpression statement_expression = new CStatementExpression();
 } {
-	statement_expression.expression = Expression()
+    statement_expression.expression = Expression()
 
-	{ return statement_expression; }
+    { return statement_expression; }
 }
 
 
 CLocalVariableDeclaration ForInit() : {
-	CLocalVariableDeclaration local_variable_declaration = new CLocalVariableDeclaration();
-	CType type;
-	CVariableInit variable_init;
+    CLocalVariableDeclaration local_variable_declaration = new CLocalVariableDeclaration();
+    CType type;
+    CVariableInit variable_init;
 } {
-	type = Type()						{ local_variable_declaration.type = type.name; }
-	variable_init = VariableInitialization()		{ local_variable_declaration.variables.add(variable_init); }
+    type = Type()                        { local_variable_declaration.type = type.name; }
+    variable_init = VariableInitialization()        { local_variable_declaration.variables.add(variable_init); }
 
-	(	LOOKAHEAD(",") "," 
-		variable_init = VariableInitialization()	{ local_variable_declaration.variables.add(variable_init); }
-	)*
+    (    LOOKAHEAD(",") "," 
+        variable_init = VariableInitialization()    { local_variable_declaration.variables.add(variable_init); }
+    )*
 
-	{ return local_variable_declaration; }
+    { return local_variable_declaration; }
 }
 
 CForStatement ForStatement() : {
-	CForStatement for_statement = new CForStatement();
-	CExpression init, increment;
+    CForStatement for_statement = new CForStatement();
+    CExpression init, increment;
 } {
-	"for" "("
-			[
-				  LOOKAHEAD(ForInit()) for_statement.init = ForInit()
-				| (
-					init = Expression()					{ for_statement.expression_inits.add(init); }
-					(
-						LOOKAHEAD(",") "," init = Expression()		{ for_statement.expression_inits.add(init); }
-					)*
-				  )
-			]
-		";"
-			for_statement.conditional = Expression()
-		";"
-			increment = Expression()						{ for_statement.increment_expressions.add(increment); }
-			(
-				LOOKAHEAD(",") "," increment = Expression()			{ for_statement.increment_expressions.add(increment); }
-			)*
-	")"
-	for_statement.statement = Statement()
+    "for" "("
+            [
+                  LOOKAHEAD(ForInit()) for_statement.init = ForInit()
+                | (
+                    init = Expression()                    { for_statement.expression_inits.add(init); }
+                    (
+                        LOOKAHEAD(",") "," init = Expression()        { for_statement.expression_inits.add(init); }
+                    )*
+                  )
+            ]
+        ";"
+            for_statement.conditional = Expression()
+        ";"
+            increment = Expression()                        { for_statement.increment_expressions.add(increment); }
+            (
+                LOOKAHEAD(",") "," increment = Expression()            { for_statement.increment_expressions.add(increment); }
+            )*
+    ")"
+    for_statement.statement = Statement()
 
-	{ return for_statement; }
+    { return for_statement; }
 }
 
 CWhileStatement WhileStatement() : {
-	CWhileStatement while_statement = new CWhileStatement();
+    CWhileStatement while_statement = new CWhileStatement();
 } {
-	"while" "(" while_statement.conditional = Expression() ")" while_statement.block = Block()
+    "while" "(" while_statement.conditional = Expression() ")" while_statement.block = Block()
 
-	{ return while_statement; }
+    { return while_statement; }
 }
 
 CIfStatement IfStatement() : {
-	CIfStatement if_statement = new CIfStatement();
+    CIfStatement if_statement = new CIfStatement();
 } {
-	"if" "(" if_statement.expression = Expression() ")" if_statement.statement = Statement() [ LOOKAHEAD("else") "else" if_statement.else_statement = Statement() ]
+    "if" "(" if_statement.expression = Expression() ")" if_statement.statement = Statement() [ LOOKAHEAD("else") "else" if_statement.else_statement = Statement() ]
 
-	{ return if_statement; }
+    { return if_statement; }
 }
 
 CSwitchStatement SwitchStatement() : {
-	CSwitchStatement switch_statement = new CSwitchStatement();
-	CExpression expression;
-	CStatement statement;
+    CSwitchStatement switch_statement = new CSwitchStatement();
+    CExpression expression;
+    CStatement statement;
 } {
-	"switch" "(" expression = Expression() ")" "{"			{ switch_statement.expression = expression; }
-		(
-			statement = Statement()				{ switch_statement.statements.add(statement); }
-		)*
-	"}"
+    "switch" "(" expression = Expression() ")" "{"            { switch_statement.expression = expression; }
+        (
+            statement = Statement()                { switch_statement.statements.add(statement); }
+        )*
+    "}"
 
-	{ return switch_statement; }
+    { return switch_statement; }
 }
 
 CCaseStatement CaseStatement() : {
-	CCaseStatement case_statement = new CCaseStatement();
-	CExpression expression;
+    CCaseStatement case_statement = new CCaseStatement();
+    CExpression expression;
 } {
-	"case" expression = Expression() ":"				{ case_statement.expression = expression; }
+    "case" expression = Expression() ":"                { case_statement.expression = expression; }
 
-	{ return case_statement; }
+    { return case_statement; }
 }
 
 CDefaultStatement DefaultStatement() : {
-	CDefaultStatement default_statement = new CDefaultStatement();
+    CDefaultStatement default_statement = new CDefaultStatement();
 } {
-	"default" ":"
+    "default" ":"
 
-	{ return default_statement; }
+    { return default_statement; }
 }
 
 CLabelStatement LabelStatement() : {
-	CLabelStatement label_statement = new CLabelStatement();
-	Token t;
+    CLabelStatement label_statement = new CLabelStatement();
+    Token t;
 } {
-	t = <IDENTIFIER> ":"						{ label_statement.label = t.image; }
+    t = <IDENTIFIER> ":"                        { label_statement.label = t.image; }
 
-	{ return label_statement; }
+    { return label_statement; }
 }
 
 CBreakStatement BreakStatement() : {
-	CBreakStatement break_statement = new CBreakStatement();
+    CBreakStatement break_statement = new CBreakStatement();
 } {
-	"break" ";"
+    "break" ";"
 
-	{ return break_statement; }
+    { return break_statement; }
 }
 
 CLocalVariableDeclaration LocalVariableDeclaration() : {
-	CLocalVariableDeclaration local_variable_declaration = new CLocalVariableDeclaration();
-	CType type;
-	CVariableInit variable_init;
-    Token t = null;
+    CLocalVariableDeclaration local_variable_declaration = new CLocalVariableDeclaration();
+    CType type;
+    CVariableInit variable_init;
+   Token t = null;
 } {
-	[	
-		t = "token"                                 { local_variable_declaration.is_token = true; }
-	]
-	type = Type()                                   { local_variable_declaration.type = type.name; }
-	variable_init = VariableInitialization()		{ local_variable_declaration.variables.add(variable_init); }
+    [    
+        t = "token"                         { local_variable_declaration.is_token = true; }
+    ]
+    type = Type()                           { local_variable_declaration.type = type.name; }
+    variable_init = VariableInitialization()        { local_variable_declaration.variables.add(variable_init); }
 
-	(	LOOKAHEAD(",") "," 
-		variable_init = VariableInitialization()	{ local_variable_declaration.variables.add(variable_init); }
-	)*
+    (    LOOKAHEAD(",") "," 
+        variable_init = VariableInitialization()    { local_variable_declaration.variables.add(variable_init); }
+    )*
 
-	{
-        if (t != null) local_variable_declaration.initLineAndColumn(t);
-        else local_variable_declaration.initLineAndColumn(type);
+    {
+      if (t != null) local_variable_declaration.initLineAndColumn(t);
+      else local_variable_declaration.initLineAndColumn(type);
 
-        return local_variable_declaration;
-    }
+      return local_variable_declaration;
+   }
 }
 
 CVariableInit VariableInitialization() : {
-	Token t;
-	CVariableInit variable_init = new CVariableInit();
-	CExpression expression;
+    Token t;
+    CVariableInit variable_init = new CVariableInit();
+    CExpression expression;
 } {
-	t = <IDENTIFIER>					{ variable_init.name = t.image; }
-	[
-		LOOKAHEAD("=") "=" expression = Expression()	{ variable_init.expression = expression; }
-	]	
+    t = <IDENTIFIER>                    { variable_init.name = t.image; }
+    [
+        LOOKAHEAD("=") "=" expression = Expression()    { variable_init.expression = expression; }
+    ]    
 
-	{
-        variable_init.initLineAndColumn(t);
-        return variable_init;
-    }
+    {
+      variable_init.initLineAndColumn(t);
+      return variable_init;
+   }
 }
 
 CArrayInit ArrayInitialization() : {
-	CArrayInit array_init = new CArrayInit();
-	CArrayInit sub_array_init;
-	CExpression init;
+    CArrayInit array_init = new CArrayInit();
+    CArrayInit sub_array_init;
+    CExpression init;
 } {
-	"{" [
-		(	
-			  sub_array_init = ArrayInitialization()		{ array_init.inits.add(sub_array_init); }
-			| init = Expression()					{ array_init.inits.add(init); }
-		)
+    "{" [
+        (    
+              sub_array_init = ArrayInitialization()        { array_init.inits.add(sub_array_init); }
+            | init = Expression()                    { array_init.inits.add(init); }
+        )
 
-		(","
-			(
-				  sub_array_init = ArrayInitialization()	{ array_init.inits.add(sub_array_init); }
-				| init = Expression()				{ array_init.inits.add(init); }
-			)
-		)*
-	] "}"
+        (","
+            (
+                  sub_array_init = ArrayInitialization()    { array_init.inits.add(sub_array_init); }
+                | init = Expression()                { array_init.inits.add(init); }
+            )
+        )*
+    ] "}"
 
-	{ return array_init; }
+    { return array_init; }
 }
 
 CExpression Expression() : {
-	CExpression expression = new CExpression();
-	Token t1 = null, t2 = null;
-	Vector<String> prefixes = new Vector<String>();
-	Vector<Object> suffixes = new Vector<Object>();
-	String type;
+    CExpression expression = new CExpression();
+    Token t1 = null, t2 = null;
+    Vector<String> prefixes = new Vector<String>();
+    Vector<Object> suffixes = new Vector<Object>();
+    String type;
 } {
-	(
-		  t1 = "++"								{ prefixes.add(t1.image); }
-		| t1 = "--"								{ prefixes.add(t1.image); }
-		| t1 = "!"								{ prefixes.add(t1.image); }
-		| t1 = "-"								{ prefixes.add(t1.image); }
-		| t1 = "~"								{ prefixes.add(t1.image); }
-	)*
+    (
+          t1 = "++"                                { prefixes.add(t1.image); }
+        | t1 = "--"                                { prefixes.add(t1.image); }
+        | t1 = "!"                                { prefixes.add(t1.image); }
+        | t1 = "-"                                { prefixes.add(t1.image); }
+        | t1 = "~"                                { prefixes.add(t1.image); }
+    )*
 
-	expression.value = Value()
+    expression.value = Value()
 
-	(
-		  t2 = "++"								{ suffixes.add(t2.image); }
-		| t2 = "--"								{ suffixes.add(t2.image); }
-	)*
+    (
+          t2 = "++"                                { suffixes.add(t2.image); }
+        | t2 = "--"                                { suffixes.add(t2.image); }
+    )*
 
-	[
-		(
-			  expression.operator = AssignmentOperator()
-			| expression.operator = Operator()
-		)
-		expression.operator_expression = Expression()
-	]
+    [
+        (
+              expression.operator = AssignmentOperator()
+            | expression.operator = Operator()
+        )
+        expression.operator_expression = Expression()
+    ]
 
-	{
-        expression.initLineAndColumn(expression.value);
-        if (t1 != null) {
-            expression.initLineAndColumnBegin(t1);
-        }
-        if (t2 != null) {
-            expression.initLineAndColumnEnd(t2);
-        }
+    {
+      expression.initLineAndColumn(expression.value);
+      if (t1 != null) {
+         expression.initLineAndColumnBegin(t1);
+      }
+      if (t2 != null) {
+         expression.initLineAndColumnEnd(t2);
+      }
 
-		expression.suffixes = suffixes;
-		expression.prefixes = prefixes;
-		return expression;
-	}
+        expression.suffixes = suffixes;
+        expression.prefixes = prefixes;
+        return expression;
+    }
 }
 
 CValue Value() : {
-	CValue value = new CValue();
-	CAllocation allocation;
-	CExpression expression;
-	CMessageSend message_send;
-    CMethodInvocation method_invocation;
-    CFieldAccess field_access;
-	CType type;
-    CVariableName variableName;
-	Token t, t2;
-    Token beginToken, endToken;
-    boolean hasBegin = false;
+    CValue value = new CValue();
+    CAllocation allocation;
+    CExpression expression;
+    CMessageSend message_send;
+   CMethodInvocation method_invocation;
+   CFieldAccess field_access;
+    CType type;
+   CVariableName variableName;
+    Token t, t2;
+   Token beginToken, endToken;
+   boolean hasBegin = false;
 } {
-	[
-		LOOKAHEAD( "(" type = Type() ")" )
-		beginToken = "(" type = Type() ")"		                            { value.cast_type = type.name; value.initLineAndColumnBegin(beginToken); hasBegin = true;}
-	]
-	(
-		  value.literal = Literal()                                         { value.initLineAndColumnEnd( value.literal );                                  if (!hasBegin) value.initLineAndColumnBegin( value.literal ); }
-        | variableName = VariableName()                                     { value.variable_name = variableName; value.initLineAndColumnEnd(variableName); if (!hasBegin) value.initLineAndColumnBegin(variableName); }
-		| beginToken = "(" expression = Expression() endToken = ")"         { value.expression = expression; value.initLineAndColumnEnd(endToken);          if (!hasBegin) value.initLineAndColumnBegin(beginToken); }
-		| allocation = Allocation()					                        { value.allocation = allocation; value.initLineAndColumnEnd(allocation);        if (!hasBegin) value.initLineAndColumnBegin(allocation); }
-	)
-	(
-          LOOKAHEAD( "[" )
-          t = "[" expression = Expression() t2 = "]"                        {
-                                                                                CArrayAccess array_access = new CArrayAccess(expression);
-                                                                                array_access.initLineAndColumn(t, t2);
-                                                                                value.modifications.add(array_access);
-                                                                                if (System.getProperty("debugValue") != null) System.out.println("In CValue, adding array access");
-                                                                                value.initLineAndColumnEnd(t2);
-                                                                            }
-        | LOOKAHEAD( "<-" )
-          message_send = MessageSend()                                      { value.modifications.add(message_send); value.initLineAndColumnEnd(message_send); }
-        | LOOKAHEAD( "." <IDENTIFIER> "(")
-          method_invocation = MethodInvocation()                            { value.modifications.add(method_invocation); value.initLineAndColumnEnd(method_invocation); }
-        | field_access = FieldAccess()                                      { value.modifications.add(field_access); value.initLineAndColumnEnd(field_access); }
-	)*
+    [
+        LOOKAHEAD( "(" type = Type() ")" )
+        beginToken = "(" type = Type() ")"                             { value.cast_type = type.name; value.initLineAndColumnBegin(beginToken); hasBegin = true;}
+    ]
+    (
+          value.literal = Literal()                               { value.initLineAndColumnEnd( value.literal );                          if (!hasBegin) value.initLineAndColumnBegin( value.literal ); }
+      | variableName = VariableName()                            { value.variable_name = variableName; value.initLineAndColumnEnd(variableName); if (!hasBegin) value.initLineAndColumnBegin(variableName); }
+        | beginToken = "(" expression = Expression() endToken = ")"       { value.expression = expression; value.initLineAndColumnEnd(endToken);        if (!hasBegin) value.initLineAndColumnBegin(beginToken); }
+        | allocation = Allocation()                                      { value.allocation = allocation; value.initLineAndColumnEnd(allocation);      if (!hasBegin) value.initLineAndColumnBegin(allocation); }
+    )
+    (
+        LOOKAHEAD( "[" )
+        t = "[" expression = Expression() t2 = "]"                  {
+                                                            CArrayAccess array_access = new CArrayAccess(expression);
+                                                            array_access.initLineAndColumn(t, t2);
+                                                            value.modifications.add(array_access);
+                                                            if (System.getProperty("debugValue") != null) System.out.println("In CValue, adding array access");
+                                                            value.initLineAndColumnEnd(t2);
+                                                         }
+      | LOOKAHEAD( "<-" )
+        message_send = MessageSend()                             { value.modifications.add(message_send); value.initLineAndColumnEnd(message_send); }
+      | LOOKAHEAD( "." <IDENTIFIER> "(")
+        method_invocation = MethodInvocation()                     { value.modifications.add(method_invocation); value.initLineAndColumnEnd(method_invocation); }
+      | field_access = FieldAccess()                             { value.modifications.add(field_access); value.initLineAndColumnEnd(field_access); }
+    )*
 
-	{ return value; }
+    { return value; }
 }
 
 CVariableName VariableName() : {
-    CVariableName variableName = new CVariableName();
-    Token t;
+   CVariableName variableName = new CVariableName();
+   Token t;
 } {
-    t = <IDENTIFIER>
-    {
-        variableName.name = t.image;
-        variableName.initLineAndColumn(t);
-        return variableName;
-    }
+   t = <IDENTIFIER>
+   {
+      variableName.name = t.image;
+      variableName.initLineAndColumn(t);
+      return variableName;
+   }
 }
 
 CFieldAccess FieldAccess() : {
-    CFieldAccess field_access = new CFieldAccess();
-    Token t, t1;
+   CFieldAccess field_access = new CFieldAccess();
+   Token t, t1;
 } {
-    t1 = "." t = <IDENTIFIER>                                   { field_access.name = t.image; }
+   t1 = "." t = <IDENTIFIER>                           { field_access.name = t.image; }
 
-    {
-        field_access.initLineAndColumn(t1, t);
-        return field_access;
-    }
+   {
+      field_access.initLineAndColumn(t1, t);
+      return field_access;
+   }
 }
 
 CMethodInvocation MethodInvocation() : {
-    CMethodInvocation method_invocation = new CMethodInvocation();
-    CArguments arguments;
-    Token t, invoket;
+   CMethodInvocation method_invocation = new CMethodInvocation();
+   CArguments arguments;
+   Token t, invoket;
 } {
-    invoket = "."
-    t = <IDENTIFIER>                    {   if (System.getProperty("debugMethodInvocation") != null) System.out.println("in method invocation, identifier = " + t.image); }
-    arguments = Arguments()             {
-                                            method_invocation.method_name = t.image;
-                                            method_invocation.arguments = arguments.arguments;
-                                            method_invocation.initLineAndColumn(invoket, arguments);
-                                        }
+   invoket = "."
+   t = <IDENTIFIER>               {   if (System.getProperty("debugMethodInvocation") != null) System.out.println("in method invocation, identifier = " + t.image); }
+   arguments = Arguments()          {
+                                 method_invocation.method_name = t.image;
+                                 method_invocation.arguments = arguments.arguments;
+                                 method_invocation.initLineAndColumn(invoket, arguments);
+                              }
 
-    { return method_invocation; }                                        
+   { return method_invocation; }                              
 }
 
 CMessageSend MessageSend() : {
-	CMessageSend message_send = new CMessageSend();
-	CMessageProperty message_property;
-	CArguments arguments;
-	Token t, invoket;
+    CMessageSend message_send = new CMessageSend();
+    CMessageProperty message_property;
+    CArguments arguments;
+    Token t, invoket;
 } {
-    invoket = "<-"
-    t = <IDENTIFIER>
-    arguments = Arguments()             {
-                                            message_send.message_name = t.image;
-                                            message_send.arguments = arguments. arguments;
-                                            message_send.initLineAndColumn(invoket, arguments);
-                                        }
+   invoket = "<-"
+   t = <IDENTIFIER>
+   arguments = Arguments()          {
+                                 message_send.message_name = t.image;
+                                 message_send.arguments = arguments. arguments;
+                                 message_send.initLineAndColumn(invoket, arguments);
+                              }
 
-    [ 
-      LOOKAHEAD( ":" ( "delay" | "waitfor") )
-      message_property = MessageProperty()          { message_send.message_property = message_property; }
-    ]
+   [ 
+     LOOKAHEAD( ":" ( "delay" | "waitfor") )
+     message_property = MessageProperty()        { message_send.message_property = message_property; }
+   ]
 
-	{ return message_send; }
+    { return message_send; }
 }
 
 CMessageProperty MessageProperty() : {
-	CMessageProperty message_property = new CMessageProperty();
-	CArguments arguments;
+    CMessageProperty message_property = new CMessageProperty();
+    CArguments arguments;
 } {
-	":"
-	(
-		  "delay" 				{ message_property.name = "delay"; }
-		| "waitfor"				{ message_property.name = "waitfor"; }
-	)
-	arguments = Arguments()				{ message_property.arguments = arguments.arguments; }
+    ":"
+    (
+          "delay"                 { message_property.name = "delay"; }
+        | "waitfor"                { message_property.name = "waitfor"; }
+    )
+    arguments = Arguments()                { message_property.arguments = arguments.arguments; }
 
-	{ return message_property; }
+    { return message_property; }
 }
 
 CArguments Arguments() : {
-    CArguments arguments = new CArguments();
-	CExpression expression;
-    Token t1, t2;
+   CArguments arguments = new CArguments();
+    CExpression expression;
+   Token t1, t2;
 } {
-	t1 = "(" [
-		expression = Expression()		{ arguments.arguments.add(expression); }
-		(","
-			expression = Expression()	{ arguments.arguments.add(expression); }
-		)*
-	] t2 = ")"
+    t1 = "(" [
+        expression = Expression()        { arguments.arguments.add(expression); }
+        (","
+            expression = Expression()    { arguments.arguments.add(expression); }
+        )*
+    ] t2 = ")"
 
-	{
-        arguments.initLineAndColumn(t1, t2);
-        return arguments;
-    }
+    {
+      arguments.initLineAndColumn(t1, t2);
+      return arguments;
+   }
 }
 
 CAllocation Allocation() : {
-	CAllocation allocation = new CAllocation();
-    CArguments arguments;
-    CName type;
-    CPrimitiveType ptype;
-    Token t;
+    CAllocation allocation = new CAllocation();
+   CArguments arguments;
+   CName type;
+   CPrimitiveType ptype;
+   Token t;
 } {
-	(
-		 LOOKAHEAD("new" Name() "(")
-		 (
-			t = "new"
-			type = Name()
-			arguments = Arguments()                         { allocation.arguments = arguments.arguments; }
-			[ BindDeclaration(allocation) ]                 { allocation.type = type.name; }
-		  )
-		| (	
-			t = "new"                                       { allocation.initLineAndColumn(t); }
-			(
-				  ptype = PrimitiveType()                   { allocation.type = ptype.name; }
-				| type = Name()                             { allocation.type = type.name; }
-			)
-			ArrayDimsAndInits(allocation)
-		  )
-		| (
-			t = "reference"                                 { allocation.remote_reference = true; }
-			type = Name()
-			BindDeclaration(allocation)                     { allocation.type = type.name; }
-		  )
-	)
+    (
+         LOOKAHEAD("new" Name() "(")
+         (
+            t = "new"
+            type = Name()
+            arguments = Arguments()                   { allocation.arguments = arguments.arguments; }
+            [ BindDeclaration(allocation) ]             { allocation.type = type.name; }
+          )
+        | (    
+            t = "new"                              { allocation.initLineAndColumn(t); }
+            (
+                  ptype = PrimitiveType()               { allocation.type = ptype.name; }
+                | type = Name()                      { allocation.type = type.name; }
+            )
+            ArrayDimsAndInits(allocation)
+          )
+        | (
+            t = "reference"                         { allocation.remote_reference = true; }
+            type = Name()
+            BindDeclaration(allocation)                { allocation.type = type.name; }
+          )
+    )
 
-	{
-        allocation.initLineAndColumnBegin(t);
-        return allocation;
-    }
+    {
+      allocation.initLineAndColumnBegin(t);
+      return allocation;
+   }
 }
 
 void BindDeclaration(CAllocation allocation) : {
-	CExpression expression;
+    CExpression expression;
 } {
-	"at" "("
-		expression = Expression()		{ allocation.first_expression = expression; }
-	[
-		"," expression = Expression()		{ allocation.second_expression = expression; }
-		"," expression = Expression()		{ allocation.third_expression = expression; }
-	] ")"
+    "at" "("
+        expression = Expression()        { allocation.first_expression = expression; }
+    [
+        "," expression = Expression()        { allocation.second_expression = expression; }
+        "," expression = Expression()        { allocation.third_expression = expression; }
+    ] ")"
 }
 
 void ArrayDimsAndInits(CAllocation allocation) : {
-	CExpression expression;
+    CExpression expression;
 } {
-	(
-		  LOOKAHEAD("[" "]")
-		  (
-			(
-				LOOKAHEAD("[" "]")
-				"[" "]"					{ allocation.array_dimensions++; }
-			)+
-			[	LOOKAHEAD( ArrayInitialization() )
-				allocation.array_init = ArrayInitialization()
-			]
-		  )
-		| (
-									{ allocation.array_arguments = new Vector<CExpression>(); }
-			(
-				LOOKAHEAD("[" Expression() "]")
-				"[" expression = Expression() "]"	{
-										allocation.array_arguments.add(expression);
-										allocation.array_dimensions++;
-									}
-			)+
-			(
-				LOOKAHEAD ("[" "]")
-				"[" "]"					{ allocation.array_dimensions++; }
-			)*
-		  )
-	)
+    (
+          LOOKAHEAD("[" "]")
+          (
+            (
+                LOOKAHEAD("[" "]")
+                "[" "]"                    { allocation.array_dimensions++; }
+            )+
+            [    LOOKAHEAD( ArrayInitialization() )
+                allocation.array_init = ArrayInitialization()
+            ]
+          )
+        | (
+                                    { allocation.array_arguments = new Vector<CExpression>(); }
+            (
+                LOOKAHEAD("[" Expression() "]")
+                "[" expression = Expression() "]"    {
+                                        allocation.array_arguments.add(expression);
+                                        allocation.array_dimensions++;
+                                    }
+            )+
+            (
+                LOOKAHEAD ("[" "]")
+                "[" "]"                    { allocation.array_dimensions++; }
+            )*
+          )
+    )
 }
 
 CLiteral Literal() : {
-	CLiteral literal;
+    CLiteral literal;
 } {
-	(
-		  literal = SelfLiteral()
-		| literal = ParentLiteral()
-		| literal = IntegerLiteral()
-		| literal = FloatingPointLiteral()
-		| literal = CharacterLiteral()
-		| literal = StringLiteral()
-		| literal = BooleanLiteral()
-		| literal = NullLiteral()
-		| literal = AcknowledgementLiteral()
-	)
+    (
+          literal = SelfLiteral()
+        | literal = ParentLiteral()
+        | literal = IntegerLiteral()
+        | literal = FloatingPointLiteral()
+        | literal = CharacterLiteral()
+        | literal = StringLiteral()
+        | literal = BooleanLiteral()
+        | literal = NullLiteral()
+        | literal = AcknowledgementLiteral()
+    )
 
-	{ return literal; }
+    { return literal; }
 }
 
 CLiteral SelfLiteral() : {
-    CLiteral literal = new CLiteral();
-    literal.type = "self";
-    Token t;
+   CLiteral literal = new CLiteral();
+   literal.type = "self";
+   Token t;
 } {
-    t = "self"                          { literal.value = "self"; }
+   t = "self"                    { literal.value = "self"; }
 
-    {
-        literal.initLineAndColumn(t);
-        return literal;
-    }
+   {
+      literal.initLineAndColumn(t);
+      return literal;
+   }
 }
 
 CLiteral ParentLiteral() : {
-    CLiteral literal = new CLiteral();
-    literal.type = "parent";
-    Token t;
+   CLiteral literal = new CLiteral();
+   literal.type = "parent";
+   Token t;
 } {
-    t = "parent"                          { literal.value = "parent"; }
+   t = "parent"                    { literal.value = "parent"; }
 
-    {
-        literal.initLineAndColumn(t);
-        return literal;
-    }
+   {
+      literal.initLineAndColumn(t);
+      return literal;
+   }
 }
 
 
 CLiteral IntegerLiteral() : {
-	CLiteral literal = new CLiteral();
-	literal.type = "int";
-	Token t;
+    CLiteral literal = new CLiteral();
+    literal.type = "int";
+    Token t;
 } {
-	t  = <INTEGER_LITERAL>			{ literal.value = t.image; }
+    t  = <INTEGER_LITERAL>            { literal.value = t.image; }
 
-    {
-        literal.initLineAndColumn(t);
-	    return literal;
-    }
+   {
+      literal.initLineAndColumn(t);
+       return literal;
+   }
 }
 
 CLiteral FloatingPointLiteral() : {
-	CLiteral literal = new CLiteral();
-	literal.type = "double";
-	Token t;
+    CLiteral literal = new CLiteral();
+    literal.type = "double";
+    Token t;
 } {
-	t = <FLOATING_POINT_LITERAL>		{ literal.value = t.image; }
+    t = <FLOATING_POINT_LITERAL>        { literal.value = t.image; }
 
-    {
-        literal.initLineAndColumn(t);
-	    return literal;
-    }
+   {
+      literal.initLineAndColumn(t);
+       return literal;
+   }
 }
 
 CLiteral CharacterLiteral() : {
-	CLiteral literal = new CLiteral();
-	literal.type = "char";
-	Token t;
+    CLiteral literal = new CLiteral();
+    literal.type = "char";
+    Token t;
 } {
-	t = <CHARACTER_LITERAL>			{ literal.value = t.image; }
+    t = <CHARACTER_LITERAL>            { literal.value = t.image; }
 
-    {
-        literal.initLineAndColumn(t);
-	    return literal;
-    }
+   {
+      literal.initLineAndColumn(t);
+       return literal;
+   }
 }
 
 CLiteral StringLiteral() : {
-	CLiteral literal = new CLiteral();
-	literal.type = "String";
-	Token t;
+    CLiteral literal = new CLiteral();
+    literal.type = "String";
+    Token t;
 } {
-	t = <STRING_LITERAL>			{ literal.value = t.image; }
+    t = <STRING_LITERAL>            { literal.value = t.image; }
 
-    {
-        literal.initLineAndColumn(t);
-        return literal;
-    }
+   {
+      literal.initLineAndColumn(t);
+      return literal;
+   }
 }
 
 CLiteral BooleanLiteral() : {
-	CLiteral literal = new CLiteral();
-	literal.type = "boolean";
-	Token t;
+    CLiteral literal = new CLiteral();
+    literal.type = "boolean";
+    Token t;
 } {
-	(
-		  t = "true"
-		| t = "false"
-	)					{ literal.value = t.image; }
+    (
+          t = "true"
+        | t = "false"
+    )                    { literal.value = t.image; }
 
-    {
-        literal.initLineAndColumn(t);
-	    return literal;
-    }
+   {
+      literal.initLineAndColumn(t);
+       return literal;
+   }
 }
 
 CLiteral NullLiteral() : {
-	CLiteral literal = new CLiteral();
-	literal.type = "null";
-    Token t;
+    CLiteral literal = new CLiteral();
+    literal.type = "null";
+   Token t;
 } {
-	t = "null"					{ literal.value = "null"; }
+    t = "null"                    { literal.value = "null"; }
 
-    {
-        literal.initLineAndColumn(t);
-	    return literal;
-    }
+   {
+      literal.initLineAndColumn(t);
+       return literal;
+   }
 }
 
 CLiteral AcknowledgementLiteral() : {
-	CLiteral literal = new CLiteral();
-	literal.type = "ack";
-    Token t;
+    CLiteral literal = new CLiteral();
+    literal.type = "ack";
+   Token t;
 } {
-	t = "ack"					{ literal.value = "ack"; }
+    t = "ack"                    { literal.value = "ack"; }
 
-    {
-        literal.initLineAndColumn(t);
-	    return literal;
-    }
+   {
+      literal.initLineAndColumn(t);
+       return literal;
+   }
 }
 
 String AssignmentOperator() : {
-	Token t;
+    Token t;
 } {
-	(
-		  t = "="
-		| t = "*="
-		| t = "/="
-		| t = "%="
-		| t = "+="
-		| t = "-="
-		| t = "<<="
-		| t = ">>="
-		| t = ">>>="
-		| t = "&="
-		| t = "^="
-		| t = "|="
-	)
+    (
+          t = "="
+        | t = "*="
+        | t = "/="
+        | t = "%="
+        | t = "+="
+        | t = "-="
+        | t = "<<="
+        | t = ">>="
+        | t = ">>>="
+        | t = "&="
+        | t = "^="
+        | t = "|="
+    )
 
-	{ return t.image; }
+    { return t.image; }
 }
 
 String Operator() : {
-	Token t;
+    Token t;
 } {
-	(
-		  t = "||"
-		| t = "&&"
-		| t = "|"
-		| t = "^"
-		| t = "&"
-		| t = "=="
-		| t = "!="
-		| t = ">"
-		| t = "<"
-		| t = "<="
-		| t = ">="
-		| t = "<<"
-		| t = ">>"
-		| t = ">>>"
-		| t = "+"
-		| t = "-"
-		| t = "*"
-		| t = "/"
-		| t = "%"
-		| t = "instanceof"
-	)
+    (
+          t = "||"
+        | t = "&&"
+        | t = "|"
+        | t = "^"
+        | t = "&"
+        | t = "=="
+        | t = "!="
+        | t = ">"
+        | t = "<"
+        | t = "<="
+        | t = ">="
+        | t = "<<"
+        | t = ">>"
+        | t = ">>>"
+        | t = "+"
+        | t = "-"
+        | t = "*"
+        | t = "/"
+        | t = "%"
+        | t = "instanceof"
+    )
 
-	{ return t.image; }
+    { return t.image; }
 }
 
