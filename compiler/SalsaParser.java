@@ -1407,7 +1407,7 @@
       jjtreeCloseNodeScope(jjtn000);
       jjtn000.jjtSetLastToken(getToken(0));
         if (t != null) {
-            System.err.println("pass statement on line " + t.beginLine + " will pass later");
+//            System.err.println("pass statement on line " + t.beginLine + " will pass later");
             pass_statement.will_pass_later = true;
         }
         {if (true) return pass_statement;}
@@ -2138,7 +2138,7 @@
         case DECR:
         case MINUS:
           init = Expression();
-                                                       array_init.inits.add(init);
+                                                              array_init.inits.add(init);
           break;
         default:
           jj_la1[35] = jj_gen;
@@ -2181,7 +2181,7 @@
           case DECR:
           case MINUS:
             init = Expression();
-                                                       array_init.inits.add(init);
+                                                              array_init.inits.add(init);
             break;
           default:
             jj_la1[37] = jj_gen;

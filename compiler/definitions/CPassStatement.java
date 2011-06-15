@@ -39,7 +39,7 @@ public class CPassStatement extends CStatement {
 			if (expression != null) {
                 TypeSymbol expressionType = expression.getType();
                 if (SymbolTable.isMutableObject( expressionType )) {
-                    code += " SalsaSystem.deepCopy( " + expression.toJavaCode() + " )";
+                    code += "(" + expressionType.getName() + ") DeepCopy.deepCopy( " + expression.toJavaCode() + " )";
                 } else {
                     code += " " + expression.toJavaCode();
                 }

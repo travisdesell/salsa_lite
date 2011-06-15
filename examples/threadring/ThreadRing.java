@@ -1,4 +1,5 @@
 /****** SALSA LANGUAGE IMPORTS ******/
+import salsa_lite.common.DeepCopy;
 import salsa_lite.local_fcs.Acknowledgement;
 import salsa_lite.local_fcs.SynchronousMailboxStage;
 import salsa_lite.local_fcs.LocalActor;
@@ -36,7 +37,7 @@ public class ThreadRing extends salsa_lite.local_fcs.LocalActor {
 	public void invokeConstructor(int messageId, Object[] arguments) throws ConstructorNotFoundException {
 		switch(messageId) {
 			case 0: construct( (Integer)arguments[0] ); return;
-			case 1: construct( (java.lang.String[])arguments[0] ); return;
+			case 1: construct( (String[])arguments[0] ); return;
 			default: throw new ConstructorNotFoundException(messageId, arguments);
 		}
 	}
@@ -102,12 +103,7 @@ public class ThreadRing extends salsa_lite.local_fcs.LocalActor {
 		ThreadRing actor = new ThreadRing();
 		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);
 		Message input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);
-		MessageDirector md = MessageDirector.construct(0, new Object[]{input_message, token_positions.length});
-		TokenDirector argument_token;
-		for (int i = 0; i < token_positions.length; i++) {
-			argument_token = (TokenDirector)arguments[token_positions[i]];
-			StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, argument_token, 0 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
-		}
+		MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions});
 		return output_continuation;
 	}
 
@@ -120,12 +116,7 @@ public class ThreadRing extends salsa_lite.local_fcs.LocalActor {
 		ThreadRing actor = new ThreadRing(target_stage);
 		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage);
 		Message input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);
-		MessageDirector md = MessageDirector.construct(0, new Object[]{input_message, token_positions.length}, target_stage);
-		TokenDirector argument_token;
-		for (int i = 0; i < token_positions.length; i++) {
-			argument_token = (TokenDirector)arguments[token_positions[i]];
-			argument_token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, argument_token, 0 /*addMessageDirector*/, new Object[]{md, token_positions[i]}));
-		}
+		MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage);
 		return output_continuation;
 	}
 

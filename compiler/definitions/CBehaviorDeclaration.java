@@ -42,7 +42,7 @@ public class CBehaviorDeclaration extends CErrorInformation {
 
 		String code = "";
 		for (int i = 0; i < implements_names.size(); i++) {
-			code += implements_names.get(i);
+			code += implements_names.get(i).name;
 			if (i < implements_names.size() - 1) code += ", ";
 		}
 		return code;
@@ -106,7 +106,7 @@ public class CBehaviorDeclaration extends CErrorInformation {
 	public int getActConstructor() {
 		for (int i = 0; i < constructors.size(); i++) {
 			CConstructor con = constructors.get(i);
-			if (con.parameters.size() == 1 && con.parameters.get(0).type.equals("String[]")) return i;
+			if (con.parameters.size() == 1 && con.parameters.get(0).type.name.equals("String[]")) return i;
 
 		}
 		return -1;

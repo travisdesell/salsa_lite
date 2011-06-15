@@ -13,12 +13,17 @@ public class CArrayInit extends CVariableInit {
 		return false;
 	}
 
-	public String toJavaCode() {
+	public String toJavaCode(String type, boolean is_token) {
 		String code = "{";
 
 		for (int i = 0; i < inits.size(); i++) {
-			code += inits.get(i).toJavaCode();
-			if (i < inits.size() - 1) code += ", ";
+            if (inits.get(i) instanceof CExpression) {
+                code += ((CExpression)inits.get(i)).toJavaCode();
+            } else {
+                code += inits.get(i).toJavaCode(type, is_token);
+            }
+
+            if (i < inits.size() - 1) code += ", ";
 		}
 
 		return code + "}";

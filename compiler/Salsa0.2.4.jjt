@@ -673,7 +673,7 @@ CPassStatement PassStatement() : {
 
     {
         if (t != null) {
-            System.err.println("pass statement on line " + t.beginLine + " will pass later");
+//            System.err.println("pass statement on line " + t.beginLine + " will pass later");
             pass_statement.will_pass_later = true;
         }
         return pass_statement;
@@ -843,13 +843,13 @@ CArrayInit ArrayInitialization() : {
     "{" [
         (    
               sub_array_init = ArrayInitialization()        { array_init.inits.add(sub_array_init); }
-            | init = Expression()                    { array_init.inits.add(init); }
+            | init = Expression()                           { array_init.inits.add(init); }
         )
 
         (","
             (
                   sub_array_init = ArrayInitialization()    { array_init.inits.add(sub_array_init); }
-                | init = Expression()                { array_init.inits.add(init); }
+                | init = Expression()                       { array_init.inits.add(init); }
             )
         )*
     ] "}"

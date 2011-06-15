@@ -30,9 +30,13 @@ public class CExpression extends CVariableInit {
 		if (operator == null) {
 			return value_type;
 		} else if (operator.equals("=")) {
-			if (!value_type.equals(operator_expression.getType())) {
-				System.err.println("Conflicting types: " + value_type + ", " + operator_expression.getType());
+			if (!value_type.canMatch(operator_expression.getType())) {
+                CompilerErrors.printErrorMessage("Conflicting types.  Cannot assign '" + operator_expression.getType().getLongSignature() + "' to '" + value_type.getLongSignature() + "'", operator_expression);
 			}
+
+            if (!value.isToken() && operator_expression.isToken()) {
+                CompilerErrors.printErrorMessage("Cannot assign a token to a non-token.", operator_expression);
+            }
 
 			return value_type;
 		} else {

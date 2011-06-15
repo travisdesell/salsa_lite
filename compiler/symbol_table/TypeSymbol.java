@@ -4,11 +4,14 @@ import salsa_lite.compiler.definitions.CExpression;
 
 import java.util.LinkedHashMap;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Vector;
 
 public class TypeSymbol implements Comparable<TypeSymbol> {
     TypeSymbol superType = null;
     public TypeSymbol getSuperType()    { return superType; }
+
+    LinkedList<TypeSymbol> implementsTypes = new LinkedList<TypeSymbol>();
 
     String name;
     public String getName()             { return name; }
@@ -18,6 +21,8 @@ public class TypeSymbol implements Comparable<TypeSymbol> {
 
     public String getSignature()        { return name; }
     public String getLongSignature()    { return module + name; }
+
+    public boolean isInterface = false;
 
     public int compareTo(TypeSymbol other) {
         return getLongSignature().compareTo(other.getLongSignature());
@@ -56,20 +61,35 @@ public class TypeSymbol implements Comparable<TypeSymbol> {
     /**
      *  This type matches the target if the target is the same type, or a superclass of this type
      */
-    public boolean canMatch(TypeSymbol target) throws SalsaNotFoundException {
+    public boolean canMatch(TypeSymbol target) {
         if (this.equals(target)) return true;
 
-        if (this.getName().equals("null")) {
-            if (target instanceof PrimitiveType) return false;
+        if (target.getName().equals("null")) {
+//            System.err.println("target's name is null for match against '" + this.getLongSignature());
+            if (this instanceof PrimitiveType) return false;
             else return true; // null can match any actor, array or object
         }
 
         if (this instanceof PrimitiveType && !(target instanceof PrimitiveType)) {
-            TypeSymbol nonPrimitive = SymbolTable.getTypeSymbol( toNonPrimitiveString() );
-            return nonPrimitive.canMatch(target);
+            try {
+                TypeSymbol nonPrimitive = SymbolTable.getTypeSymbol( toNonPrimitiveString() );
+                return nonPrimitive.canMatch(target);
+            } catch (SalsaNotFoundException snfe) {
+                System.err.println("Could not find TypeSymbol for non-primivite version of primitive type '" + toNonPrimitiveString() + "'.");
+                System.err.println("This should never happen.");
+                throw new RuntimeException();
+            }
         }
 
-        if (superType != null) return superType.canMatch(target);
+        boolean canMatch = false;
+
+        if (superType != null) canMatch = superType.canMatch(target);
+        if (canMatch) return true;
+
+        for (TypeSymbol implementsType : implementsTypes) {
+            canMatch = implementsType.canMatch(target);
+            if (canMatch) return true;
+        }
         return false;
     }
 

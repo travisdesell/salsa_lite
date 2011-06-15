@@ -27,7 +27,7 @@ public class CLocalVariableDeclaration extends CStatement {
                  */
 
 				code += "TokenDirector ";
-				code += variables.get(i).toJavaCodeAsToken();
+				code += variables.get(i).toJavaCodeAsToken(type.name, is_token);
 
                 try {
     				SymbolTable.addVariableType(variables.get(i).name, type.name, true, false);
@@ -43,7 +43,7 @@ public class CLocalVariableDeclaration extends CStatement {
 		} else {
 			for (int i = 0; i < variables.size(); i++) {
 				code += type.name + " ";
-				code += variables.get(i).toJavaCode();
+				code += variables.get(i).toJavaCode(type.name, is_token);
 
                 try {
 				    SymbolTable.addVariableType(variables.get(i).name, type.name, false, false);

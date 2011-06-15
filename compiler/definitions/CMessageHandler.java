@@ -23,7 +23,7 @@ public class CMessageHandler extends CErrorInformation {
     }
 	
 	public void addContainedMessageHandlers(Vector<CMessageHandler> containedMessageHandlers) {
-		block.addContainedMessageHandlers(containedMessageHandlers);
+        if (block != null) block.addContainedMessageHandlers(containedMessageHandlers);
 	}
 
 	public String[] getArgumentTypes() {
@@ -87,7 +87,10 @@ public class CMessageHandler extends CErrorInformation {
 		}
 		definition_code += ") ";
 
-		String block_code = block.toJavaCode() + "\n";
+		String block_code = ";";
+        if (block != null) {
+            block_code = block.toJavaCode() + "\n";
+        }
 
 		if (SymbolTable.token_pass_exception && SymbolTable.continuation_pass_exception) definition_code += "throws TokenPassException, ContinuationPassException ";
 		else if (SymbolTable.token_pass_exception) definition_code += "throws TokenPassException ";

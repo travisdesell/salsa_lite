@@ -4,7 +4,7 @@ import object java.util.LinkedList;
 
 behavior TokenDirector extends ContinuationDirector {
 
-	LinkedList<MessageDirector> message_directors = new LinkedList<MessageDirector>();
+	LinkedList<Director> directors = new LinkedList<Director>();
 	LinkedList<Integer> positions = new LinkedList<Integer>();
 
 	Object value;
@@ -19,31 +19,30 @@ behavior TokenDirector extends ContinuationDirector {
     }
 
 	ack setValue(Object value) {
-//        System.err.println("set value for token director: " + value + ", message_directors.size(): " + message_directors.size() + ", positions.size(): " + positions.size());
+//        System.err.println("set value for token director: " + value + ", directors.size(): " + directors.size() + ", positions.size(): " + positions.size());
 
         self.unresolved = false;
 		self.value = value;
 
-		MessageDirector message_director;
+		Director director;
 		int position;
 
-		while (message_directors.size() > 0) {
-            message_director = message_directors.removeFirst();
+		while (directors.size() > 0) {
+            director = directors.removeFirst();
 			position = positions.removeFirst();
-			Message message = new Message(Message.SIMPLE_MESSAGE, message_director, 0, new Object[]{position, value});
-			StageService.sendMessage(message);
+
+            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, (LocalActor)director, 0 /*setValue*/, new Object[]{position, value}));
 		}
 	}
 
-	ack addMessageDirector(MessageDirector message_director, int position) {
+	ack addDirector(Director director, int position) {
 //        System.err.println("adding message director with position: " + position + " to token director.");
 
 		if (unresolved) {
-			message_directors.add(message_director);
+			directors.add(director);
 			positions.add(position);
 		} else {
-			Message message = new Message(Message.SIMPLE_MESSAGE, message_director, 0, new Object[]{position, value});
-			StageService.sendMessage(message);
+            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, (LocalActor)director, 0 /*setValue*/, new Object[]{position, value}));
 		}
 	}
 

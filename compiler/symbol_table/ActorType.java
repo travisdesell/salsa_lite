@@ -2,6 +2,7 @@ package salsa_lite.compiler.symbol_table;
 
 import java.util.StringTokenizer;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
@@ -17,6 +18,7 @@ import salsa_lite.compiler.definitions.CompilerErrors;
 import salsa_lite.compiler.definitions.CCompilationUnit;
 import salsa_lite.compiler.definitions.CConstructor;
 import salsa_lite.compiler.definitions.CExpression;
+import salsa_lite.compiler.definitions.CName;
 import salsa_lite.compiler.definitions.CGenericType;
 import salsa_lite.compiler.definitions.CMessageHandler;
 import salsa_lite.compiler.definitions.CLocalVariableDeclaration;
@@ -111,7 +113,19 @@ public class ActorType extends TypeSymbol {
 
     public void load(CCompilationUnit cu, String oldModule) throws SalsaNotFoundException {
         int i;
-		this.superType = SymbolTable.getTypeSymbol(cu.getExtendsName().name);
+        if (cu.getExtendsName() != null) {
+            this.superType = SymbolTable.getTypeSymbol(cu.getExtendsName().name);
+            if (this.superType.isInterface) this.isInterface = true;
+        } else {
+            this.superType = SymbolTable.getTypeSymbol("LocalActor");
+            this.isInterface = true;
+        }
+
+        if (cu.behavior_declaration != null && cu.behavior_declaration.implements_names != null) {
+            for (CName implementsName : cu.behavior_declaration.implements_names) {
+                implementsTypes.add( SymbolTable.getTypeSymbol(implementsName.name) );
+            }
+        }
 
         for (CGenericType generic_type : cu.getName().generic_types) {
             ObjectType ot;
@@ -128,9 +142,11 @@ public class ActorType extends TypeSymbol {
 
 
 		Vector<CConstructor> cv = cu.getConstructors();
-		for (i = 0; i < cv.size(); i++) {
-            ConstructorSymbol cs = new ConstructorSymbol(i, this, cv.get(i));
-            constructors.put( cs.getLongSignature(), cs );
+        if (cv != null) {
+            for (i = 0; i < cv.size(); i++) {
+                ConstructorSymbol cs = new ConstructorSymbol(i, this, cv.get(i));
+                constructors.put( cs.getLongSignature(), cs );
+            }
         }
 
         Vector<CMessageHandler> mv = cu.getMessageHandlers();

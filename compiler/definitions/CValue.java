@@ -8,6 +8,7 @@ import salsa_lite.compiler.symbol_table.ActorType;
 import salsa_lite.compiler.symbol_table.ArrayType;
 import salsa_lite.compiler.symbol_table.ObjectType;
 import salsa_lite.compiler.symbol_table.PrimitiveType;
+import salsa_lite.compiler.symbol_table.MethodSymbol;
 import salsa_lite.compiler.symbol_table.MessageSymbol;
 import salsa_lite.compiler.symbol_table.TypeSymbol;
 import salsa_lite.compiler.symbol_table.SalsaNotFoundException;
@@ -131,6 +132,12 @@ public class CValue extends CErrorInformation {
                 } catch (SalsaNotFoundException snfe) {
                     CompilerErrors.printErrorMessage("[CValue.getType]: Could not determine type for method invocation. " + snfe.toString(), this);
                     throw new RuntimeException(snfe);
+                }
+
+                for (CExpression expression : method_invocation.arguments) {
+                    if (expression.isToken()) {
+                        CompilerErrors.printErrorMessage("[CValue.getType]: Cannot send a token as the argument to a method invocation.", expression);
+                    }
                 }
 
                 if (value_type == null) {
@@ -274,7 +281,12 @@ public class CValue extends CErrorInformation {
 
                 try {
                     if (currentType instanceof ObjectType) {
-                        currentType = ((ObjectType)currentType).getMethod(mi.method_name, mi.arguments).getReturnType();
+                        MethodSymbol ms = ((ObjectType)currentType).getMethod(mi.method_name, mi.arguments);
+                        if (ms == null) {
+                            CompilerErrors.printErrorMessage("Could not find matching method.", mi);
+                            currentType = null;
+                        }
+                        currentType = ms.getReturnType();
                     } else if (currentType instanceof ActorType) {
                         if (modifications.getFirst().equals(modification) && (isSelf() || isParent())) {
                             currentType = ((ActorType)currentType).getMessage(mi.method_name, mi.arguments).getPassType();
@@ -302,7 +314,7 @@ public class CValue extends CErrorInformation {
 
                                 if (!argument.equals(mi.arguments.lastElement())) code += ", ";
                             } else {
-                                CompilerErrors.printErrorMessage("cannot pass a token to a method invocation", argument);
+                                CompilerErrors.printErrorMessage("[CValue.toJavaCode]: Cannot pass a token to a method invocation", argument);
                             }
                         }
                         code += ")";
@@ -347,7 +359,14 @@ public class CValue extends CErrorInformation {
                     String expression_director_code = "";
                     pre_code += "Message(";
 
+                    if (currentType.isInterface) code = "(LocalActor)" + code;
                     code = pre_code + code + ", ";
+
+
+                    if (!(currentType instanceof ActorType)) {
+                        CompilerErrors.printErrorMessage("Cannot send a message to an object.", ms);
+                        throw new RuntimeException();
+                    }
 
                     ActorType at = (ActorType)currentType;
                     MessageSymbol messageSymbol = at.getMessage(ms.message_name, ms.arguments);
@@ -375,7 +394,7 @@ public class CValue extends CErrorInformation {
                             hasToken = true;
 
                         } else if (SymbolTable.isMutableObject( argument.getType() )) {
-                            argument_code += "SalsaSystem.deepCopy( ";
+                            argument_code += "(" + argument.getType().getName() + ")DeepCopy.deepCopy( ";
                         }
 
                         SymbolTable.withinArguments = true;

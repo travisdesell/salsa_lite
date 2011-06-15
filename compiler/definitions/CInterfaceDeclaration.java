@@ -12,6 +12,10 @@ public class CInterfaceDeclaration {
 	public Vector<CLocalVariableDeclaration> variable_declarations = new Vector<CLocalVariableDeclaration>();
 	public Vector<CMessageHandler> message_handlers = new Vector<CMessageHandler>();
 
+    public CName getExtendsName() {
+        return extends_name;
+    } 
+
 	public String toJavaCode() {
 		return "";
 	}

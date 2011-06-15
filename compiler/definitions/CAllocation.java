@@ -43,7 +43,10 @@ public class CAllocation extends CVariableInit {
 
 	public TypeSymbol getType() {
         try {
-            TypeSymbol t = SymbolTable.getTypeSymbol(type.name);
+            String typeName = type.name;
+            for (int i = 0; i < array_dimensions; i++) typeName += "[]";
+
+            TypeSymbol t = SymbolTable.getTypeSymbol(typeName);
             return t;
         } catch (SalsaNotFoundException snfe) {
             CompilerErrors.printErrorMessage("[CAllocation.getType]: " + snfe.toString(), type);
@@ -110,7 +113,7 @@ public class CAllocation extends CVariableInit {
                     code += "]";
                 }
 
-                if (array_init != null) code += array_init.toJavaCode();
+                if (array_init != null) code += array_init.toJavaCode(type.name, isToken());
             }
         } catch (SalsaNotFoundException snfe) {
             CompilerErrors.printErrorMessage("[CAllocation.getType]: " + snfe.toString(), type);
