@@ -31,7 +31,7 @@ public class CVariableInit extends CErrorInformation {
         }
 
 		if (expression != null) {
-            if (!ts.canMatch(expression.getType())) {
+            if (ts.canMatch(expression.getType()) < 0) {
                 CompilerErrors.printErrorMessage("Conflicting types.  Cannot assign '" + expression.getType().getLongSignature() + "' to '" + ts.getLongSignature() + "'", expression);
             }
 
@@ -61,7 +61,7 @@ public class CVariableInit extends CErrorInformation {
         }
 
 		if (expression != null) {
-            if (!ts.canMatch(expression.getType())) {
+            if (ts.canMatch(expression.getType()) < 0) {
                 CompilerErrors.printErrorMessage("Conflicting types.  Cannot assign '" + expression.getType().getLongSignature() + "' to '" + ts.getLongSignature() + "'", expression);
             }
 

@@ -61,19 +61,25 @@ public class TypeSymbol implements Comparable<TypeSymbol> {
     /**
      *  This type matches the target if the target is the same type, or a superclass of this type
      */
-    public boolean canMatch(TypeSymbol target) {
-        if (this.equals(target)) return true;
+    public int canMatch(TypeSymbol target) {
+        return canMatch(target, 0);
+    }
+
+    public int canMatch(TypeSymbol target, int distance) {
+//        System.err.println("distance: " + distance + ", testing '" + getSignature() + "' vs '" + target.getSignature() + "'");
+
+        if (this.equals(target)) return distance;
 
         if (target.getName().equals("null")) {
 //            System.err.println("target's name is null for match against '" + this.getLongSignature());
-            if (this instanceof PrimitiveType) return false;
-            else return true; // null can match any actor, array or object
+            if (this instanceof PrimitiveType) return -1;
+            else return distance; // null can match any actor, array or object
         }
 
         if (this instanceof PrimitiveType && !(target instanceof PrimitiveType)) {
             try {
                 TypeSymbol nonPrimitive = SymbolTable.getTypeSymbol( toNonPrimitiveString() );
-                return nonPrimitive.canMatch(target);
+                return nonPrimitive.canMatch(target, distance + 1);
             } catch (SalsaNotFoundException snfe) {
                 System.err.println("Could not find TypeSymbol for non-primivite version of primitive type '" + toNonPrimitiveString() + "'.");
                 System.err.println("This should never happen.");
@@ -81,16 +87,16 @@ public class TypeSymbol implements Comparable<TypeSymbol> {
             }
         }
 
-        boolean canMatch = false;
+        int temp_distance = -1;
 
-        if (superType != null) canMatch = superType.canMatch(target);
-        if (canMatch) return true;
+        if (superType != null) temp_distance = superType.canMatch(target, distance + 1);
+        if (temp_distance >= 0) return temp_distance;
 
         for (TypeSymbol implementsType : implementsTypes) {
-            canMatch = implementsType.canMatch(target);
-            if (canMatch) return true;
+            temp_distance = implementsType.canMatch(target, distance + 1);
+            if (temp_distance >= 0) return temp_distance;
         }
-        return false;
+        return -1;
     }
 
     public String toNonPrimitiveString() {

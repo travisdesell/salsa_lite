@@ -83,24 +83,56 @@ public class Invokable {
     public static Invokable matchInvokable(Invokable targetArguments, LinkedHashMap<String, ? extends Invokable> invokableMap) throws SalsaNotFoundException {
         Invokable match = null;
         int matches = 0;
-        for (Invokable current : new LinkedList<Invokable>(invokableMap.values())) {
-            if (targetArguments.matches(current)) {
-                matches++;
+        int[] match_distance = new int[invokableMap.values().size()];
 
-                if (matches == 2) {
-                    System.err.println("COMPILER WARNING [Invokable.matchParameterTypes]: matching targetArguments on '" + targetArguments.getLongSignature() + "' had multiple matches:");
-                    System.err.println("\t" + match.getLongSignature());
-                }
+        int min_distance = Integer.MAX_VALUE;
+        int i = 0;
+        for (Invokable current : new LinkedList<Invokable>(invokableMap.values())) {
+            match_distance[i] = targetArguments.matches(current);
+
+            if (match_distance[i] >= 0 && match_distance[i] < min_distance) {
+                matches = 1;
+                min_distance = match_distance[i];
+
                 match = current;
-                if (matches > 1) {
-                    System.err.println("\t" + match.getLongSignature());
+            } else if (match_distance[i] >= 0 && match_distance[i] == min_distance) {
+                matches++;
+            }
+            i++;
+        }
+
+        if (matches > 1) {
+            int min_match = match_distance[1];
+            int min_match_position = 1;
+            int min_matches = 0;
+            for (i = 1; i < match_distance.length; i++) {
+                if (min_match >= 0 && min_match < match_distance[i]) {
+                    min_match_position = i;
+                    min_match = match_distance[i];
+                    min_matches = 0;
+                } else if (min_match >= 0 && min_match == match_distance[i]) {
+                    min_matches++;
                 }
+            }
+
+            if (min_matches > 1) {
+                i = 0;
+                System.err.println("COMPILER WARNING [Invokable.matchParameterTypes]: matching targetArguments on '" + targetArguments.getLongSignature() + "' had multiple matches:");
+                for (Invokable current : new LinkedList<Invokable>(invokableMap.values())) {
+                    if (match_distance[i] == min_match) {
+                        System.err.println("\t [distance: " + match_distance[i] + "]" + current.getLongSignature());
+                    }
+                    i++;
+                }
+            } else {
+                return match;
             }
         }
 
         if (match == null) {
             System.err.println("COMPILER ERROR [Invokable.matchParameterTypes]: could not find matching targetArguments for '" + targetArguments.getLongSignature() + "'.");
             System.err.println("known potential invokables:");
+            i = 0;
             for (Invokable current : new LinkedList<Invokable>(invokableMap.values())) {
                 System.err.println("\t" + current.getLongSignature());
             }
@@ -111,18 +143,23 @@ public class Invokable {
 
     /**
      *  The current invokable is has the arguments we're trying to send to target
+     *  returns -1 if there is no match, otherwise it returns
+     *  the distance between types (in terms of how many superclasses away it is)
      */
-    public boolean matches(Invokable target) throws SalsaNotFoundException {
-        if (!name.equals(target.getName())) return false;
-        if (parameterTypes.length != target.parameterTypes.length) return false;
+    public int matches(Invokable target) throws SalsaNotFoundException {
+        if (!name.equals(target.getName())) return -1;
+        if (parameterTypes.length != target.parameterTypes.length) return -1;
 
+        int match_distance;
+        int total_match_distance = 0;
         for (int i = 0; i < parameterTypes.length; i++) {
-            boolean canMatch = parameterTypes[i].canMatch( target.parameterTypes[i] );
+            match_distance = this.parameterTypes[i].canMatch( target.parameterTypes[i] );
+            total_match_distance += match_distance;
 //            System.err.println("\t[" + parameterTypes[i].getLongSignature() + "] vs [" + target.parameterTypes[i].getLongSignature() + "] -- " + canMatch);
 
-            if (!canMatch) return false;
+            if (match_distance < 0) return -1;
         }
 
-        return true;
+        return total_match_distance;
     }
 }

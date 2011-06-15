@@ -1,8 +1,5 @@
 import salsa_lite.language.JoinDirector;
 
-import object java.lang.Integer;
-import object java.lang.System;
-
 behavior ThreadRing {
 	ThreadRing next;
 	int id;

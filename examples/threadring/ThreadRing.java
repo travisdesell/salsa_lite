@@ -18,8 +18,6 @@ import salsa_lite.local_fcs.language.exceptions.ConstructorNotFoundException;
 /****** END SALSA LANGUAGE IMPORTS ******/
 
 import salsa_lite.local_fcs.language.JoinDirector;
-import java.lang.Integer;
-import java.lang.System;
 
 public class ThreadRing extends salsa_lite.local_fcs.LocalActor {
 	ThreadRing next;
