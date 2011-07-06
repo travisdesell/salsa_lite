@@ -44,7 +44,7 @@ public class GenericCell<T extends Object> extends salsa_lite.local_fcs.LocalAct
 		GenericCell<Object> gco = GenericCell.construct(1, new Object[]{"object cell message"});
 		ContinuationDirector continuation_token = StageService.sendContinuationMessage(gcs, 2 /*print*/, null);
 		continuation_token = StageService.sendContinuationMessage(gco, 2 /*print*/, null, continuation_token);
-		continuation_token = StageService.sendContinuationMessage(gco, 1 /*set*/, new Object[]{StageService.sendImplicitTokenMessage(gcs, 0 /*get*/, null, continuation_token)}, new int[]{0}, continuation_token);
+		continuation_token = StageService.sendContinuationMessage(gco, 1 /*set*/, new Object[]{StageService.sendImplicitTokenMessage(gcs, 0 /*get*/, null, continuation_token)}, new int[]{0});
 		StageService.sendMessage(gco, 2 /*print*/, null, continuation_token);
 	}
 
@@ -55,10 +55,12 @@ public class GenericCell<T extends Object> extends salsa_lite.local_fcs.LocalAct
 
 
 	public T get() {
+		System.err.println("getting: " + value);
 		return (T)DeepCopy.deepCopy( value );
 	}
 
 	public void set(T value) {
+		System.err.println("setting: " + value);
 		this.value = value;
 	}
 

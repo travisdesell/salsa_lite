@@ -15,6 +15,7 @@ behavior ContinuationDirector {
 		}
 	}
 
+    //need to deal with multiple setMessage messages being received
 	ack setMessage(Message message) {
 		if (unresolved) {
 			self.message = message;

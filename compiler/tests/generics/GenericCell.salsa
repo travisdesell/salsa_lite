@@ -16,10 +16,12 @@ behavior GenericCell<T extends Object> {
     }
 
     T get() {
+        System.err.println("getting: " + value);
         pass value;
     }
 
     ack set(T value) {
+        System.err.println("setting: " + value);
         self.value = value;
     }
 

@@ -4,13 +4,12 @@ behavior MessageDirector implements Director {
 
 	Message message;
 	int required_tokens;
-	ContinuationDirector continuation_token = null;
 
 	MessageDirector(Message message, ContinuationDirector input_continuation) {
         self.message = message;
         self.required_tokens = 1;
 
-        continuation_token<-setMessage( new Message(Message.SIMPLE_MESSAGE, self, 0 /*resolve*/, new Object[]{-1, null}) );
+        input_continuation<-setMessage( new Message(Message.SIMPLE_MESSAGE, self, 0 /*resolve*/, new Object[]{-1, null}) );
 	}
 
     MessageDirector(Message message, ContinuationDirector[] input_continuations) {
@@ -31,7 +30,7 @@ behavior MessageDirector implements Director {
         self.message = message;
         self.required_tokens = token_positions.length + 1;
 
-        continuation_token<-setMessage( new Message(Message.SIMPLE_MESSAGE, self, 0 /*setValue*/, new Object[]{-1, null}) );
+        input_continuation<-setMessage( new Message(Message.SIMPLE_MESSAGE, self, 0 /*setValue*/, new Object[]{-1, null}) );
 
         for (int i = 0; i < token_positions.length; i++) {
             ((TokenDirector)arguments[token_positions[i]])<-addDirector(self, token_positions[i]);
@@ -68,12 +67,6 @@ behavior MessageDirector implements Director {
         if (position >= 0) message.arguments[position] = value;
 		required_tokens--;
 
-		if (required_tokens <= 0) {
-			if (continuation_token == null) {
-				StageService.sendMessage(message);
-			} else {
-				continuation_token<-setMessage(message);
-			}
-		}
+		if (required_tokens <= 0) StageService.sendMessage(message);
 	}
 }
