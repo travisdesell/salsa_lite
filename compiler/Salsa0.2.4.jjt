@@ -426,7 +426,7 @@ CInterfaceDeclaration InterfaceDeclaration() : {
     CMessageHandler message_handler;
     CLocalVariableDeclaration variable_declaration;
     Token t;
-   CName name;
+    CName name;
 } {
     "interface" name = Name()                                                       { interface_declaration.interface_name = name; }
     [
@@ -556,7 +556,7 @@ CMessageHandler InterfaceMessageHandlerDeclaration() : {
         message_handler.pass_type = pass_type;
         message_handler.name = t.image;
         message_handler.parameters = parameters;
-      message_handler.initLineAndColumn(pass_type, t2);
+        message_handler.initLineAndColumn(pass_type, t2);
         return message_handler;
     }
 }
@@ -578,7 +578,7 @@ CMessageHandler MessageHandlerDeclaration() : {
         message_handler.name = t.image;
         message_handler.parameters = parameters;
         message_handler.block = block;
-      message_handler.initLineAndColumn(pass_type, block);
+        message_handler.initLineAndColumn(pass_type, block);
         return message_handler;
     }
 }
@@ -1015,11 +1015,11 @@ CMethodInvocation MethodInvocation() : {
 } {
    invoket = "."
    t = <IDENTIFIER>               {   if (System.getProperty("debugMethodInvocation") != null) System.out.println("in method invocation, identifier = " + t.image); }
-   arguments = Arguments()          {
-                                 method_invocation.method_name = t.image;
-                                 method_invocation.arguments = arguments.arguments;
-                                 method_invocation.initLineAndColumn(invoket, arguments);
-                              }
+   arguments = Arguments()      {
+                                    method_invocation.method_name = t.image;
+                                    method_invocation.arguments = arguments.arguments;
+                                    method_invocation.initLineAndColumn(invoket, arguments);
+                                }
 
    { return method_invocation; }                              
 }

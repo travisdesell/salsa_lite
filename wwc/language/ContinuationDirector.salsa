@@ -1,0 +1,29 @@
+module salsa_lite.wwc.language;
+
+import object java.util.LinkedList;
+
+behavior ContinuationDirector {
+
+	boolean unresolved = true;
+	LinkedList<Message> messages = new LinkedList<Message>();
+
+	ContinuationDirector() {}
+
+	ack resolve() {
+		if (messages.size() > 0) {
+            for (Message message : messages) {
+			    StageService.sendMessage(message);
+            }
+		} else {
+			unresolved = false;
+		}
+	}
+
+	ack setMessage(Message message) {
+		if (unresolved) {
+			messages.add(message);
+		} else {
+			StageService.sendMessage(message);
+		}
+	}
+}

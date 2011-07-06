@@ -1,0 +1,66 @@
+Building:
+    Make sure the salsa_lite directory is in your classpath.
+
+    To reparse the grammar (and re-generate the compiler files) and recompile salsa run the parse_and_build.sh script.  You'll need JavaCC (the Java Compiler Compiler -- http://javacc.java.net/) installed to be able to modify the grammar and update syntax.
+
+    To just compile everything (without regenerating the compiler files), run the build.sh script.
+
+
+Running the compiler:
+    I recommend using the following aliases in your profile to run the salsa compiler:
+
+    For local salsa:
+        alias slcf='java -Dlocal_fcs salsa_lite.compiler.SalsaCompiler'
+
+    For distributed (world wide computer) salsa:
+        alias slcw='java -Dwwc salsa_lite.compiler.SalsaCompiler'
+
+
+Running SALSA programs:
+    After running the salsa compiler, then running the java compiler on the generated code:
+    java <module>.<ActorName>
+    You can set the number of stages used with the -Dnstages=<number of stages> system property.
+    
+    Please let us know at salsadev [at] cs.rpi.edu if the SALSA compiler does not errors or warnings that the Java compiler does.
+
+
+Notable changes from SALSA 1.x and before:
+    *   When importing Java objects, use (for example) 'import object java.util.LinkedList;'. Objects in java.lang are automatically imported.
+    *   void is not a valid return type for a message handler any more, use ack (for acknowledgement).  This better represents the fact that message handlers that don't return a value can still be used in continuations, as they send an acknowledgement.
+    *   Extended For loop syntax added.
+    *   Generics are usable.
+    *   return statements are now pass statements. ie: use 'pass 10;' instead of 'return 10;'
+    *   currentContinuation is not used anymore, instead pass statements are used.  ie: 'a<-m1() @ currentContinuation;' is now 'a<-m1() @ pass;'.  This will pass an acknowledgement as the first class continuation.  If you want to pass the actual value, use: 'pass a<-m1();'.
+    *   There is no longer an act method, instead, for an actor that can be run from the command line, create a constructor that takes an array of strings. When that actor is run, the constructor with an array of Strings as the argument will be invoked.
+    *   Salsa now allows for tokens within expressions, eg: 'a<-m1( b<-m2() + c<-m3() * d<-m4() );' will work.
+    *       This can also be combined with continuations, eg: 'e<-m5() @ a<-m1( b<-m2() + c<-m3() * d<-m4() ) @ f<-m6();'.
+    *       And in pass statements, eg: 'pass a<-m1( b<-m2() + c<-m3() * d<-m4() );'.
+    *   It is possible to invoke methods on self.  Because of this, to prevent ambiguity, for an actor to send a message or invoke a method on itself, use either 'self<-message();' or 'self.method();'.  Using 'message()' or 'method()' will not work (we might want to change this, maybe make sending a message the default).
+    *   Join blocks are no longer in the language.  Instead, the JoinDirector actor can be used, see salsa_lite/examples/threadring/ThreadRing.salsa for an example.
+    *   The local_fcs package has automatic garbage collection (using Java's garbage collector).
+    *   When using the local_fcs runtime, you can specify what stage an actor runs on: 'NewActor na = new NewActor() at (<stage number>);' or 'NewActor na = newActor() at (StageService.getStage(anotherActor));' or 'NewActor na = new NewActor() at (StageService.getNewStage());'.
+
+
+TODO:
+    *   Get the wwc package working again.
+    *   Add garbage collection support for the wwc package.  We should be able to use the same automatic collection strategy as local_fcs for actors that don't migrate or have their references sent to other theaters.
+    *   Syntax for generic methods needs to be added.
+    *   Type checking for generics may not completely work not sure about things like <? super Something> and <T, E extends T, F extends E>.
+    *   Need to add more tests for generics (and other language features) in salsa_lite/compiler/tests
+    *   Add a local thread pool implementation, in addition to the local_fcs -- local First Class Stage, to compare the two for a publication.
+    *   Need to implement a version of local_fcs that is fair. Right now an actor can enter an infinite loop or execute a blocking method which will starve the other actors on that stage.
+    *   Add tests for nested expression directors, ie: a<-m( b<-m( c<-m() + d<-m(), e<-m() ) * f<-m() )
+    *   Add tests for method invocations within expression directors, ie: a<-m( Math.log(o.something() + 10 * b<-m()) )
+    *   Allow self(...) and parent(...) as the first line within constructors to call another or the superclasses's constructor.
+    *   Implement token arrays in the compiler (have them use the language.ArrayDirector class).
+    *   Add compiler tests for token arrays.
+    *   Implement message blocks, ie: { a<-m1(); b<-m2(); } @ { c<-m3(); d<-m4() }
+    *   Add compiler tests for message blocks.
+    *   Report an error if trying to invoke a static method on a non-static object
+    *   Get inheritance working correctly.  The correct message id's need to be generated for subclasses so when appropriate they override the parent's message handlers.
+    *   Add compiler tests for inheritance.
+    *   Get interfaces working correctly.  They need special messages that know they were sent using an interface, so they invoke the correct message handler.
+    *   Add compiler tests for interfaces
+    *   Add syntax support for try/catch blocks for Java support.
+    *   Add support for access control.  All fields of an actor are private (and can't be shared due to no-shared memory), but methods should be able to be private, protected, public (or no modifier).
+

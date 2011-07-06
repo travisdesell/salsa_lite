@@ -478,7 +478,7 @@
     CMessageHandler message_handler;
     CLocalVariableDeclaration variable_declaration;
     Token t;
-   CName name;
+    CName name;
     try {
       jj_consume_token(INTERFACE);
       name = Name();
@@ -930,7 +930,7 @@
         message_handler.pass_type = pass_type;
         message_handler.name = t.image;
         message_handler.parameters = parameters;
-      message_handler.initLineAndColumn(pass_type, t2);
+        message_handler.initLineAndColumn(pass_type, t2);
         {if (true) return message_handler;}
     } catch (Throwable jjte000) {
       if (jjtc000) {
@@ -981,7 +981,7 @@
         message_handler.name = t.image;
         message_handler.parameters = parameters;
         message_handler.block = block;
-      message_handler.initLineAndColumn(pass_type, block);
+        message_handler.initLineAndColumn(pass_type, block);
         {if (true) return message_handler;}
     } catch (Throwable jjte000) {
       if (jjtc000) {
@@ -2770,9 +2770,9 @@
       t = jj_consume_token(IDENTIFIER);
                                       if (System.getProperty("debugMethodInvocation") != null) System.out.println("in method invocation, identifier = " + t.image);
       arguments = Arguments();
-                                 method_invocation.method_name = t.image;
-                                 method_invocation.arguments = arguments.arguments;
-                                 method_invocation.initLineAndColumn(invoket, arguments);
+                                    method_invocation.method_name = t.image;
+                                    method_invocation.arguments = arguments.arguments;
+                                    method_invocation.initLineAndColumn(invoket, arguments);
      jjtree.closeNodeScope(jjtn000, true);
      jjtc000 = false;
      jjtreeCloseNodeScope(jjtn000);

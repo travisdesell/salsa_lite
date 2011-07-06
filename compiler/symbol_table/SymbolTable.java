@@ -368,9 +368,7 @@ public class SymbolTable {
         currentModule = "";
 
 		runtimeModule = "salsa_lite.";
-		if (System.getProperty("local") != null) runtimeModule += "local";
-		else if (System.getProperty("local_noref") != null) runtimeModule += "local_noref";
-		else if (System.getProperty("local_fcs") != null) runtimeModule += "local_fcs";
+		if (System.getProperty("local_fcs") != null) runtimeModule += "local_fcs";
 		else if (System.getProperty("wwc") != null) runtimeModule += "wwc";
 		languageModule = runtimeModule + ".language.";
 
@@ -553,8 +551,13 @@ public class SymbolTable {
             addVariableType("Stage", "Stage", false, true);
 
 
+            ActorType localActorType = null;
+            if (System.getProperty("wwc") != null) {
+                localActorType = new ActorType(runtimeModule + ".WWCActor", SymbolTable.getTypeSymbol("Object"));
+            } else {
+                localActorType = new ActorType(runtimeModule + ".LocalActor", SymbolTable.getTypeSymbol("Object"));
+            }
 
-            ActorType localActorType = new ActorType(runtimeModule + ".LocalActor", SymbolTable.getTypeSymbol("Object"));
             FieldSymbol stageField = new FieldSymbol(localActorType, "stage", SymbolTable.getTypeSymbol("Stage"));
             localActorType.fields.add(stageField);
 
@@ -562,7 +565,12 @@ public class SymbolTable {
             namespace.put(localActorType.getName(), localActorType.getLongSignature());
             addVariableType("stage", "Stage", false, true);     //should add an actor's parent fields to namespace as well instead of this hack
 
-            FieldSymbol targetField = new FieldSymbol(messageType, "target", SymbolTable.getTypeSymbol("LocalActor"));
+            FieldSymbol targetField = null;
+            if (System.getProperty("wwc") != null) {
+                targetField = new FieldSymbol(messageType, "target", SymbolTable.getTypeSymbol("WWCActor"));
+            } else {
+                targetField = new FieldSymbol(messageType, "target", SymbolTable.getTypeSymbol("LocalActor"));
+            }
             messageType.fields.add(targetField);
 
             if (!cu.getName().equals("ContinuationDirector")) {

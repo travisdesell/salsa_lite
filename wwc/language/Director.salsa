@@ -1,0 +1,5 @@
+module salsa_lite.wwc.language;
+
+interface Director {
+    ack setValue(int position, Object value);
+}
