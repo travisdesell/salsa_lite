@@ -25,6 +25,7 @@ Running SALSA programs:
 
 
 Notable changes from SALSA 1.x and before:
+    *   The compiler now does static typechecking. Error reporting for the compiler has also been greatly improved.
     *   When importing Java objects, use (for example) 'import object java.util.LinkedList;'. Objects in java.lang are automatically imported.
     *   void is not a valid return type for a message handler any more, use ack (for acknowledgement).  This better represents the fact that message handlers that don't return a value can still be used in continuations, as they send an acknowledgement.
     *   Extended For loop syntax added.
