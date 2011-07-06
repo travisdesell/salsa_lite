@@ -49,7 +49,7 @@ Notable changes from SALSA 1.x and before:
     *   When using the local_fcs runtime, you can specify what stage an actor runs on: 'NewActor na = new NewActor() at (<stage number>);' or 'NewActor na = newActor() at (StageService.getStage(anotherActor));' or 'NewActor na = new NewActor() at (StageService.getNewStage());'.
 
 
-<b>BUGS</b>:
+BUGS:
     *   Get the wwc package working again.
     *   Type checking for generics may not completely work not sure about things like <? super Something> and <T, E extends T, F extends E>.
 
@@ -57,7 +57,7 @@ Notable changes from SALSA 1.x and before:
     *   Get interfaces working correctly.  They need special messages that know they were sent using an interface, so they invoke the correct message handler.
 
 
-<b>TODO</b>:
+TODO:
     *   Add garbage collection support for the wwc package.  We should be able to use the same automatic collection strategy as local_fcs for actors that don't migrate or have their references sent to other theaters.
 
     *   Report an error if trying to invoke a static method on a non-static object
