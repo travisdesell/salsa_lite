@@ -14,7 +14,6 @@ public class CName extends CErrorInformation {
         this.name = name;
     }
 
-
     public String toNonGenericName() {
         if (name.contains("<")) return name.substring(0, name.lastIndexOf('<'));
         else return name;

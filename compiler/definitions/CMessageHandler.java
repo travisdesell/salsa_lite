@@ -32,38 +32,14 @@ public class CMessageHandler extends CErrorInformation {
 		return argument_types;
 	}
 
-    /*
-	public String getCaseInvocation() {
-		String code = name + "(";
-		for (int i = 0; i < parameters.size(); i++) {
-			CFormalParameter parameter = parameters.get(i);
-            try {
-                TypeSymbol ts = SymbolTable.getTypeSymbol(parameter.type.name);
-                System.err.println("getting type symbol: " + parameter.type.name + " got " + ts.getSignature());
-
-    			code += "(" + SymbolTable.getTypeSymbol(parameter.type.name).toNonPrimitiveString() + ")arguments[" + i +"]";
-            } catch (SalsaNotFoundException snfe) {
-                CompilerErrors.printErrorMessage("[CMessageHandler.getCaseInvocation] Could not find parameter type. " + snfe.toString(), parameter);
-                throw new RuntimeException(snfe);
-            }
-
-			if (i != parameters.size() - 1) code += ", ";
-		}
-		code += ");";
-
-		if (pass_type.name.equals("ack")) {
-			code += " return null;";
-		} else {
-            code = "return " + code;
-		}
-		return code;
-	}
-*/
-
 	public String toJavaCode() {
 		SymbolTable.currentMessageName = name;
 
 		String definition_code = CIndent.getIndent() + "public ";
+
+        if (pass_type.name.equals("void")) {
+            CompilerErrors.printErrorMessage("[CMessageHandler.toJavaCode] 'void' is not a valid pass type for a message. Use 'ack' instead.", pass_type);
+        }
 		if (pass_type.name.equals("ack")) definition_code += "void";
 		else definition_code += pass_type.name;
 		definition_code += " " + name + "(";

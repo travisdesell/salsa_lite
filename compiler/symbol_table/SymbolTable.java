@@ -80,42 +80,71 @@ public class SymbolTable {
 
 
     public static TypeSymbol getTypeSymbol(String name) throws SalsaNotFoundException {
-        TypeSymbol knownType;
-        
-        String longSignature = namespace.get(name);
-        if (longSignature != null) {
-            knownType = knownTypes.get(longSignature);
+        return getTypeSymbol(name, null);
+    }
+
+    public static TypeSymbol getTypeSymbol(String name, String superType) throws SalsaNotFoundException {
+        TypeSymbol knownType = null;
+        String baseType = name;
+        String arrayDims = "";
+        String genericDeclarations = "";
+
+        if (name.charAt(0) == '[' || name.charAt(name.length() - 1) == ']') {
+            arrayDims = ArrayType.getArrayDims(baseType);
+            baseType = ArrayType.getBaseType(baseType);
         } else {
-            knownType = knownTypes.get(name);
+            baseType = name;
+        }
+
+        if (baseType.charAt(0) == '?') {
+            if (baseType.startsWith("? extends")) {
+//                System.err.println("returning wildcard type: " + baseType);
+                knownType = new ObjectType("?", SymbolTable.getTypeSymbol(baseType.substring(10, baseType.length())));
+            } else if (baseType.startsWith("? super")) {
+//                System.err.println("superType: " + superType);
+                knownType = new ObjectType("?", SymbolTable.getTypeSymbol(superType));
+            } else {
+//                System.err.println("superType: " + superType);
+                knownType = new ObjectType("?", SymbolTable.getTypeSymbol(superType));
+            }
+        } else if (baseType.contains("<")) {
+            genericDeclarations = baseType.substring(baseType.indexOf("<"), baseType.length());
+            baseType = baseType.substring(0, baseType.indexOf("<"));
         }
 
         if (knownType == null) {
-            knownType = load(name);
+            String longSignature = namespace.get(baseType);
+            if (longSignature != null) {
+                knownType = knownTypes.get(longSignature);
+            } else {
+                knownType = knownTypes.get(baseType);
+            }
+        }
+
+        if (knownType == null) {
+            knownType = importEither(baseType);
+        }
+
+        if (!genericDeclarations.equals("")) {
+            knownType = knownType.copy().replaceGenerics(genericDeclarations);
+        }
+
+        if (!arrayDims.equals("")) {
+            knownType = new ArrayType(knownType, arrayDims);
         }
 
         return knownType;
     }
 
-    public static TypeSymbol load(String name) throws SalsaNotFoundException {
+    public static TypeSymbol importEither(String name) throws SalsaNotFoundException {
         TypeSymbol st;
-
-        if (name.contains("<")) {
-            TypeSymbol baseType = getTypeSymbol(name.substring(0, name.indexOf("<")));
-
-            if (baseType == null) {
-                throw new SalsaNotFoundException("", name, "generic base type");
-            }
-            if (!name.contains(".")) name = baseType.module + name;
-        }
-        
-        if (name.charAt(0) == '[' || name.charAt(name.length() - 1) == ']') {
-            st = loadArray(name);
-        } else if (ActorType.findSalsaFile(name) != null) {
-            if (!name.contains(".")) st = loadActor( getCurrentModule() + name);
-            else st = loadActor(name);
+       
+        if (ActorType.findSalsaFile(name) != null) {
+            if (!name.contains(".")) st = importActor( getCurrentModule() + name);
+            else st = importActor(name);
         } else {
-            if (!name.contains(".")) st = loadObject( getCurrentModule() + name);
-            else st = loadObject(name);
+            if (!name.contains(".")) st = importObject( getCurrentModule() + name);
+            else st = importObject(name);
         }
 
         return st;
@@ -133,15 +162,7 @@ public class SymbolTable {
         ((ObjectType)knownTypes.get(name)).isMutable = false;
     }
 
-    public static ArrayType loadArray(String name) throws SalsaNotFoundException {
-        if (knownTypes.get(name) != null) return (ArrayType)knownTypes.get(name);
-
-        ArrayType arrayType = new ArrayType(name);
-        knownTypes.put(arrayType.getLongSignature(), arrayType);
-        return arrayType;
-    }
-
-    public static ObjectType loadObject(String name) throws SalsaNotFoundException {
+    public static ObjectType importObject(String name) throws SalsaNotFoundException {
         if (knownTypes.get(name) != null) return (ObjectType)knownTypes.get(name);
 
         ObjectType objectType = new ObjectType(name);
@@ -152,11 +173,11 @@ public class SymbolTable {
         return objectType;
     }
 
-    public static ActorType loadActor(String name) throws SalsaNotFoundException {
+    public static ActorType importActor(String name) throws SalsaNotFoundException {
         TypeSymbol ts = knownTypes.get(name);
         if (ts != null) {
             if (!(ts instanceof ActorType)) {
-                System.err.println("COMPILER ERROR [SymbolTable.loadActor]: tried to load an actor from name '" + name + "' but got a non-actor type '" + ts.getLongSignature() + "'.");
+                System.err.println("COMPILER ERROR [SymbolTable.importActor]: tried to load an actor from name '" + name + "' but got a non-actor type '" + ts.getLongSignature() + "'.");
                 throw new RuntimeException();
             }
 
@@ -188,9 +209,13 @@ public class SymbolTable {
 		scope = scope.parent;
 	}
 
+    public static void addGenericVariableType(String name, TypeSymbol typeSymbol) {
+        addVariableType(name, new VariableTypeSymbol(name, typeSymbol, false, false, true));
+    }
+
     public static void addVariableType(String name, String type, boolean isToken, boolean isStatic) throws SalsaNotFoundException {
         TypeSymbol typeSymbol = getTypeSymbol(type);
-        VariableTypeSymbol variableTypeSymbol = new VariableTypeSymbol(name, typeSymbol, isToken, isStatic);
+        VariableTypeSymbol variableTypeSymbol = new VariableTypeSymbol(name, typeSymbol, isToken, isStatic, false);
 
         addVariableType(name, variableTypeSymbol);
     }
@@ -199,7 +224,7 @@ public class SymbolTable {
 		VariableTypeSymbol symbolInScope = scope.getVariableType(name, false);
 
         if (symbolInScope != null) {
-            System.err.println("COMPILER WARNING [SymbolTable.addVariableType]: Conflict of declarations. '" + name + "' already declared in current scope as '" + symbolInScope.getType().getLongSignature() + "', trying to redefine as '" + type.getType().getLongSignature() + "'");
+//            System.err.println("COMPILER WARNING [SymbolTable.addVariableType]: Conflict of declarations. '" + name + "' already declared in current scope as '" + symbolInScope.getType().getLongSignature() + "', trying to redefine as '" + type.getType().getLongSignature() + "'");
 
             if (!symbolInScope.getType().equals( type.getType() )) throw new RuntimeException();
         } else {
@@ -211,9 +236,9 @@ public class SymbolTable {
 		VariableTypeSymbol variableTypeSymbol = scope.getVariableType(name);
 
         if (variableTypeSymbol == null) {
-            System.err.println("COMPILER WARNING [SymbolTable.getVariableType]: Lookup of type for variable '" + name + "' failed. Attempting to load it as a Class for static invocations.");
+//            System.err.println("COMPILER WARNING [SymbolTable.getVariableType]: Lookup of type for variable '" + name + "' failed. Attempting to load it as a Class for static invocations.");
             //It might be a type for a static method
-            TypeSymbol typeSymbol = load(name);
+            TypeSymbol typeSymbol = getTypeSymbol(name);
 
             addVariableType(name, name, false, true);
             variableTypeSymbol = scope.getVariableType(name);
@@ -235,6 +260,10 @@ public class SymbolTable {
 
     public static boolean isToken(String name) throws SalsaNotFoundException {
         return getVariableTypeSymbol(name).isToken();
+    }
+
+    public static boolean isGeneric(String name) throws SalsaNotFoundException {
+        return getVariableTypeSymbol(name).isGeneric();
     }
 
     static TypeSymbol continuationType;
@@ -316,13 +345,13 @@ public class SymbolTable {
 		else return type1;
 	}
 
-    public static void loadDefaultPrimitive(String name) throws SalsaNotFoundException {
+    public static void importDefaultPrimitive(String name) throws SalsaNotFoundException {
         loadPrimitive(name);
         addVariableType(name, name, false, true);
     }
 
-    public static void loadDefaultObject(String name, boolean isImmutable) throws SalsaNotFoundException {
-        loadObject(name);
+    public static void importDefaultObject(String name, boolean isImmutable) throws SalsaNotFoundException {
+        importObject(name);
         if (isImmutable) setImmutableObject(name);
         addVariableType(getTypeSymbol(name).getName(), name, false, true);
     }
@@ -335,6 +364,8 @@ public class SymbolTable {
         scope = null;
 
         openScope();
+
+        currentModule = "";
 
 		runtimeModule = "salsa_lite.";
 		if (System.getProperty("local") != null) runtimeModule += "local";
@@ -349,17 +380,17 @@ public class SymbolTable {
             /**
              * Load the primitive types
              */
-            loadDefaultPrimitive("void");
-            loadDefaultPrimitive("null");
-            loadDefaultPrimitive("ack");
-            loadDefaultPrimitive("boolean");
-            loadDefaultPrimitive("byte");
-            loadDefaultPrimitive("char");
-            loadDefaultPrimitive("short");
-            loadDefaultPrimitive("int");
-            loadDefaultPrimitive("long");
-            loadDefaultPrimitive("float");
-            loadDefaultPrimitive("double");
+            importDefaultPrimitive("void");
+            importDefaultPrimitive("null");
+            importDefaultPrimitive("ack");
+            importDefaultPrimitive("boolean");
+            importDefaultPrimitive("byte");
+            importDefaultPrimitive("char");
+            importDefaultPrimitive("short");
+            importDefaultPrimitive("int");
+            importDefaultPrimitive("long");
+            importDefaultPrimitive("float");
+            importDefaultPrimitive("double");
 
             /**
              * Make sure we know the symbols from everything in java.lang as these are imported by default
@@ -368,110 +399,109 @@ public class SymbolTable {
             /**
              * Import interfaces from java.lang
              */
-            loadDefaultObject("java.lang.Appendable", false);
-            loadDefaultObject("java.lang.CharSequence", false);
-            loadDefaultObject("java.lang.Cloneable", false);
-            loadDefaultObject("java.lang.Comparable", false);
-            loadDefaultObject("java.lang.Iterable", false);
-            loadDefaultObject("java.lang.Readable", false);
-            loadDefaultObject("java.lang.Runnable", false);
-            //loadDefaultObject("java.lang.Thread.UncaughtExceptionHandler", false);
+            importDefaultObject("java.lang.Appendable", false);
+            importDefaultObject("java.lang.CharSequence", false);
+            importDefaultObject("java.lang.Cloneable", false);
+            importDefaultObject("java.lang.Comparable", false);
+            importDefaultObject("java.lang.Iterable", false);
+            importDefaultObject("java.lang.Readable", false);
+            importDefaultObject("java.lang.Runnable", false);
+            //importDefaultObject("java.lang.Thread.UncaughtExceptionHandler", false);
 
             /**
              * Import classes from java.lang
              */
-            loadDefaultObject("java.lang.Boolean", true);
-            loadDefaultObject("java.lang.Byte", true);
-            loadDefaultObject("java.lang.Character", true);
-            loadDefaultObject("java.lang.Class", false);
-    //        loadDefaultObject("java.lang.ClassLoader", false);
-            loadDefaultObject("java.lang.Compiler", false);
-            loadDefaultObject("java.lang.Double", true);
-            loadDefaultObject("java.lang.Enum", false);
-            loadDefaultObject("java.lang.Float", true);
-            loadDefaultObject("java.lang.InheritableThreadLocal", false);
-            loadDefaultObject("java.lang.Integer", true);
-            loadDefaultObject("java.lang.Long", true);
-            loadDefaultObject("java.lang.Math", false);
-            loadDefaultObject("java.lang.Number", true);
-            loadDefaultObject("java.lang.Object", false);
-            loadDefaultObject("java.lang.Package", false);
-    //        loadDefaultObject("java.lang.Process", false);
-    //        loadDefaultObject("java.lang.ProcessBuilder", false);
-            loadDefaultObject("java.lang.Runtime", false);
-            loadDefaultObject("java.lang.RuntimePermission", false);
-            loadDefaultObject("java.lang.SecurityManager", false);
-            loadDefaultObject("java.lang.Short", true);
-            loadDefaultObject("java.lang.StackTraceElement", false);
-            loadDefaultObject("java.lang.StrictMath", false);
-            loadDefaultObject("java.lang.String", true);
-            loadDefaultObject("java.lang.StringBuffer", false);
-            loadDefaultObject("java.lang.System", false);
-    //        loadDefaultObject("java.lang.Thread", false);
-    //        loadDefaultObject("java.lang.ThreadGroup", false);
-    //        loadDefaultObject("java.lang.ThreadLocal", false);
-            loadDefaultObject("java.lang.Throwable", false);
-            loadDefaultObject("java.lang.Void", false);
+            importDefaultObject("java.lang.Boolean", true);
+            importDefaultObject("java.lang.Byte", true);
+            importDefaultObject("java.lang.Character", true);
+            importDefaultObject("java.lang.Class", false);
+    //        importDefaultObject("java.lang.ClassLoader", false);
+            importDefaultObject("java.lang.Compiler", false);
+            importDefaultObject("java.lang.Double", true);
+            importDefaultObject("java.lang.Enum", false);
+            importDefaultObject("java.lang.Float", true);
+            importDefaultObject("java.lang.InheritableThreadLocal", false);
+            importDefaultObject("java.lang.Integer", true);
+            importDefaultObject("java.lang.Long", true);
+            importDefaultObject("java.lang.Math", false);
+            importDefaultObject("java.lang.Number", true);
+            importDefaultObject("java.lang.Package", false);
+    //        importDefaultObject("java.lang.Process", false);
+    //        importDefaultObject("java.lang.ProcessBuilder", false);
+            importDefaultObject("java.lang.Runtime", false);
+            importDefaultObject("java.lang.RuntimePermission", false);
+            importDefaultObject("java.lang.SecurityManager", false);
+            importDefaultObject("java.lang.Short", true);
+            importDefaultObject("java.lang.StackTraceElement", false);
+            importDefaultObject("java.lang.StrictMath", false);
+            importDefaultObject("java.lang.String", true);
+            importDefaultObject("java.lang.StringBuffer", false);
+            importDefaultObject("java.lang.System", false);
+    //        importDefaultObject("java.lang.Thread", false);
+    //        importDefaultObject("java.lang.ThreadGroup", false);
+    //        importDefaultObject("java.lang.ThreadLocal", false);
+            importDefaultObject("java.lang.Throwable", false);
+            importDefaultObject("java.lang.Void", false);
 
             /**
              * Import enums from java.lang
              */
-    //        loadDefaultObject("java.lang.Thread.State", false);
+    //        importDefaultObject("java.lang.Thread.State", false);
 
             /**
              * Import exceptions from java.lang
              */
-            loadDefaultObject("java.lang.ArithmeticException", false);
-            loadDefaultObject("java.lang.ArrayIndexOutOfBoundsException", false);
-            loadDefaultObject("java.lang.ArrayStoreException", false);
-            loadDefaultObject("java.lang.ClassCastException", false);
-            loadDefaultObject("java.lang.ClassNotFoundException", false);
-            loadDefaultObject("java.lang.CloneNotSupportedException", false);
-            loadDefaultObject("java.lang.EnumConstantNotPresentException", false);
-            loadDefaultObject("java.lang.Exception", false);
-            loadDefaultObject("java.lang.IllegalAccessException", false);
-            loadDefaultObject("java.lang.IllegalArgumentException", false);
-            loadDefaultObject("java.lang.IllegalMonitorStateException", false);
-            loadDefaultObject("java.lang.IllegalStateException", false);
-            loadDefaultObject("java.lang.IndexOutOfBoundsException", false);
-            loadDefaultObject("java.lang.InstantiationException", false);
-            loadDefaultObject("java.lang.InterruptedException", false);
-            loadDefaultObject("java.lang.NegativeArraySizeException", false);
-            loadDefaultObject("java.lang.NoSuchFieldException", false);
-            loadDefaultObject("java.lang.NoSuchMethodException", false);
-            loadDefaultObject("java.lang.NullPointerException", false);
-            loadDefaultObject("java.lang.NumberFormatException", false);
-            loadDefaultObject("java.lang.RuntimeException", false);
-            loadDefaultObject("java.lang.SecurityException", false);
-            loadDefaultObject("java.lang.StringIndexOutOfBoundsException", false);
-            loadDefaultObject("java.lang.TypeNotPresentException", false);
-            loadDefaultObject("java.lang.UnsupportedOperationException", false);
+            importDefaultObject("java.lang.ArithmeticException", false);
+            importDefaultObject("java.lang.ArrayIndexOutOfBoundsException", false);
+            importDefaultObject("java.lang.ArrayStoreException", false);
+            importDefaultObject("java.lang.ClassCastException", false);
+            importDefaultObject("java.lang.ClassNotFoundException", false);
+            importDefaultObject("java.lang.CloneNotSupportedException", false);
+            importDefaultObject("java.lang.EnumConstantNotPresentException", false);
+            importDefaultObject("java.lang.Exception", false);
+            importDefaultObject("java.lang.IllegalAccessException", false);
+            importDefaultObject("java.lang.IllegalArgumentException", false);
+            importDefaultObject("java.lang.IllegalMonitorStateException", false);
+            importDefaultObject("java.lang.IllegalStateException", false);
+            importDefaultObject("java.lang.IndexOutOfBoundsException", false);
+            importDefaultObject("java.lang.InstantiationException", false);
+            importDefaultObject("java.lang.InterruptedException", false);
+            importDefaultObject("java.lang.NegativeArraySizeException", false);
+            importDefaultObject("java.lang.NoSuchFieldException", false);
+            importDefaultObject("java.lang.NoSuchMethodException", false);
+            importDefaultObject("java.lang.NullPointerException", false);
+            importDefaultObject("java.lang.NumberFormatException", false);
+            importDefaultObject("java.lang.RuntimeException", false);
+            importDefaultObject("java.lang.SecurityException", false);
+            importDefaultObject("java.lang.StringIndexOutOfBoundsException", false);
+            importDefaultObject("java.lang.TypeNotPresentException", false);
+            importDefaultObject("java.lang.UnsupportedOperationException", false);
 
             /**
              * Import errors from java.lang
              */
-            loadDefaultObject("java.lang.AbstractMethodError", false);
-            loadDefaultObject("java.lang.AssertionError", false);
-            loadDefaultObject("java.lang.ClassCircularityError", false);
-            loadDefaultObject("java.lang.ClassFormatError", false);
-            loadDefaultObject("java.lang.Error", false);
-            loadDefaultObject("java.lang.ExceptionInInitializerError", false);
-            loadDefaultObject("java.lang.IllegalAccessError", false);
-            loadDefaultObject("java.lang.IncompatibleClassChangeError", false);
-            loadDefaultObject("java.lang.InstantiationError", false);
-            loadDefaultObject("java.lang.InternalError", false);
-            loadDefaultObject("java.lang.LinkageError", false);
-            loadDefaultObject("java.lang.NoClassDefFoundError", false);
-            loadDefaultObject("java.lang.NoSuchFieldError", false);
-            loadDefaultObject("java.lang.NoSuchMethodError", false);
-            loadDefaultObject("java.lang.OutOfMemoryError", false);
-            loadDefaultObject("java.lang.StackOverflowError", false);
-            loadDefaultObject("java.lang.ThreadDeath", false);
-            loadDefaultObject("java.lang.UnknownError", false);
-            loadDefaultObject("java.lang.UnsatisfiedLinkError", false);
-            loadDefaultObject("java.lang.UnsupportedClassVersionError", false);
-            loadDefaultObject("java.lang.VerifyError", false);
-            loadDefaultObject("java.lang.VirtualMachineError", false);
+            importDefaultObject("java.lang.AbstractMethodError", false);
+            importDefaultObject("java.lang.AssertionError", false);
+            importDefaultObject("java.lang.ClassCircularityError", false);
+            importDefaultObject("java.lang.ClassFormatError", false);
+            importDefaultObject("java.lang.Error", false);
+            importDefaultObject("java.lang.ExceptionInInitializerError", false);
+            importDefaultObject("java.lang.IllegalAccessError", false);
+            importDefaultObject("java.lang.IncompatibleClassChangeError", false);
+            importDefaultObject("java.lang.InstantiationError", false);
+            importDefaultObject("java.lang.InternalError", false);
+            importDefaultObject("java.lang.LinkageError", false);
+            importDefaultObject("java.lang.NoClassDefFoundError", false);
+            importDefaultObject("java.lang.NoSuchFieldError", false);
+            importDefaultObject("java.lang.NoSuchMethodError", false);
+            importDefaultObject("java.lang.OutOfMemoryError", false);
+            importDefaultObject("java.lang.StackOverflowError", false);
+            importDefaultObject("java.lang.ThreadDeath", false);
+            importDefaultObject("java.lang.UnknownError", false);
+            importDefaultObject("java.lang.UnsatisfiedLinkError", false);
+            importDefaultObject("java.lang.UnsupportedClassVersionError", false);
+            importDefaultObject("java.lang.VerifyError", false);
+            importDefaultObject("java.lang.VirtualMachineError", false);
         
             /**
              *  Make sure the actor is in the correct file
@@ -495,9 +525,9 @@ public class SymbolTable {
              */
             ObjectType messageType = new ObjectType(runtimeModule + ".Message", SymbolTable.getTypeSymbol("Object"));
             FieldSymbol simpleMessageField = new FieldSymbol(messageType, "SIMPLE_MESSAGE", SymbolTable.getTypeSymbol("int"));
-            messageType.fields.put(simpleMessageField.getLongSignature(), simpleMessageField);
+            messageType.fields.add(simpleMessageField);
             FieldSymbol argumentsField = new FieldSymbol(messageType, "arguments", SymbolTable.getTypeSymbol("Object[]"));
-            messageType.fields.put(argumentsField.getLongSignature(), argumentsField);
+            messageType.fields.add(argumentsField);
 
             knownTypes.put( messageType.getLongSignature(), messageType );
             namespace.put( messageType.getName(), messageType.getLongSignature() );
@@ -507,7 +537,7 @@ public class SymbolTable {
 
             ObjectType stageServiceType = new ObjectType(runtimeModule + ".StageService");
             MethodSymbol sendMessageMethod = new MethodSymbol(0, stageServiceType, "sendMessage", SymbolTable.getTypeSymbol("void"), new TypeSymbol[]{ SymbolTable.getTypeSymbol("Message") }, true);
-            stageServiceType.method_handlers.put(sendMessageMethod.getLongSignature(), sendMessageMethod);
+            stageServiceType.method_handlers.add(sendMessageMethod);
 
             knownTypes.put( stageServiceType.getLongSignature(), stageServiceType );
             namespace.put( stageServiceType.getName(), stageServiceType.getLongSignature() );
@@ -516,7 +546,7 @@ public class SymbolTable {
 
             ObjectType stageType = new ObjectType(runtimeModule + ".Stage");
             FieldSymbol messageField = new FieldSymbol(stageType, "message", SymbolTable.getTypeSymbol("Message"));
-            stageType.fields.put(messageField.getLongSignature(), messageField);
+            stageType.fields.add(messageField);
 
             knownTypes.put( stageType.getLongSignature(), stageType );
             namespace.put( stageType.getName(), stageType.getLongSignature() );
@@ -526,32 +556,37 @@ public class SymbolTable {
 
             ActorType localActorType = new ActorType(runtimeModule + ".LocalActor", SymbolTable.getTypeSymbol("Object"));
             FieldSymbol stageField = new FieldSymbol(localActorType, "stage", SymbolTable.getTypeSymbol("Stage"));
-            localActorType.fields.put(stageField.getLongSignature(), stageField);
+            localActorType.fields.add(stageField);
 
             knownTypes.put(localActorType.getLongSignature(), localActorType);
             namespace.put(localActorType.getName(), localActorType.getLongSignature());
             addVariableType("stage", "Stage", false, true);     //should add an actor's parent fields to namespace as well instead of this hack
 
             FieldSymbol targetField = new FieldSymbol(messageType, "target", SymbolTable.getTypeSymbol("LocalActor"));
-            messageType.fields.put(targetField.getLongSignature(), targetField);
+            messageType.fields.add(targetField);
 
             if (!cu.getName().equals("ContinuationDirector")) {
                 //On the chance we're compiling ContinuationDirector
                 FieldSymbol continuationDirectorField = new FieldSymbol(messageType, "continuationDirector", SymbolTable.getTypeSymbol(runtimeModule + ".language.ContinuationDirector"));
-                messageType.fields.put(continuationDirectorField.getLongSignature(), continuationDirectorField);
+                messageType.fields.add(continuationDirectorField);
             }
 
-            ActorType currentActorType = new ActorType( getCurrentModule() + cu.getName() );
+            openScope();
+            String actorName = cu.getName().name;
+
+            if (actorName.contains("<")) actorName = actorName.substring(0, actorName.indexOf("<"));
+            ActorType currentActorType = new ActorType( getCurrentModule() + actorName );
             knownTypes.put(currentActorType.getLongSignature(), currentActorType);
-            namespace.put(currentActorType.getName(), currentActorType.getLongSignature());
+            namespace.put(actorName, currentActorType.getLongSignature());
             cu.getImportDeclarationCode();                      //this will load the current actor's dependencies
             currentActorType.load(cu, getCurrentModule());
 
-            if (cu.getName().equals("ContinuatinoDirector")) {
+            if (cu.getName().equals("ContinuationDirector")) {
                 //On the chance we're compiling ContinuationDirector
                 FieldSymbol continuationDirectorField = new FieldSymbol(messageType, "continuationDirector", SymbolTable.getTypeSymbol(runtimeModule + ".language.ContinuationDirector"));
-                messageType.fields.put(continuationDirectorField.getLongSignature(), continuationDirectorField);
+                messageType.fields.add(continuationDirectorField);
             }
+            closeScope();
 
         } catch (SalsaNotFoundException snfe) {
             System.err.println("COMPILER ERROR [SymbolTable.resetSymbolTable]: " + snfe.toString());
@@ -559,11 +594,11 @@ public class SymbolTable {
             System.exit(0);
         }
 
-//        loadActor(runtimeModule + ".ContinuationDirector");
-//        loadActor(runtimeModule + ".TokenDirector");
-//        loadActor(runtimeModule + ".ImplicitTokenDirector");
-//        loadActor(runtimeModule + ".JoinDirector");
-//        loadActor(runtimeModule + ".MessageDirector");
+//        importActor(runtimeModule + ".ContinuationDirector");
+//        importActor(runtimeModule + ".TokenDirector");
+//        importActor(runtimeModule + ".ImplicitTokenDirector");
+//        importActor(runtimeModule + ".JoinDirector");
+//        importActor(runtimeModule + ".MessageDirector");
     }
 
     /**
@@ -584,13 +619,13 @@ public class SymbolTable {
 
             ObjectType ot = (ObjectType)ts;
 
-            LinkedList<FieldSymbol> fields = new LinkedList<FieldSymbol>(ot.fields.values());
+            ArrayList<FieldSymbol> fields = new ArrayList<FieldSymbol>(ot.fields);
             for (FieldSymbol fs : fields) System.out.println("\t" + fs.getLongSignature());
 
-            LinkedList<ConstructorSymbol> constructors = new LinkedList<ConstructorSymbol>(ot.constructors.values());
+            ArrayList<ConstructorSymbol> constructors = ot.constructors;
             for (ConstructorSymbol cs : constructors) System.out.println("\t" + cs.getLongSignature());
 
-            LinkedList<MethodSymbol> method_handlers = new LinkedList<MethodSymbol>(ot.method_handlers.values());
+            ArrayList<MethodSymbol> method_handlers = ot.method_handlers;
             for (MethodSymbol ms : method_handlers) System.out.println("\t" + ms.getLongSignature());
         }
 
@@ -603,13 +638,13 @@ public class SymbolTable {
 
             ActorType at = (ActorType)ts;
 
-            LinkedList<FieldSymbol> fields = new LinkedList<FieldSymbol>(at.fields.values());
+            ArrayList<FieldSymbol> fields = at.fields;
             for (FieldSymbol fs : fields) System.out.println("\t" + fs.getLongSignature());
 
-            LinkedList<ConstructorSymbol> constructors = new LinkedList<ConstructorSymbol>(at.constructors.values());
+            ArrayList<ConstructorSymbol> constructors = at.constructors;
             for (ConstructorSymbol cs : constructors) System.out.println("\t" + cs.getLongSignature());
 
-            LinkedList<MessageSymbol> message_handlers = new LinkedList<MessageSymbol>(at.message_handlers.values());
+            ArrayList<MessageSymbol> message_handlers = at.message_handlers;
             for (MessageSymbol ms : message_handlers) System.out.println("\t" + ms.getLongSignature());
         }
 
@@ -623,7 +658,7 @@ public class SymbolTable {
 
             ArrayType at = (ArrayType)ts;
 
-            LinkedList<FieldSymbol> fields = new LinkedList<FieldSymbol>(at.fields.values());
+            ArrayList<FieldSymbol> fields = at.fields;
             for (FieldSymbol fs : fields) System.out.println("\t" + fs.getLongSignature());
         }
 

@@ -70,6 +70,7 @@ public class CValue extends CErrorInformation {
 		TypeSymbol value_type = getValueType();
 
         for (CModification modification : modifications) {
+
             if (modification instanceof CArrayAccess) {
                 CArrayAccess array_access = (CArrayAccess)modification;
 
@@ -113,6 +114,7 @@ public class CValue extends CErrorInformation {
                 try {
                     if (value_type instanceof ObjectType) {
                         value_type = ((ObjectType)value_type).getMethod(method_invocation.method_name, method_invocation.arguments).getReturnType();
+
                     } else if (value_type instanceof ActorType) {
                         if (modifications.getFirst().equals(modification) && (isSelf() || isParent())) {
                             value_type = ((ActorType)value_type).getMessage(method_invocation.method_name, method_invocation.arguments).getPassType();
@@ -164,7 +166,6 @@ public class CValue extends CErrorInformation {
                     throw new RuntimeException();
                 }
             }
-
         }
 
         return value_type;
@@ -364,15 +365,17 @@ public class CValue extends CErrorInformation {
 
 
                     if (!(currentType instanceof ActorType)) {
-                        CompilerErrors.printErrorMessage("Cannot send a message to an object.", ms);
+                        CompilerErrors.printErrorMessage("Cannot send a message to an object '" + currentType.getLongSignature() + "'.", ms);
                         throw new RuntimeException();
                     }
 
                     ActorType at = (ActorType)currentType;
-                    MessageSymbol messageSymbol = at.getMessage(ms.message_name, ms.arguments);
-                    if (messageSymbol == null) {
+                    MessageSymbol messageSymbol = null;
+                    try {
+                        messageSymbol = at.getMessage(ms.message_name, ms.arguments);
+                    } catch (SalsaNotFoundException snfe) {
                         CompilerErrors.printErrorMessage("Could not find matching message, message name: '" + ms.message_name + "'", ms);
-                        throw new RuntimeException();
+                        throw new RuntimeException(snfe);
                     }
 
                     code += messageSymbol.getId();

@@ -2,7 +2,7 @@ package salsa_lite.compiler.symbol_table;
 
 import java.util.Vector;
 import java.util.LinkedList;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 
 import salsa_lite.compiler.definitions.CExpression;
 
@@ -80,14 +80,18 @@ public class Invokable {
         return signature + ")";
     }
 
-    public static Invokable matchInvokable(Invokable targetArguments, LinkedHashMap<String, ? extends Invokable> invokableMap) throws SalsaNotFoundException {
+    public String toString() {
+        return getLongSignature();
+    }
+
+    public static Invokable matchInvokable(Invokable targetArguments, ArrayList<? extends Invokable> invokables) throws SalsaNotFoundException {
         Invokable match = null;
         int matches = 0;
-        int[] match_distance = new int[invokableMap.values().size()];
+        int[] match_distance = new int[invokables.size()];
 
         int min_distance = Integer.MAX_VALUE;
         int i = 0;
-        for (Invokable current : new LinkedList<Invokable>(invokableMap.values())) {
+        for (Invokable current : invokables) {
             match_distance[i] = targetArguments.matches(current);
 
             if (match_distance[i] >= 0 && match_distance[i] < min_distance) {
@@ -118,7 +122,7 @@ public class Invokable {
             if (min_matches > 1) {
                 i = 0;
                 System.err.println("COMPILER WARNING [Invokable.matchParameterTypes]: matching targetArguments on '" + targetArguments.getLongSignature() + "' had multiple matches:");
-                for (Invokable current : new LinkedList<Invokable>(invokableMap.values())) {
+                for (Invokable current : invokables) {
                     if (match_distance[i] == min_match) {
                         System.err.println("\t [distance: " + match_distance[i] + "]" + current.getLongSignature());
                     }
@@ -131,13 +135,19 @@ public class Invokable {
 
         if (match == null) {
             System.err.println("COMPILER ERROR [Invokable.matchParameterTypes]: could not find matching targetArguments for '" + targetArguments.getLongSignature() + "'.");
+
+            for (TypeSymbol ts : targetArguments.parameterTypes) {
+                System.err.println("\tts: " + ts + " -- supertype: " + ts.superType);
+            }
+
             System.err.println("potential matches:");
             i = 0;
-            for (Invokable current : new LinkedList<Invokable>(invokableMap.values())) {
+            for (Invokable current : invokables) {
                 if (!current.getName().equals(targetArguments.getName())) continue;
                 if (targetArguments.parameterTypes.length != current.parameterTypes.length) continue;
                 System.err.println("\t" + current.getLongSignature());
             }
+            throw new SalsaNotFoundException(targetArguments.getEnclosingType().getModule(), targetArguments.getEnclosingType().getName(), "Could not find matching targetArguments for '" + targetArguments.getLongSignature() + "'");
         }
 
         return match;

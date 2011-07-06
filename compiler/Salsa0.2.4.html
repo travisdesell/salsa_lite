@@ -143,6 +143,7 @@
 | &lt;REFERENCE: "reference"&gt;
 | &lt;SELF: "self"&gt;
 | &lt;SHORT: "short"&gt;
+| &lt;SUPER: "super"&gt;
 | &lt;SWITCH: "switch"&gt;
 | &lt;_TOKEN: "token"&gt;
 | &lt;TRUE: "true"&gt;
@@ -307,7 +308,7 @@
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod7">GenericType</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>( "?" "extends" &lt;IDENTIFIER&gt; | &lt;IDENTIFIER&gt; "extends" &lt;IDENTIFIER&gt; | &lt;IDENTIFIER&gt; )</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( "?" ( "extends" | "super" ) <A HREF="#prod6">Name</A> | "?" | <A HREF="#prod6">Name</A> ( "extends" | "super" ) <A HREF="#prod6">Name</A> | <A HREF="#prod6">Name</A> )</TD>
 </TR>
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod8">GenericDeclaration</A></TD>
@@ -327,7 +328,7 @@
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod5">InterfaceDeclaration</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>"interface" <A HREF="#prod6">Name</A> ( "extends" <A HREF="#prod6">Name</A> )? "{" ( <A HREF="#prod9">InterfaceMessageHandlerDeclaration</A> | <A HREF="#prod10">LocalVariableDeclaration</A> ";" )* "}"</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>"interface" <A HREF="#prod6">Name</A> ( "extends" <A HREF="#prod6">Name</A> ( "," <A HREF="#prod6">Name</A> )* )? "{" ( <A HREF="#prod9">InterfaceMessageHandlerDeclaration</A> | <A HREF="#prod10">LocalVariableDeclaration</A> ";" )* "}"</TD>
 </TR>
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod4">BehaviorDeclaration</A></TD>

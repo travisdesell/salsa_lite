@@ -68,14 +68,10 @@ behavior MessageDirector implements Director {
         if (position >= 0) message.arguments[position] = value;
 		required_tokens--;
 
-//        System.err.println("Resolved message director, position: " + position + ", value: " + value + ", required_tokens: " + required_tokens);
-
 		if (required_tokens <= 0) {
 			if (continuation_token == null) {
-//                System.err.println("sending message to message target: " + message.target + ", message: " + message);
 				StageService.sendMessage(message);
 			} else {
-//                System.err.println("sending message to continuation token: " + continuation_token + ", message: " + message);
 				continuation_token<-setMessage(message);
 			}
 		}

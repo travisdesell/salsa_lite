@@ -61,7 +61,13 @@ public class CAllocation extends CVariableInit {
         try {
             if (arguments != null) {
                 if (SymbolTable.isActor(type.name)) {
-                    code += type.name +".construct(" + SymbolTable.getTypeSymbol(type.name).getConstructor(arguments).getId() + ", ";
+
+                    if (type.name.contains("<")) {
+                        code += type.name.substring(0, type.name.indexOf("<")) +".construct(" + SymbolTable.getTypeSymbol(type.name).getConstructor(arguments).getId() + ", ";
+
+                    } else {
+                        code += type.name +".construct(" + SymbolTable.getTypeSymbol(type.name).getConstructor(arguments).getId() + ", ";
+                    }
 
                     String argument_code = "";
                     for (int i = 0; i < arguments.size(); i++) {

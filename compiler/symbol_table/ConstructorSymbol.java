@@ -11,6 +11,31 @@ import salsa_lite.compiler.definitions.CompilerErrors;
 
 public class ConstructorSymbol extends Invokable {
 
+    public ConstructorSymbol replaceGenerics(ArrayList<String> declaredGenericTypes, ArrayList<TypeSymbol> instantiatedGenericTypes) throws SalsaNotFoundException {
+//        System.err.println("replacing generics on '" + getLongSignature() + "' -- declared: " + declaredGenericTypes.toString() + ", instantiated: " + instantiatedGenericTypes.toString());
+
+        TypeSymbol[] replacedParameters = new TypeSymbol[parameterTypes.length];
+        for (int i = 0; i < replacedParameters.length; i++) {
+            TypeSymbol replacement = Symbol.getGenericReplacement( parameterTypes[i].getName(), declaredGenericTypes, instantiatedGenericTypes );
+            if (replacement != null) {
+                replacedParameters[i] = replacement;
+            } else {
+                replacedParameters[i] = parameterTypes[i];
+            }
+        }
+
+        ConstructorSymbol replacement = new ConstructorSymbol(id, this.enclosingType, replacedParameters);
+//        System.err.println("replaced generic constructor: " + replacement.getLongSignature());
+
+        return replacement;
+    }
+
+    public ConstructorSymbol(int id, TypeSymbol enclosingType, TypeSymbol[] parameterTypes) {
+        super(id, enclosingType);
+        this.parameterTypes = parameterTypes;
+    }
+
+/*
     public ConstructorSymbol(int id, TypeSymbol enclosingType, Constructor constructor, ArrayList<String> declaredGenericTypes, ArrayList<TypeSymbol> instantiatedGenericTypes) throws SalsaNotFoundException {
         super(id, enclosingType);
 
@@ -37,17 +62,19 @@ public class ConstructorSymbol extends Invokable {
             }
         }
     }
-
+*/
 
     public ConstructorSymbol(int id, TypeSymbol enclosingType, Constructor constructor) throws SalsaNotFoundException {
         super(id, enclosingType);
 
-        Class[] parameterClasses = constructor.getParameterTypes();
+        Type[] parameterClasses = constructor.getParameterTypes();
         parameterTypes = new TypeSymbol[parameterClasses.length];
 
         int i = 0;
-        for (Class c : parameterClasses) {
-            parameterTypes[i++] = SymbolTable.getTypeSymbol( c.getName() );
+        for (Type t : parameterClasses) {
+            String parameterName = TypeSymbol.genericStringToName(t.toString());
+//            System.err.println("constructor parameterName: " + parameterName);
+            parameterTypes[i++] = SymbolTable.getTypeSymbol( parameterName );
         }
     }
 

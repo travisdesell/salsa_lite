@@ -129,7 +129,7 @@ TOKEN : {
     | < EXTENDS: "extends" >
     | < FALSE: "false" >
     | < FLOAT: "float" >
-   | < FOR: "for" >
+    | < FOR: "for" >
     | < IF: "if" >
     | < IMPLEMENTS: "implements" >
     | < IMPORT: "import" >
@@ -149,11 +149,12 @@ TOKEN : {
     | < REFERENCE: "reference" >
     | < SELF: "self" >
     | < SHORT: "short" >
+    | < SUPER: "super" >
     | < SWITCH: "switch" >
     | < _TOKEN: "token" >
     | < TRUE: "true" >
     | < WAITFOR: "waitfor" >
-   | < WHILE: "while" >
+    | < WHILE: "while" >
 }
 
 /* LITERALS */
@@ -334,20 +335,30 @@ String ModuleDeclaration() : {
 
 CGenericType GenericType() : {
     CGenericType generic_type;
-    Token t1 = null, t2 = null;
+    CName name = null, bound = null;
+    Token t = null, modifier = null;
 } {
-        t1 = "?" "extends" t2 = <IDENTIFIER>
-    |   LOOKAHEAD(<IDENTIFIER> "extends") t1 = <IDENTIFIER> "extends" t2 = <IDENTIFIER>
-    |   t1 = <IDENTIFIER>
+    (
+            LOOKAHEAD("?" ("extends" | "super")) t = "?" (modifier = "extends" | modifier = "super") bound = Name()
+        |   t = "?"
+        |   LOOKAHEAD(Name() ("extends" | "super")) name = Name() (modifier = "extends" | modifier = "super") bound = Name()
+        |   name = Name()
+    )
 
     {
-        if (t2 == null) {
-            generic_type = new CGenericType(t1.image);
-            generic_type.initLineAndColumn(t1, t1);
-        } else {
-            generic_type = new CGenericType(t1.image, t2.image);
-            generic_type.initLineAndColumn(t1, t2);
+        if (t != null) {
+            name = new CName(t.image);
+            name.initLineAndColumn(t, t);
         }
+
+        if (bound == null) {
+            generic_type = new CGenericType(name);
+            generic_type.initLineAndColumn(name, name);
+        } else {
+            generic_type = new CGenericType(name, modifier.image, bound);
+            generic_type.initLineAndColumn(name, bound);
+        }
+
         return generic_type;
     }
 }
@@ -418,7 +429,10 @@ CInterfaceDeclaration InterfaceDeclaration() : {
    CName name;
 } {
     "interface" name = Name()                                                       { interface_declaration.interface_name = name; }
-    ["extends" name = Name()                                                        { interface_declaration.extends_name = name; } ]
+    [
+        "extends" name = Name()                                                     { interface_declaration.extends_names.add(name); }
+        ( "," name = Name() )*                                                      { interface_declaration.extends_names.add(name); }    
+    ]
     "{"
         (
               LOOKAHEAD(Type() <IDENTIFIER> FormalParameters()) message_handler = InterfaceMessageHandlerDeclaration()    { interface_declaration.message_handlers.add(message_handler); }

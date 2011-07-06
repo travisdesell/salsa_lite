@@ -9,6 +9,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 
@@ -21,182 +22,165 @@ import salsa_lite.compiler.definitions.CExpression;
 public class ObjectType extends TypeSymbol {
 
     public boolean isMutable = true;
-    public boolean isEnum = true;
+    public boolean isEnum = false;
 
-    public ArrayList<TypeSymbol> instantiatedGenericTypes = new ArrayList<TypeSymbol>();
-    public ArrayList<String> declaredGenericTypes = new ArrayList<String>();
+	protected ArrayList<MethodSymbol> method_handlers = new ArrayList<MethodSymbol>();
 
-	public ObjectType(String name) throws SalsaNotFoundException {
-        if (!name.contains(".")) {
-            System.err.println("ERROR: creating new ObjectType without package: " + name);
-            throw new RuntimeException();
-        }
+	public MethodSymbol getMethodHandler(int i) {
+        return method_handlers.get(i);
+    }
 
-        this.module = name.substring(0, name.lastIndexOf('.') + 1);
-        this.name = name.substring(name.lastIndexOf('.') + 1, name.length());
-
-        if (name.contains("<")) {
-//            System.out.println("New Generic ObjectType -- [" + this.module + "] " + this.name);
-            String genericTypesString = name.substring(name.indexOf("<") + 1, name.length() - 1);
-
-//            System.out.println("generic types: " + genericTypesString);
-            StringTokenizer st = new StringTokenizer(genericTypesString, ", ");
-            while (st.hasMoreTokens()) {
-                String generic_type = st.nextToken();
-
-                TypeSymbol ts = SymbolTable.getTypeSymbol(generic_type);
-                instantiatedGenericTypes.add(ts);
-            }
-
-            try {
-                Class importClass = Class.forName(this.module + this.name.substring(0, this.name.indexOf("<")));
-//                System.out.println("reflection class generic types:");
-                for (TypeVariable tv : importClass.getTypeParameters()) {
-                    declaredGenericTypes.add(tv.getName());
-                }
-            } catch(Exception e) {
-                System.err.println("Error using reflection on generic class: '" + this.module + this.name + "'");
-                throw new RuntimeException(e);
-            }
-
-            if (instantiatedGenericTypes.size() != declaredGenericTypes.size()) {
-                throw new SalsaNotFoundException(module, name, "Wrong number of generic parameters. generic object");
-            }
-
-//            System.out.println("generic class instantiated types:");
-//            for (int i = 0; i < instantiatedGenericTypes.size(); i++) {
-//                System.out.println("\t" + declaredGenericTypes.get(i) + " -- " + instantiatedGenericTypes.get(i).getSignature());
-//            }
-        }
-	}
+    public MethodSymbol getMethod(String name, Vector<CExpression> parameters) throws SalsaNotFoundException {
+        return (MethodSymbol)Invokable.matchInvokable(new Invokable(name, this, parameters), method_handlers);
+    }
 
     public ObjectType(String name, TypeSymbol superType) throws SalsaNotFoundException {
         this(name);
         this.superType = superType;
     }
 
-	protected LinkedHashMap<String,MethodSymbol> method_handlers     = new LinkedHashMap<String,MethodSymbol>();
+	public ObjectType(String name) throws SalsaNotFoundException {
+        if (!name.contains(".")) {
+            if (SymbolTable.getCurrentModule().equals("") || name.startsWith("?")) {
+                this.module = "";
+                this.name = name;
+            } else {
+                System.err.println("ERROR: creating new ObjectType without package: " + name);
+                throw new RuntimeException();
+            }
+        } else {
+            this.module = name.substring(0, name.lastIndexOf('.') + 1);
+            this.name = name.substring(name.lastIndexOf('.') + 1, name.length());
+        }
+    }
 
-	public MethodSymbol         getMethodHandler(int i)     { return new ArrayList<MethodSymbol>(method_handlers.values()).get(i); }
+    private ObjectType(boolean isMutable, boolean isEnum, String module, String name, TypeSymbol superType, ArrayList<TypeSymbol> implementsTypes, ArrayList<String> declaredGenericTypes, ArrayList<FieldSymbol> fields, ArrayList<ConstructorSymbol> constructors, ArrayList<MethodSymbol> method_handlers) {
+        this.isMutable = isMutable;
+        this.isEnum = isEnum;
+        this.module = module;
+        this.name = name;
+        this.superType = superType;
+        this.implementsTypes = implementsTypes;
+        this.declaredGenericTypes = declaredGenericTypes;
+        this.fields = fields;
+        this.constructors = constructors;
+        this.method_handlers = method_handlers;
+    }
 
-    public MethodSymbol         getMethod(String s)         { return method_handlers.get(s); }
+    public TypeSymbol copy() {
+        ObjectType copy = new ObjectType(isMutable, isEnum, module, name, superType, new ArrayList<TypeSymbol>(implementsTypes), new ArrayList<String>(declaredGenericTypes), new ArrayList<FieldSymbol>(fields), new ArrayList<ConstructorSymbol>(constructors), new ArrayList<MethodSymbol>(method_handlers));
 
-    public MethodSymbol getMethod(String name, Vector<CExpression> parameters) throws SalsaNotFoundException {
-        return (MethodSymbol)Invokable.matchInvokable(new Invokable(name, this, parameters), method_handlers);
+        for (ConstructorSymbol cs : copy.constructors)   cs.enclosingType = copy;
+        for (MethodSymbol ms : copy.method_handlers)    ms.enclosingType = copy;
+        for (FieldSymbol fs : copy.fields)              fs.enclosingType = copy;
+
+        return copy;
+    } 
+
+    public TypeSymbol replaceGenerics(String genericTypesString) throws SalsaNotFoundException {
+        ObjectType copy = (ObjectType)this.copy();
+
+        if (!copy.isGeneric()) throw new SalsaNotFoundException(module, name, "Tried to replace generics on non generic-class: " + copy.getLongSignature());
+
+        ArrayList<TypeSymbol> instantiatedGenericTypes = parseGenerics(genericTypesString, declaredGenericTypes, true);
+
+        if (instantiatedGenericTypes.size() != declaredGenericTypes.size()) {
+            throw new SalsaNotFoundException(module, name, "Wrong number of generic parameters. instantiated " + instantiatedGenericTypes.toString() + ", declared " + declaredGenericTypes.toString() + ". generic object");
+        }
+
+        for (int i = 0; i < instantiatedGenericTypes.size(); i++) {
+//            if (SymbolTable.isGeneric(instantiatedGenericTypes.get(i).getLongSignature())) {
+//                copy.declaredGenericTypes.set(i, instantiatedGenericTypes.get(i).getLongSignature());
+//            }
+            copy.declaredGenericTypes.set(i, instantiatedGenericTypes.get(i).getLongSignature());
+        }
+
+        if (copy.superType != null && copy.superType.isGeneric()) {
+            copy.superType = copy.superType.replaceGenerics(getGenericsString(copy.superType, declaredGenericTypes, instantiatedGenericTypes));
+        } else {
+            copy.superType = this.superType;
+        }
+
+        for (int i = 0; i < implementsTypes.size(); i++) {
+            if (copy.implementsTypes.get(i).isGeneric()) {
+                String genericsString = getGenericsString(copy.implementsTypes.get(i), declaredGenericTypes, instantiatedGenericTypes);
+
+                copy.implementsTypes.set(i, copy.implementsTypes.get(i).replaceGenerics(genericsString));
+            }
+        }
+
+        for (int i = 0; i < copy.constructors.size(); i++)       copy.constructors.set(i, copy.constructors.get(i).replaceGenerics(declaredGenericTypes, instantiatedGenericTypes));
+        for (int i = 0; i < copy.fields.size(); i++)             copy.fields.set(i, copy.fields.get(i).replaceGenerics(declaredGenericTypes, instantiatedGenericTypes));
+        for (int i = 0; i < copy.method_handlers.size(); i++)    copy.method_handlers.set(i, copy.method_handlers.get(i).replaceGenerics(declaredGenericTypes, instantiatedGenericTypes));
+
+//        System.err.println("replaced generics for " + copy.getLongSignature());
+//        System.err.println("\tfields: " + copy.fields.toString());
+//        System.err.println("\tconstructors: " + copy.constructors.toString());
+//        System.err.println("\tmethod_handlers: " + copy.method_handlers.toString());
+
+        return copy;
     }
 
 	public void load() throws SalsaNotFoundException {
 		int i;
         Class importClass = null;
 
-//        System.err.println("Trying to load object: [" + module + "] " + name);
-
-        String name = this.name;
-        if (name.contains("<")) name = name.substring(0, name.indexOf("<"));
-
         try {
-            importClass = Class.forName(module + name);
-        } catch (ClassNotFoundException e) {
-//			System.out.println("Compiler Error: Unknown class: [" + module + "] " + name + " -- imported Java Objects must be compiled.");
-            throw new SalsaNotFoundException(module, name, "object");
-		}
+            importClass = Class.forName(this.module + this.name);
+
+            for (TypeVariable tv : importClass.getTypeParameters()) {
+                declaredGenericTypes.add(tv.getName());
+                addGenericType(tv.getName(), "Object");
+
+                TypeSymbol ts = SymbolTable.getTypeSymbol(tv.getName());
+           }
+        } catch(Exception e) {
+//            System.err.println("Error using reflection to get class: '" + this.module + this.name + "'");
+            throw new SalsaNotFoundException("Could not load java object '" + this.getLongSignature() + "'", e);
+        }
 
         if (importClass.isEnum()) {
             isMutable = false;
             isEnum = true;
         }
 
-        /*
-        TypeVariable[] typeParameters = importClass.getTypeParameters();
-        for (TypeVariable tv : typeParameters) {
-            System.out.println(getLongSignature() + " -- OBJECT GENERIC TYPE PARAMETER: " + tv);
-        }
-        o*/
-
         if (importClass.getSuperclass() != null) {
-            if (this.name.contains("<")) {
-                String superClassString = importClass.getGenericSuperclass().toString();
-                if (superClassString.substring(0, 6).equals("class ")) {
-                    superClassString = superClassString.substring(6, superClassString.length());
-                }
-                if (superClassString.substring(0, 10).equals("interface ")) {
-                    superClassString = superClassString.substring(10, superClassString.length());
-                }
+            String genericSuperclassName = importClass.getGenericSuperclass().toString();
+            genericSuperclassName = genericStringToName(genericSuperclassName);
 
-                String replacedGenericString = TypeSymbol.replaceGenerics(superClassString, declaredGenericTypes, instantiatedGenericTypes);
-                superType = SymbolTable.getTypeSymbol( replacedGenericString );
-            } else {
-                superType = SymbolTable.getTypeSymbol( importClass.getSuperclass().getName() );
-            }
+            superType = SymbolTable.getTypeSymbol( genericSuperclassName );
         }
 
+        Type[] genericInterfaces = importClass.getGenericInterfaces();
         Class[] interfaces = importClass.getInterfaces();
         if (interfaces.length > 0) {
-            if (this.name.contains("<")) {
-                Type[] genericInterfaces = importClass.getGenericInterfaces();
+            for (i = 0; i < interfaces.length; i++) {
+                String genericInterfaceName = genericInterfaces[i].toString();
+                genericInterfaceName = genericStringToName(genericInterfaceName);
 
-                for (i = 0; i < genericInterfaces.length; i++) {
-                    String interfaceString = genericInterfaces[i].toString();
-                    if (interfaceString.substring(0, 6).equals("class ")) {
-                        interfaceString = interfaceString.substring(6, interfaceString.length());
-                    }
-                    if (interfaceString.substring(0, 10).equals("interface ")) {
-                        interfaceString = interfaceString.substring(10, interfaceString.length());
-                    }
-
-                    implementsTypes.add( SymbolTable.getTypeSymbol( TypeSymbol.replaceGenerics(interfaceString, declaredGenericTypes, instantiatedGenericTypes) ) );
-                }
-            } else {
-                for (i = 0; i < interfaces.length; i++) {
-                    implementsTypes.add( SymbolTable.getTypeSymbol( interfaces[i].getName() ) );
-                }
+                TypeSymbol implementsType = SymbolTable.getTypeSymbol(genericInterfaceName);
+                implementsTypes.add( implementsType );
             }
         }
 
 		Constructor[] cv = importClass.getConstructors();
 		for (i = 0; i < cv.length; i++) {
-            ConstructorSymbol cs = null;
-
-            Type[] tv = cv[i].getGenericParameterTypes();
-            if (this.name.contains("<") && tv.length > 0) {
-//                System.out.println("constructor type parameters for: " + cv[i].getName());
-//                for (Type tv1 : tv) System.out.println("\t" + tv1.toString());
-                cs = new ConstructorSymbol(i, this, cv[i], declaredGenericTypes, instantiatedGenericTypes);
-            } else {
-                cs = new ConstructorSymbol(i, this, cv[i]);
-            }
-
-            constructors.put( cs.getLongSignature(), cs );
+            ConstructorSymbol cs = new ConstructorSymbol(i, this, cv[i]);
+            constructors.add( cs );
         }
 
 		Method[] mv = importClass.getMethods();
 		for (i = 0; i < mv.length; i++) {
-            MethodSymbol ms = null;
-
-            Type[] tv = mv[i].getGenericParameterTypes();
-            if (this.name.contains("<") && tv.length > 0) {
-//                System.out.println("method type parameters for: " + getLongSignature() + " " + mv[i].getName());
-//                for (Type tv1 : tv) System.out.println("\t" + tv1.toString());
-
-                ms = new MethodSymbol(i, this, mv[i], declaredGenericTypes, instantiatedGenericTypes);
-            } else {
-                ms = new MethodSymbol(i, this, mv[i]);
-            }
-
-            method_handlers.put( ms.getLongSignature(), ms );
+//            System.err.println("Object; " + getName() + ", generic method: " + mv[i].toGenericString());
+            MethodSymbol ms = new MethodSymbol(i, this, mv[i]);
+            method_handlers.add( ms );
         }
 
         Field[] fv = importClass.getFields();
         for (i = 0; i < fv.length; i++) {
-            FieldSymbol fs = null;
-            Type t = fv[i].getGenericType();
-            if (this.name.contains("<") && t != null) {
-                fs = new FieldSymbol(this, fv[i], declaredGenericTypes, instantiatedGenericTypes);
-            } else {
-                fs = new FieldSymbol(this, fv[i]);
-            }
-
-            fields.put( fs.getLongSignature(), fs );
+//            System.err.println("Object: " + getName() + ", generic field: " + fv[i].toGenericString());
+            FieldSymbol fs = new FieldSymbol(this, fv[i]);
+            fields.add( fs );
         }
 	}
 }

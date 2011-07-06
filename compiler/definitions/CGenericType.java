@@ -2,20 +2,21 @@ package salsa_lite.compiler.definitions;
 
 
 public class CGenericType extends CErrorInformation {
-    public String name;
-    public String extends_type;
+    public CName name, bound;
+    public String modifier;
 
-    public CGenericType(String name) {
+    public CGenericType(CName name) {
         this.name = name;
     }
 
-    public CGenericType(String name, String extends_type) {
+    public CGenericType(CName name, String modifier, CName bound) {
         this.name = name;
-        this.extends_type = extends_type;
+        this.modifier = modifier;
+        this.bound = bound;
     }
 
     public String toString() {
-        if (extends_type != null) return name + " extends " + extends_type;
-        else return name;
+        if (modifier != null) return name.name + " " + modifier + " " + bound.name;
+        else return name.name;
     }
 }

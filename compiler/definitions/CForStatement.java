@@ -2,6 +2,8 @@ package salsa_lite.compiler.definitions;
 
 import java.util.Vector;
 
+import salsa_lite.compiler.symbol_table.SymbolTable;
+
 public class CForStatement extends CStatement {
 
 	public CLocalVariableDeclaration init;
@@ -18,6 +20,7 @@ public class CForStatement extends CStatement {
                 CompilerErrors.printErrorMessage("Cannot have tokens within a for loop's initializer.", init);
         }
 
+        SymbolTable.openScope();
 		String code = "for (";
 
 		if (init != null) {
@@ -44,6 +47,7 @@ public class CForStatement extends CStatement {
 			if (i != increment_expressions.size() - 1) code += ", ";
 		}
 		code += ") " + statement.toJavaCode();
+        SymbolTable.closeScope();
 
 		return code;
 	}

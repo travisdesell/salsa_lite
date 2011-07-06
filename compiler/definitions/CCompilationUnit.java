@@ -34,8 +34,16 @@ public class CCompilationUnit {
 
 	public CName getExtendsName() {
 		if (behavior_declaration != null) return behavior_declaration.getExtendsName();
-		else return interface_declaration.getExtendsName();
+		else return null;
 	}
+
+    public Vector<CName> getImplementsNames() {
+        if (behavior_declaration == null) {
+            return interface_declaration.extends_names;
+        } else {
+            return behavior_declaration.implements_names;
+        }
+    }
 
 	public Vector<CEnumeration> getEnumerations() {
 		if (behavior_declaration != null) return behavior_declaration.enumerations;
@@ -74,14 +82,14 @@ public class CCompilationUnit {
 
             try {
                 if (import_declaration.is_object) {
-                    SymbolTable.loadObject(import_string);
+                    SymbolTable.importObject(import_string);
                     SymbolTable.addVariableType(import_declaration.import_string, import_declaration.import_string, false, true);
 
                 } else if (import_declaration.is_enum) {
-                    SymbolTable.loadObject(import_string);
+                    SymbolTable.importObject(import_string);
                     SymbolTable.addVariableType(import_declaration.import_string, import_declaration.import_string, false, true);
 
-                } else SymbolTable.loadActor(import_string);
+                } else SymbolTable.importActor(import_string);
             } catch (SalsaNotFoundException snfe) {
                 CompilerErrors.printErrorMessage("[CCompilationUnit.getImportDeclarationCode] Could not find object, enum or actor to import. " + snfe.toString(), import_declaration);
                 throw new RuntimeException(snfe);
@@ -128,7 +136,10 @@ public class CCompilationUnit {
 	public String getCaseInvocation(TypeSymbol[] parameterTypes) throws SalsaNotFoundException {
 		String code = "(";
 		for (int i = 0; i < parameterTypes.length; i++) {
-			code += " (" + parameterTypes[i].toNonPrimitiveString() +")arguments[" + i +"]";
+            String typeString = parameterTypes[i].toNonPrimitiveString();
+            typeString = TypeSymbol.removeBounds(typeString);
+
+			code += " (" + typeString +")arguments[" + i +"]";
 			if (i < parameterTypes.length - 1) code += ",";
 			else code += " ";
 		}
@@ -284,9 +295,9 @@ public class CCompilationUnit {
 		String actor_name = getName().name;
         try {
             if (module_string == null) {
-                SymbolTable.loadActor(actor_name);
+                SymbolTable.importActor(actor_name);
             } else {
-                SymbolTable.loadActor(module_string + "." + actor_name);
+                SymbolTable.importActor(module_string + "." + actor_name);
             }
         } catch (SalsaNotFoundException snfe) {
             CompilerErrors.printErrorMessage("VERY BAD ERROR. Could not get type for actor being compiled. This should never happen.", behavior_declaration);
@@ -414,11 +425,11 @@ public class CCompilationUnit {
 
         String actor_name = getName().name;
         try {
-            if (module_string == null) {
-                SymbolTable.loadActor(actor_name);
-            } else {
-                SymbolTable.loadActor(module_string + "." + actor_name);
-            }
+//            if (module_string == null) {
+//                SymbolTable.importActor(actor_name);
+//            } else {
+//                SymbolTable.importActor(module_string + "." + actor_name);
+//            }
             SymbolTable.addVariableType("self", actor_name, false, false);
         } catch (SalsaNotFoundException snfe) {
             CompilerErrors.printErrorMessage("VERY BAD ERROR. Could not get type for actor being compiled. This should never happen.", behavior_declaration);
@@ -448,7 +459,7 @@ public class CCompilationUnit {
 
 		String implementsNames = null;
         if (behavior_declaration != null) implementsNames = behavior_declaration.getImplementsNames();
-        else if (interface_declaration.extends_name != null) implementsNames = interface_declaration.extends_name.name;
+        else if (interface_declaration.extends_names.size() > 0) implementsNames = interface_declaration.getImplementsNames();
 
 		if (implementsNames != null) code += " implements " + implementsNames;
 
@@ -490,7 +501,7 @@ public class CCompilationUnit {
 		int number_original_messages = getMessageHandlers().size();
 		for (i = 0; i < containedMessageHandlers.size(); i++) {
             MessageSymbol ms = new MessageSymbol(i + number_original_messages, self_type, containedMessageHandlers.get(i));
-            at.message_handlers.put( ms.getLongSignature(), ms );
+            at.message_handlers.add( ms );
 		}
 
 		code += getFieldCode() + "\n";
