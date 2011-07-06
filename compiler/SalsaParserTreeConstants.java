@@ -24,40 +24,41 @@ public interface SalsaParserTreeConstants
   public int JJTPASSSTATEMENT = 18;
   public int JJTSTATEMENTEXPRESSION = 19;
   public int JJTFORINIT = 20;
-  public int JJTFORSTATEMENT = 21;
-  public int JJTWHILESTATEMENT = 22;
-  public int JJTIFSTATEMENT = 23;
-  public int JJTSWITCHSTATEMENT = 24;
-  public int JJTCASESTATEMENT = 25;
-  public int JJTDEFAULTSTATEMENT = 26;
-  public int JJTLABELSTATEMENT = 27;
-  public int JJTBREAKSTATEMENT = 28;
-  public int JJTLOCALVARIABLEDECLARATION = 29;
-  public int JJTVARIABLEINITIALIZATION = 30;
-  public int JJTARRAYINITIALIZATION = 31;
-  public int JJTEXPRESSION = 32;
-  public int JJTVALUE = 33;
-  public int JJTVARIABLENAME = 34;
-  public int JJTFIELDACCESS = 35;
-  public int JJTMETHODINVOCATION = 36;
-  public int JJTMESSAGESEND = 37;
-  public int JJTMESSAGEPROPERTY = 38;
-  public int JJTARGUMENTS = 39;
-  public int JJTALLOCATION = 40;
-  public int JJTBINDDECLARATION = 41;
-  public int JJTARRAYDIMSANDINITS = 42;
-  public int JJTLITERAL = 43;
-  public int JJTSELFLITERAL = 44;
-  public int JJTPARENTLITERAL = 45;
-  public int JJTINTEGERLITERAL = 46;
-  public int JJTFLOATINGPOINTLITERAL = 47;
-  public int JJTCHARACTERLITERAL = 48;
-  public int JJTSTRINGLITERAL = 49;
-  public int JJTBOOLEANLITERAL = 50;
-  public int JJTNULLLITERAL = 51;
-  public int JJTACKNOWLEDGEMENTLITERAL = 52;
-  public int JJTASSIGNMENTOPERATOR = 53;
-  public int JJTOPERATOR = 54;
+  public int JJTEXTENDEDFOR = 21;
+  public int JJTFORSTATEMENT = 22;
+  public int JJTWHILESTATEMENT = 23;
+  public int JJTIFSTATEMENT = 24;
+  public int JJTSWITCHSTATEMENT = 25;
+  public int JJTCASESTATEMENT = 26;
+  public int JJTDEFAULTSTATEMENT = 27;
+  public int JJTLABELSTATEMENT = 28;
+  public int JJTBREAKSTATEMENT = 29;
+  public int JJTLOCALVARIABLEDECLARATION = 30;
+  public int JJTVARIABLEINITIALIZATION = 31;
+  public int JJTARRAYINITIALIZATION = 32;
+  public int JJTEXPRESSION = 33;
+  public int JJTVALUE = 34;
+  public int JJTVARIABLENAME = 35;
+  public int JJTFIELDACCESS = 36;
+  public int JJTMETHODINVOCATION = 37;
+  public int JJTMESSAGESEND = 38;
+  public int JJTMESSAGEPROPERTY = 39;
+  public int JJTARGUMENTS = 40;
+  public int JJTALLOCATION = 41;
+  public int JJTBINDDECLARATION = 42;
+  public int JJTARRAYDIMSANDINITS = 43;
+  public int JJTLITERAL = 44;
+  public int JJTSELFLITERAL = 45;
+  public int JJTPARENTLITERAL = 46;
+  public int JJTINTEGERLITERAL = 47;
+  public int JJTFLOATINGPOINTLITERAL = 48;
+  public int JJTCHARACTERLITERAL = 49;
+  public int JJTSTRINGLITERAL = 50;
+  public int JJTBOOLEANLITERAL = 51;
+  public int JJTNULLLITERAL = 52;
+  public int JJTACKNOWLEDGEMENTLITERAL = 53;
+  public int JJTASSIGNMENTOPERATOR = 54;
+  public int JJTOPERATOR = 55;
 
 
   public String[] jjtNodeName = {
@@ -82,6 +83,7 @@ public interface SalsaParserTreeConstants
     "PassStatement",
     "StatementExpression",
     "ForInit",
+    "ExtendedFor",
     "ForStatement",
     "WhileStatement",
     "IfStatement",
@@ -118,4 +120,4 @@ public interface SalsaParserTreeConstants
     "Operator",
   };
 }
-/* JavaCC - OriginalChecksum=dbb1bf1d1514490706f9202a14aaade9 (do not edit this line) */
+/* JavaCC - OriginalChecksum=cbea3602ead7ec91864ef7340ef61a88 (do not edit this line) */

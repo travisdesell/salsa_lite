@@ -3,8 +3,12 @@ package salsa_lite.compiler.definitions;
 import java.util.Vector;
 
 import salsa_lite.compiler.symbol_table.SymbolTable;
+import salsa_lite.compiler.symbol_table.SalsaNotFoundException;
+
 
 public class CForStatement extends CStatement {
+
+    public CExtendedFor extended_for;
 
 	public CLocalVariableDeclaration init;
 	public Vector<CExpression> expression_inits = new Vector<CExpression>();
@@ -16,37 +20,61 @@ public class CForStatement extends CStatement {
 	public CStatement statement;
 
 	public String toJavaCode() {
-        if (init.isToken()) {
-                CompilerErrors.printErrorMessage("Cannot have tokens within a for loop's initializer.", init);
-        }
+        String code = "for (";
 
-        SymbolTable.openScope();
-		String code = "for (";
+        if (extended_for != null) {
+            code += extended_for.type.name + " ";
+            code += extended_for.name + " : ";
 
-		if (init != null) {
-			code += init.toJavaCode();
-		} else {
-			code += ";";
-		}
-
-        if (conditional.isToken()) {
-                CompilerErrors.printErrorMessage("Cannot have tokens within a for loop's conditional.", conditional);
-        }
-
-		code += " " + conditional.toJavaCode() + "; ";
-
-        for (CExpression expression : increment_expressions) {
-            if (expression.isToken()) {
-                CompilerErrors.printErrorMessage("Cannot have tokens within a for loop's increment expressions.", expression);
+            try {
+                SymbolTable.addVariableType(extended_for.name, extended_for.type.name, false, false);
+            } catch (SalsaNotFoundException snfe) {
+                CompilerErrors.printErrorMessage("[CForStatement.toJavaCode] Could not fine parameter type. " + snfe.toString() , extended_for);
             }
-        }
 
-		for (int i = 0; i < increment_expressions.size(); i++) {
-			code += increment_expressions.get(i).toJavaCode();
-			
-			if (i != increment_expressions.size() - 1) code += ", ";
-		}
-		code += ") " + statement.toJavaCode();
+            if (extended_for.expression.isToken()) {
+                CompilerErrors.printErrorMessage("Cannot use a token within an extended for statement.", extended_for);
+            } else {
+                code += extended_for.expression.toJavaCode();
+            }
+
+            code += ")";
+            SymbolTable.openScope();
+
+        } else {
+            if (init.isToken()) {
+                    CompilerErrors.printErrorMessage("Cannot have tokens within a for loop's initializer.", init);
+            }
+
+            SymbolTable.openScope();
+
+            if (init != null) {
+                code += init.toJavaCode();
+            } else {
+                code += ";";
+            }
+
+            if (conditional.isToken()) {
+                    CompilerErrors.printErrorMessage("Cannot have tokens within a for loop's conditional.", conditional);
+            }
+
+            code += " " + conditional.toJavaCode() + "; ";
+
+            for (CExpression expression : increment_expressions) {
+                if (expression.isToken()) {
+                    CompilerErrors.printErrorMessage("Cannot have tokens within a for loop's increment expressions.", expression);
+                }
+            }
+
+            for (int i = 0; i < increment_expressions.size(); i++) {
+                code += increment_expressions.get(i).toJavaCode();
+                
+                if (i != increment_expressions.size() - 1) code += ", ";
+            }
+            code += ") ";
+        }
+        
+        code += statement.toJavaCode();
         SymbolTable.closeScope();
 
 		return code;

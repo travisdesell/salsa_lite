@@ -718,11 +718,35 @@ CLocalVariableDeclaration ForInit() : {
     { return local_variable_declaration; }
 }
 
+CExtendedFor ExtendedFor() : {
+    CExtendedFor extended_for = new CExtendedFor();
+    CType type;
+    Token name;
+    CExpression expression;
+} {
+    type = Type()
+    name = <IDENTIFIER>
+    ":"
+    expression = Expression()
+
+    {
+        extended_for.type = type;
+        extended_for.name = name.image;
+        extended_for.expression = expression;
+        extended_for.initLineAndColumn(type, expression);
+        return extended_for;
+    }
+}
+
+
 CForStatement ForStatement() : {
     CForStatement for_statement = new CForStatement();
     CExpression init, increment;
 } {
     "for" "("
+    (
+        LOOKAHEAD(ExtendedFor()) for_statement.extended_for = ExtendedFor()
+        | (
             [
                   LOOKAHEAD(ForInit()) for_statement.init = ForInit()
                 | (
@@ -739,6 +763,8 @@ CForStatement ForStatement() : {
             (
                 LOOKAHEAD(",") "," increment = Expression()            { for_statement.increment_expressions.add(increment); }
             )*
+        )
+    )
     ")"
     for_statement.statement = Statement()
 

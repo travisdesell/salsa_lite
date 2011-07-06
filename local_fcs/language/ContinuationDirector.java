@@ -19,10 +19,11 @@ import salsa_lite.local_fcs.language.exceptions.ConstructorNotFoundException;
 
 /****** END SALSA LANGUAGE IMPORTS ******/
 
+import java.util.LinkedList;
 
 public class ContinuationDirector extends salsa_lite.local_fcs.LocalActor {
 	boolean unresolved = true;
-	Message message = null;
+	LinkedList<Message> messages = new LinkedList<Message>(  );
 
 
 	public Object invokeMessage(int messageId, Object[] arguments) throws ContinuationPassException, TokenPassException, MessageHandlerNotFoundException {
@@ -46,8 +47,11 @@ public class ContinuationDirector extends salsa_lite.local_fcs.LocalActor {
 
 
 	public void resolve() {
-		if (message != null) {
-			StageService.sendMessage(message);
+		if (messages.size() > 0) {
+			for (Message message : messages){
+				StageService.sendMessage(message);
+			}
+
 		}
 		else {
 			unresolved = false;
@@ -57,7 +61,7 @@ public class ContinuationDirector extends salsa_lite.local_fcs.LocalActor {
 
 	public void setMessage(Message message) {
 		if (unresolved) {
-			this.message = message;
+			messages.add(message);
 		}
 		else {
 			StageService.sendMessage(message);

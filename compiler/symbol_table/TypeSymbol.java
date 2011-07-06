@@ -228,7 +228,27 @@ public abstract class TypeSymbol implements Comparable<TypeSymbol> {
 //            } 
 
             if (declaredGenericTypes.get(i).contains(" super ") || declaredGenericTypes.get(i).contains(" extends ")) {
-                System.err.println("TODO: Need to check to see if '" + generic_type + "' can replace '" + declaredGenericTypes.get(i) + "'");
+                String gt = declaredGenericTypes.get(i);
+
+                if (gt.equals(ts.getLongSignature())) {
+                } else if (gt.contains(" super ")) {
+        //            System.err.println("super in declared generic: " + gt);
+                    String superGeneric = gt.substring( gt.indexOf(" super ") + " super ".length(), gt.length());
+
+                    System.err.println("TODO: Need to check to see if '" + generic_type + "' can replace '" + gt + "'");
+
+                } else if (gt.contains(" extends ")) {
+        //            System.err.println("extends in declared generic: " + gt);
+                    String extendsGeneric = gt.substring( gt.indexOf(" extends ") + " extends ".length(), gt.length());
+
+//                    System.err.println("TODO: Need to check to see if '" + generic_type + "' can replace '" + gt + "'");
+
+                    TypeSymbol extendsType = SymbolTable.getTypeSymbol(extendsGeneric);
+                    TypeSymbol replacementType = ts;
+                    if (ts.canMatch(extendsType) < 0) {
+                        throw new SalsaNotFoundException("no module", "no name", "Could not replace generic type '" + gt + "' with '" + ts + "'");
+                    }
+                }
             }
 
             i++;

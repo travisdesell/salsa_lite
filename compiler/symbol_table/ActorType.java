@@ -138,7 +138,11 @@ public class ActorType extends TypeSymbol {
             }
             String filename = findSalsaFile(longSignature);
 
-//            System.err.println("Getting new compilation unit to read new Actor: "+ filename);
+//            System.err.println("Getting new compilation unit to read new Actor '" + longSignature + "', filename: "+ filename);
+
+            if (filename == null) {
+                throw new SalsaNotFoundException(module, name, "actor");
+            } 
 
             FileInputStream fis = new FileInputStream( filename );
             SalsaParser.ReInit(fis);
@@ -148,7 +152,6 @@ public class ActorType extends TypeSymbol {
 //            System.err.println("setting current module to: " + module);
             SymbolTable.setCurrentModule(module);
             cu.getImportDeclarationCode();  //to import the appropriate objects/actors
-
 
         } catch (FileNotFoundException e) {
             System.out.println(e.getMessage());
@@ -184,7 +187,7 @@ public class ActorType extends TypeSymbol {
                 addGenericType( gt.toString(), "LocalActor" );
 
                 TypeSymbol ts = SymbolTable.getTypeSymbol(gt.toString());
-                System.err.println("adding generic actor type: " + ts + ", supertype: " + ts.superType);
+//                System.err.println("adding generic actor type: " + ts + ", supertype: " + ts.superType);
            }
         }
 
