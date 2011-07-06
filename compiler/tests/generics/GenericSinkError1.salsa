@@ -1,0 +1,32 @@
+import java.util.Collection;
+import java.util.LinkedList;
+
+behavior GenericSinkError1<T> {
+
+    void flush(T t) {
+        System.out.println("Flushing: " + t.toString());
+    }
+
+    <T> T writeAll(Collection<T> coll, Sink<T> sink) {
+        T last;
+
+        for (T t : coll) {
+            last = t;
+            self<-flush(last);
+        }
+
+        pass last;
+    }
+
+    GenericSinkError1(String[] arguments) {
+        GenericSinkError1<Object> s = new GenericSinkError1<Object>();
+        Collection<String> cs = new LinkedList<String>();
+
+        cs.add("1");
+        cs.add("2");
+        cs.add("3");
+        cs.add("4");
+
+        String retval = s<-writeAll(cs, s);     //should not work, illegal call
+    }
+}

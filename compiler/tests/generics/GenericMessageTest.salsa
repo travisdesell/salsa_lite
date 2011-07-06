@@ -1,0 +1,12 @@
+
+
+behavior GenericMessageTest {
+
+    <T> void someMessage(T actor1, T actor2) {
+    }
+
+    GenericMessageTest(String[] arguments) {
+        self<-someMessage( new GenericMessageTest(), new GenericMessageTest() );    // this should work
+        self<-someMessage( new GenericCell<Object>(), new GenericMessageTest() );   // this should not work, different types
+    }
+}

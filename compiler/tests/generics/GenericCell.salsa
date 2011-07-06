@@ -1,0 +1,29 @@
+behavior GenericCell<T extends Object> {
+    T value;
+
+    GenericCell(String[] arguments) {
+        GenericCell<String> gcs = new GenericCell<String>("string cell message");
+        GenericCell<Object> gco = new GenericCell<Object>("object cell message");
+
+        gcs<-print() @
+        gco<-print() @
+        gco<-set( gcs<-get() ) @
+        gco<-print();
+    }
+
+    GenericCell(T value) {
+        self.value = value;
+    }
+
+    T get() {
+        pass value;
+    }
+
+    ack set(T value) {
+        self.value = value;
+    }
+
+    ack print() {
+        System.out.println(value);
+    }
+}

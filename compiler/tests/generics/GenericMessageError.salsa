@@ -1,0 +1,8 @@
+
+
+behavior GenericMessageError<T> {
+    T someValue;
+
+    <T> T someMessage(T someOtherValue) {   // this should cause an error because T is already defined by the behavior
+    }
+}
