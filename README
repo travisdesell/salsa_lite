@@ -31,7 +31,7 @@ Notable changes from SALSA 1.x and before:
     *   Generics are usable.
     *   return statements are now pass statements. ie: use 'pass 10;' instead of 'return 10;'
     *   currentContinuation is not used anymore, instead pass statements are used.  ie: 'a<-m1() @ currentContinuation;' is now 'a<-m1() @ pass;'.  This will pass an acknowledgement as the first class continuation.  If you want to pass the actual value, use: 'pass a<-m1();'.
-    *   There is no longer an act method, instead, for an actor that can be run from the command line, create a constructor that takes an array of strings. When that actor is run, the constructor with an array of Strings as the argument will be invoked.
+    *   There is no longer an act method, instead, for an actor that can be run from the command line, create a constructor that takes an array of strings. When that actor is run, the constructor with an array of Strings as the argument will be invoked. ie: 'behavior MyActor { void act(String[] arguments) { ... } }' is now 'behavior MyActor { MyActor(String[] arguments() { ... } }'.
     *   Salsa now allows for tokens within expressions, eg: 'a<-m1( b<-m2() + c<-m3() * d<-m4() );' will work.
     *       This can also be combined with continuations, eg: 'e<-m5() @ a<-m1( b<-m2() + c<-m3() * d<-m4() ) @ f<-m6();'.
     *       And in pass statements, eg: 'pass a<-m1( b<-m2() + c<-m3() * d<-m4() );'.
