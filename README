@@ -21,7 +21,7 @@ Running SALSA programs:
     java <module>.<ActorName>
     You can set the number of stages used with the -Dnstages=<number of stages> system property.
     
-    Please let us know at salsadev [at] cs.rpi.edu if the SALSA compiler does not errors or warnings that the Java compiler does.
+    Please let us know at salsadev [at] cs.rpi.edu if the SALSA compiler does not display errors or warnings that the Java compiler does.
 
 
 Notable changes from SALSA 1.x and before:
@@ -63,5 +63,5 @@ TODO:
     *   Get interfaces working correctly.  They need special messages that know they were sent using an interface, so they invoke the correct message handler.
     *   Add compiler tests for interfaces
     *   Add syntax support for try/catch blocks for Java support.
-    *   Add support for access control.  All fields of an actor are private (and can't be shared due to no-shared memory), but methods should be able to be private, protected, public (or no modifier).
+    *   Add support for access control.  All fields of an actor are private (and can't be shared due to no-shared memory), but methods and constructors should be able to be private, protected, public (or no modifier).
 
