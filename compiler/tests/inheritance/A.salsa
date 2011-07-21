@@ -1,0 +1,16 @@
+behavior A {
+
+    ack m1() {
+        System.out.println("A.m1()");
+        self<-m3();
+    }
+
+    ack m2() {
+        System.out.println("A.m2()");
+    }
+
+    ack m3() {
+        System.out.println("A.m3()");
+    }
+
+}

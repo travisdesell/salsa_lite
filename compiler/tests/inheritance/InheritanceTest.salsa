@@ -1,0 +1,99 @@
+import salsa_lite.io.StandardOutput;
+
+behavior InheritanceTest {
+
+    InheritanceTest(String[] arguments) {
+        A a = new A();
+        B b = new B();
+        C c = new C();
+
+        A c_as_a = new C();
+
+        StandardOutput standardOutput = new StandardOutput();
+
+        standardOutput<-println("a<-m1()") @
+        standardOutput<-println("Should print out:") @
+        standardOutput<-println("A.m1()") @
+        standardOutput<-println("A.m3()") @
+        standardOutput<-println("Printing out:") @
+        a<-m1() @
+        standardOutput<-println() @
+        standardOutput<-println("a<-m2()") @
+        standardOutput<-println("Should print out:") @
+        standardOutput<-println("A.m2()") @
+        standardOutput<-println("Printing out:") @
+        a<-m2() @
+        standardOutput<-println() @
+        standardOutput<-println("a<-m3()") @
+        standardOutput<-println("Should print out:") @
+        standardOutput<-println("A.m3()") @
+        standardOutput<-println("Printing out:") @
+        a<-m3() @
+
+        standardOutput<-println() @
+        standardOutput<-println("b<-m1()") @
+        standardOutput<-println("Should print out:") @
+        standardOutput<-println("A.m1()") @
+        standardOutput<-println("A.m3()") @
+        standardOutput<-println("Printing out:") @
+        b<-m1() @
+        standardOutput<-println() @
+        standardOutput<-println("b<-m2()") @
+        standardOutput<-println("Should print out:") @
+        standardOutput<-println("B.m2()") @
+        standardOutput<-println("A.m2()") @
+        standardOutput<-println("Printing out:") @
+        b<-m2() @
+        standardOutput<-println() @
+        standardOutput<-println("b<-m3()") @
+        standardOutput<-println("Should print out:") @
+        standardOutput<-println("A.m3()") @
+        standardOutput<-println("Printing out:") @
+        b<-m3() @
+
+        standardOutput<-println() @
+        standardOutput<-println("c<-m1()") @
+        standardOutput<-println("Should print out:") @
+        standardOutput<-println("A.m1()") @
+        standardOutput<-println("C.m3()") @
+        standardOutput<-println("Printing out:") @
+        c<-m1() @
+        standardOutput<-println() @
+        standardOutput<-println("c<-m2()") @
+        standardOutput<-println("Should print out:") @
+        standardOutput<-println("C.m2()") @
+        standardOutput<-println("B.m2()") @
+        standardOutput<-println("A.m2()") @
+        standardOutput<-println("Printing out:") @
+        c<-m2() @
+        standardOutput<-println() @
+        standardOutput<-println("c<-m3()") @
+        standardOutput<-println("Should print out:") @
+        standardOutput<-println("C.m3()") @
+        standardOutput<-println("Printing out:") @
+        c<-m3() @
+
+        standardOutput<-println() @
+        standardOutput<-println("c_as_a<-m1()") @
+        standardOutput<-println("Should print out:") @
+        standardOutput<-println("A.m1()") @
+        standardOutput<-println("C.m3()") @
+        standardOutput<-println("Printing out:") @
+        c_as_a<-m1() @
+        standardOutput<-println() @
+        standardOutput<-println("c_as_a<-m2()") @
+        standardOutput<-println("Should print out:") @
+        standardOutput<-println("C.m2()") @
+        standardOutput<-println("B.m2()") @
+        standardOutput<-println("A.m2()") @
+        standardOutput<-println("Printing out:") @
+        c_as_a<-m2() @
+        standardOutput<-println() @
+        standardOutput<-println("c_as_a<-m3()") @
+        standardOutput<-println("Should print out:") @
+        standardOutput<-println("C.m3()") @
+        standardOutput<-println("Printing out:") @
+        c_as_a<-m3();
+    }
+
+}

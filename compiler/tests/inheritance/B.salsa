@@ -1,0 +1,8 @@
+behavior B extends A {
+
+    ack m2() {
+        System.out.println("B.m2()");
+        parent<-m2();
+    }
+
+}
