@@ -62,4 +62,10 @@ public class MessageSymbol extends Invokable {
             }
         }
     }
+
+    public MessageSymbol copy() {
+        MessageSymbol copy = new MessageSymbol(this.id, this.name, this.enclosingType, this.passType, this.parameterTypes);
+        copy.isOverloadedByParent = this.isOverloadedByParent;
+        return copy;
+    }
 }

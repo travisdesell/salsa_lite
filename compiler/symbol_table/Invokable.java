@@ -8,6 +8,8 @@ import salsa_lite.compiler.definitions.CExpression;
 
 public class Invokable {
 
+    public boolean isOverloadedByParent = false;
+
     int id;
     String name = "";
     TypeSymbol enclosingType;
@@ -92,6 +94,10 @@ public class Invokable {
         int min_distance = Integer.MAX_VALUE;
         int i = 0;
         for (Invokable current : invokables) {
+            if (current.isOverloadedByParent) {
+                match_distance[i] = -1;
+                continue;
+            }
             match_distance[i] = targetArguments.matches(current);
 
             if (match_distance[i] >= 0 && match_distance[i] < min_distance) {

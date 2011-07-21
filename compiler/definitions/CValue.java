@@ -36,8 +36,14 @@ public class CValue extends CErrorInformation {
 		TypeSymbol value_type;
 
         try {
-            if (isSelf() || isParent()) {
+            if (isSelf()) {
                 value_type = SymbolTable.getVariableType(literal.value);
+            } else if (isParent()) {
+                if (modifications.size() > 0 && modifications.get(0) instanceof CMessageSend) {
+                    value_type = SymbolTable.getVariableType("self");
+                } else {
+                    value_type = SymbolTable.getVariableType("self").getSuperType();
+                }
             } else if (literal != null) {
                 value_type = SymbolTable.getTypeSymbol(literal.type);
             } else if (variable_name != null) {
@@ -68,6 +74,11 @@ public class CValue extends CErrorInformation {
         }
 
 		TypeSymbol value_type = getValueType();
+
+        boolean isParentMessageSend = false;
+        if (isParent()) {
+            isParentMessageSend = true;
+        }
 
         for (CModification modification : modifications) {
 
@@ -117,7 +128,7 @@ public class CValue extends CErrorInformation {
 
                     } else if (value_type instanceof ActorType) {
                         if (modifications.getFirst().equals(modification) && (isSelf() || isParent())) {
-                            value_type = ((ActorType)value_type).getMessage(method_invocation.method_name, method_invocation.arguments).getPassType();
+                            value_type = ((ActorType)value_type).getMessage(method_invocation.method_name, method_invocation.arguments, isParentMessageSend).getPassType();
                         } else {
                             CompilerErrors.printErrorMessage("Cannot invoke a message on an actor that is not self or parent", method_invocation);
                             throw new RuntimeException();
@@ -155,7 +166,7 @@ public class CValue extends CErrorInformation {
                         CompilerErrors.printErrorMessage("Cannot send a message to a non-actor. Type is '" + value_type.getLongSignature() + "'", message_send);
                         throw new RuntimeException();
                     }
-                    value_type = ((ActorType)value_type).getMessage(message_send.message_name, message_send.arguments).getPassType();
+                    value_type = ((ActorType)value_type).getMessage(message_send.message_name, message_send.arguments, isParentMessageSend).getPassType();
                 } catch (SalsaNotFoundException snfe) {
                     CompilerErrors.printErrorMessage("[CValue.getType]: Could not determine type for message send. " + snfe.toString(), this);
                     throw new RuntimeException(snfe);
@@ -166,6 +177,8 @@ public class CValue extends CErrorInformation {
                     throw new RuntimeException();
                 }
             }
+
+            isParentMessageSend = false;
         }
 
         return value_type;
@@ -207,11 +220,18 @@ public class CValue extends CErrorInformation {
 		String code = "";
 //        System.err.println("CValue.toJavaCode, currentType: " + currentType);
 
+        boolean isParentMessageSend = false;
+
 		if (literal != null) {
             if (literal.value.equals("self")) {
                 code += "this";
             } else if (literal.value.equals("parent")) {
-                code += "super";
+                if (modifications.size() > 0 && modifications.get(0) instanceof CMessageSend) {
+                    code += "this";
+                    isParentMessageSend = true;
+                } else {
+                    code += "super";
+                }
             } else if (literal.value.equals("ack")) {
                 code += "new Acknowledgement()";
             } else {
@@ -290,7 +310,7 @@ public class CValue extends CErrorInformation {
                         currentType = ms.getReturnType();
                     } else if (currentType instanceof ActorType) {
                         if (modifications.getFirst().equals(modification) && (isSelf() || isParent())) {
-                            currentType = ((ActorType)currentType).getMessage(mi.method_name, mi.arguments).getPassType();
+                            currentType = ((ActorType)currentType).getMessage(mi.method_name, mi.arguments, isParentMessageSend).getPassType();
                         } else {
                             CompilerErrors.printErrorMessage("Cannot invoke a method on an actor that is not self or parent", mi);
                             currentType = null;
@@ -372,7 +392,7 @@ public class CValue extends CErrorInformation {
                     ActorType at = (ActorType)currentType;
                     MessageSymbol messageSymbol = null;
                     try {
-                        messageSymbol = at.getMessage(ms.message_name, ms.arguments);
+                        messageSymbol = at.getMessage(ms.message_name, ms.arguments, isParentMessageSend);
                     } catch (SalsaNotFoundException snfe) {
                         CompilerErrors.printErrorMessage("Could not find matching message, message name: '" + ms.message_name + "'", ms);
                         throw new RuntimeException(snfe);
@@ -457,13 +477,14 @@ public class CValue extends CErrorInformation {
                         code += CIndent.getIndent() + "StageService.sendMessage(" + joinDirector + ", 0 /*setValue*/, new Object[]{++" + joinDirector + "_message_count}, continuation_token)";
                     }
 
-                    currentType = ((ActorType)currentType).getMessage(ms.message_name, ms.arguments).getPassType();
+                    currentType = ((ActorType)currentType).getMessage(ms.message_name, ms.arguments, isParentMessageSend).getPassType();
                     SymbolTable.setContinuationType(currentType);
                 } catch (SalsaNotFoundException snfe) {
                     CompilerErrors.printErrorMessage("[CValue.toJavaCode]: Error looking up type for message send. " + snfe.toString(), ms);
                     throw new RuntimeException(snfe);
                 }
             }
+            isParentMessageSend = false;
         }
 
 		return code;

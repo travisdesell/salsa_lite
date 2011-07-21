@@ -29,6 +29,8 @@ Notable changes from SALSA 1.x and before:
     *   Extended For loop syntax added.
     *   Generics are usable.
 
+    *   All parameters are pass-by-copy.  The compiler will insert a deep copy statement around a mutable object (or array) before it is passed as the argument to a message.  Previous versions of SALSA had pass-by-reference for local messages, and pass-by-copy for remote messages; this change makes everything pass-by-copy.
+
     *   When importing Java objects, use (for example) 'import object java.util.LinkedList;'. Objects in java.lang are automatically imported.
     *   void is not a valid return type for a message handler any more, use ack (for acknowledgement).  This better represents the fact that message handlers that don't return a value can still be used in continuations, as they send an acknowledgement.
 

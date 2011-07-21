@@ -168,12 +168,20 @@ public class CCompilationUnit {
         }
 
         ActorType at = (ActorType)typeSymbol;
+        int number_message_handlers = at.message_handlers.size();
 
+        boolean overloads = false;
 		for (int i = 0; i < at.message_handlers.size(); i++) {
 			MessageSymbol sm = at.getMessageHandler(i);
 
             try {
-                if (sm.getPassType().getName().equals("ack")) {
+                if (sm.isOverloadedByParent) {
+                    if (overloads == false) {
+                        overloads = true;
+                        code += CIndent.getIndent() + "/* Superclasses Overloaded Message Handlers */\n";
+                    }
+                    code += CIndent.getIndent() + "case " + sm.getId() + ": return super.invokeMessage(messageId, arguments);\n";
+                } else if (sm.getPassType().getName().equals("ack")) {
                     code += CIndent.getIndent() + "case " + sm.getId() + ": " + sm.getName() + getCaseInvocation(sm.parameterTypes) + "; return null;\n";
                 } else {
                     code += CIndent.getIndent() + "case " + sm.getId() + ": return " + sm.getName() + getCaseInvocation(sm.parameterTypes) + ";\n";
@@ -183,6 +191,24 @@ public class CCompilationUnit {
                 throw new RuntimeException(snfe);
             }
 		}
+
+        if (at.overloaded_message_handlers.size() > 0) {
+            code += CIndent.getIndent() + "/* Overloaded Message handlers */\n";
+            for (int j = 0; j < at.overloaded_message_handlers.size(); j++) {
+                MessageSymbol sm = at.getOverloadedMessageHandler(j);
+
+                try {
+                    if (sm.getPassType().getName().equals("ack")) {
+                        code += CIndent.getIndent() + "case " + sm.getId() + ": super." + sm.getName() + getCaseInvocation(sm.parameterTypes) + "; return null;\n";
+                    } else {
+                        code += CIndent.getIndent() + "case " + sm.getId() + ": return super." + sm.getName() + getCaseInvocation(sm.parameterTypes) + ";\n";
+                    }
+                } catch (SalsaNotFoundException snfe) {
+                    CompilerErrors.printErrorMessage("[CCompilationUnit.getInvokeMessageCode]: Error getting parameter types for message handler. " + snfe.toString(), getMessageHandlers().get(j));
+                    throw new RuntimeException(snfe);
+                }
+            }
+        }
 
 		code += CIndent.getIndent() + "default: throw new MessageHandlerNotFoundException(messageId, arguments);\n";
 		CIndent.decreaseIndent();
@@ -224,16 +250,40 @@ public class CCompilationUnit {
 
         ActorType at = (ActorType)typeSymbol;
 
+        boolean overloads = false;
 		for (int i = 0; i < at.constructors.size(); i++) {
 			ConstructorSymbol cm = at.getConstructor(i);
 
             try {
-			    code += CIndent.getIndent() + "case " + cm.getId() + ": construct" + getCaseInvocation(cm.parameterTypes) + "; return;\n";
+                if (cm.isOverloadedByParent) {
+                    if (overloads == false) {
+                        overloads = true;
+                        code += CIndent.getIndent() + "/* Superclasses Overloaded Message Handlers */\n";
+                    }
+                    code += CIndent.getIndent() + "case " + cm.getId() + ": return super.invokeMessage(messageId, arguments);\n";
+                } else {
+    			    code += CIndent.getIndent() + "case " + cm.getId() + ": construct" + getCaseInvocation(cm.parameterTypes) + "; return;\n";
+                }
             } catch (SalsaNotFoundException snfe) {
                 CompilerErrors.printErrorMessage("[CCompilationUnit.getInvokeConstructorCode]: Error getting parameter types for constructor. " + snfe.toString(), getConstructors().get(i));
                 throw new RuntimeException(snfe);
             }
 		}
+
+        if (at.overloaded_constructors.size() > 0) {
+            code += CIndent.getIndent() + "/* Overloaded Constructors */\n";
+            for (int j = 0; j < at.overloaded_constructors.size(); j++) {
+                ConstructorSymbol cm = at.getOverloadedConstructor(j);
+
+                try {
+                    code += CIndent.getIndent() + "case " + cm.getId() + ": super.construct" + getCaseInvocation(cm.parameterTypes) + "; return;\n";
+                } catch (SalsaNotFoundException snfe) {
+                    CompilerErrors.printErrorMessage("[CCompilationUnit.getInvokeConstructorCode]: Error getting parameter types for constructor. " + snfe.toString(), getConstructors().get(j));
+                    throw new RuntimeException(snfe);
+                }
+            }
+        }
+
 
 		code += CIndent.getIndent() + "default: throw new ConstructorNotFoundException(messageId, arguments);\n";
 		CIndent.decreaseIndent();
@@ -247,12 +297,16 @@ public class CCompilationUnit {
 	public String getConstructorCode() {
 		Vector<CConstructor> constructors = getConstructors();
 		String code = "";
+        if (interface_declaration == null && (constructors == null || constructors.size() == 0 || (constructors.size() == 1 && constructors.get(0).getArgumentTypes().length == 1 && constructors.get(0).getArgumentTypes()[0].equals("String[]")))) {
+            //in this case we need to make a default constructor
+            code += CIndent.getIndent() + "public void construct() {}\n\n";
+        }
         if (constructors != null) {
             for (int i = 0; i < constructors.size(); i++) {
                 code += constructors.get(i).toJavaCode(); 
             }
             code += "\n";
-        }
+        } 
 		return code;
 	}
 
