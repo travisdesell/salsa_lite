@@ -64,7 +64,6 @@ TODO:
     *   Add more compiler tests for generics 
     *   Add compiler tests for token arrays.
     *   Add compiler tests for message blocks.
-    *   Add compiler tests for inheritance.
     *   Add compiler tests for interfaces
     *   Add tests for nested expression directors, ie: a<-m( b<-m( c<-m() + d<-m(), e<-m() ) * f<-m() )
     *   Add tests for method invocations within expression directors, ie: a<-m( Math.log(o.something() + 10 * b<-m()) )
