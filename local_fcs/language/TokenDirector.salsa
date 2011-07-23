@@ -4,7 +4,7 @@ import object java.util.LinkedList;
 
 behavior TokenDirector extends ValueDirector {
 
-	LinkedList<MessageDirector> directors = new LinkedList<MessageDirector>();
+	LinkedList<SynchronizationDirector> directors = new LinkedList<SynchronizationDirector>();
 	LinkedList<Integer> positions = new LinkedList<Integer>();
 
 	Object value;
@@ -22,23 +22,23 @@ behavior TokenDirector extends ValueDirector {
         self.unresolved = false;
 		self.value = value;
 
-		MessageDirector director;
+		SynchronizationDirector director;
 		int position;
 
 		while (directors.size() > 0) {
             director = directors.removeFirst();
 			position = positions.removeFirst();
 
-            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 0 /*setValue*/, new Object[]{position, value}));
+            director<-setValue(position, value);
 		}
 	}
 
-	ack addDirector(MessageDirector director, int position) {
+	ack addDirector(SynchronizationDirector director, int position) {
 		if (unresolved) {
 			directors.add(director);
 			positions.add(position);
 		} else {
-            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 0 /*setValue*/, new Object[]{position, value}));
+            director<-setValue(position, value);
 		}
 	}
 

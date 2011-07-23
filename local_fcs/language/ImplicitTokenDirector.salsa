@@ -4,7 +4,7 @@ module salsa_lite.local_fcs.language;
 behavior ImplicitTokenDirector extends ValueDirector {
 
 	Object value;
-	MessageDirector director;
+	SynchronizationDirector director;
 	int position;
 
 	ImplicitTokenDirector() {
@@ -14,16 +14,16 @@ behavior ImplicitTokenDirector extends ValueDirector {
 		self.value = value;
 
 		if (director != null) {
-            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 0 /*setValue*/, new Object[]{position, value}));
+            director<-setValue(position, value);
 		}
 	}
 
-	ack addDirector(MessageDirector director, int position) {
+	ack addDirector(SynchronizationDirector director, int position) {
         if (value == null) {
 			self.director = director;
 			self.position = position;
 		} else {
-            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 0 /*setValue*/, new Object[]{position, value}));
+            director<-setValue(position, value);
 		}       
 	}       
 }

@@ -1,0 +1,5 @@
+module salsa_lite.local_fcs.language;
+
+abstract behavior SynchronizationDirector extends Director {
+    abstract ack setValue(int position, Object value);
+}

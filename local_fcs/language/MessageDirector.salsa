@@ -1,6 +1,6 @@
 module salsa_lite.local_fcs.language;
 
-behavior MessageDirector {
+behavior MessageDirector extends SynchronizationDirector {
 	Message message;
 	int required_tokens;
 
