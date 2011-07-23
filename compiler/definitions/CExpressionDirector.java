@@ -71,9 +71,9 @@ public class CExpressionDirector {
 		String code = "";
 		code += "class " + expression_director_name + " extends "; 
 		if (System.getProperty("local") != null) {
-			code += "LocalActorReference";
+			code += "ActorReference";
 		} else if (System.getProperty("local_noref") != null || System.getProperty("local_fcs") != null) {
-			code += "LocalActor";
+			code += "Actor";
 		} else if (System.getProperty("wwc") != null) {
 			code += "WWCActorReference";
 		}

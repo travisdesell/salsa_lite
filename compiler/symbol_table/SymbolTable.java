@@ -367,9 +367,7 @@ public class SymbolTable {
 
         currentModule = "";
 
-		runtimeModule = "salsa_lite.";
-		if (System.getProperty("local_fcs") != null) runtimeModule += "local_fcs";
-		else if (System.getProperty("wwc") != null) runtimeModule += "wwc";
+		runtimeModule = "salsa_lite.runtime";
 		languageModule = runtimeModule + ".language.";
 
 
@@ -555,7 +553,7 @@ public class SymbolTable {
             if (System.getProperty("wwc") != null) {
                 localActorType = new ActorType(runtimeModule + ".WWCActor", SymbolTable.getTypeSymbol("Object"));
             } else {
-                localActorType = new ActorType(runtimeModule + ".LocalActor", SymbolTable.getTypeSymbol("Object"));
+                localActorType = new ActorType(runtimeModule + ".Actor", SymbolTable.getTypeSymbol("Object"));
             }
 
             FieldSymbol stageField = new FieldSymbol(localActorType, "stage", SymbolTable.getTypeSymbol("Stage"));
@@ -569,7 +567,7 @@ public class SymbolTable {
             if (System.getProperty("wwc") != null) {
                 targetField = new FieldSymbol(messageType, "target", SymbolTable.getTypeSymbol("WWCActor"));
             } else {
-                targetField = new FieldSymbol(messageType, "target", SymbolTable.getTypeSymbol("LocalActor"));
+                targetField = new FieldSymbol(messageType, "target", SymbolTable.getTypeSymbol("Actor"));
             }
             messageType.fields.add(targetField);
 

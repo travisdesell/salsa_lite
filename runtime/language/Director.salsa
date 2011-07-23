@@ -1,0 +1,4 @@
+module salsa_lite.runtime.language;
+
+behavior Director {
+}

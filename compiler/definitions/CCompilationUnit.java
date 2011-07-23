@@ -316,8 +316,8 @@ public class CCompilationUnit {
 			code += "import salsa_lite.wwc.language.exceptions.ContinuationPassException;\n";
 			code += "import salsa_lite.wwc.language.exceptions.TokenPassException;\n";
 		} else if (System.getProperty("local") != null) {
-			code += "import salsa_lite.local.LocalActorReference;\n";
-			code += "import salsa_lite.local.LocalActorState;\n";
+			code += "import salsa_lite.local.ActorReference;\n";
+			code += "import salsa_lite.local.ActorState;\n";
 			code += "import salsa_lite.local.StageService;\n";
 			code += "import salsa_lite.local.language.exceptions.ConstructorNotFoundException;\n";
 			code += "import salsa_lite.local.language.exceptions.MessageHandlerNotFoundException;\n";
@@ -345,7 +345,7 @@ public class CCompilationUnit {
 
 		String extendsName = getExtendsName().name;
 		if (System.getProperty("local") != null || System.getProperty("wwc") != null) {
-			if (extendsName.equals("LocalActor") || extendsName.equals("WWCActor")) {
+			if (extendsName.equals("Actor") || extendsName.equals("WWCActor")) {
 				extendsName += "Reference";
 			}
 		}
@@ -420,23 +420,23 @@ public class CCompilationUnit {
 		code += "/****** SALSA LANGUAGE IMPORTS ******/\n";
         code += "import salsa_lite.common.DeepCopy;\n";
 		if (System.getProperty("local_fcs") != null) {
-			code += "import salsa_lite.local_fcs.Acknowledgement;\n";
-			code += "import salsa_lite.local_fcs.SynchronousMailboxStage;\n";
-			code += "import salsa_lite.local_fcs.LocalActor;\n";
-			code += "import salsa_lite.local_fcs.Message;\n";
-			code += "import salsa_lite.local_fcs.StageService;\n";
-            if (module_string == null || !module_string.equals("salsa_lite.local_fcs.language.")) {
-                code += "import salsa_lite.local_fcs.language.Director;\n";
-                code += "import salsa_lite.local_fcs.language.JoinDirector;\n";
-                code += "import salsa_lite.local_fcs.language.MessageDirector;\n";
-                code += "import salsa_lite.local_fcs.language.ContinuationDirector;\n";
-                code += "import salsa_lite.local_fcs.language.TokenDirector;\n";
+			code += "import salsa_lite.runtime.Acknowledgement;\n";
+			code += "import salsa_lite.runtime.SynchronousMailboxStage;\n";
+			code += "import salsa_lite.runtime.Actor;\n";
+			code += "import salsa_lite.runtime.Message;\n";
+			code += "import salsa_lite.runtime.StageService;\n";
+            if (module_string == null || !module_string.equals("salsa_lite.runtime.language.")) {
+                code += "import salsa_lite.runtime.language.Director;\n";
+                code += "import salsa_lite.runtime.language.JoinDirector;\n";
+                code += "import salsa_lite.runtime.language.MessageDirector;\n";
+                code += "import salsa_lite.runtime.language.ContinuationDirector;\n";
+                code += "import salsa_lite.runtime.language.TokenDirector;\n";
             }
 			code += "\n";
-			code += "import salsa_lite.local_fcs.language.exceptions.ContinuationPassException;\n";
-			code += "import salsa_lite.local_fcs.language.exceptions.TokenPassException;\n";
-			code += "import salsa_lite.local_fcs.language.exceptions.MessageHandlerNotFoundException;\n";
-			code += "import salsa_lite.local_fcs.language.exceptions.ConstructorNotFoundException;\n";
+			code += "import salsa_lite.runtime.language.exceptions.ContinuationPassException;\n";
+			code += "import salsa_lite.runtime.language.exceptions.TokenPassException;\n";
+			code += "import salsa_lite.runtime.language.exceptions.MessageHandlerNotFoundException;\n";
+			code += "import salsa_lite.runtime.language.exceptions.ConstructorNotFoundException;\n";
 			code += "\n";
 
 		} else if (System.getProperty("wwc") != null) {
@@ -487,13 +487,13 @@ public class CCompilationUnit {
 
         if (getExtendsName() == null) {
             if (System.getProperty("local") != null || System.getProperty("wwc") != null) {
-                actor_name += "State";
+                code += "State";
             }
         } else {
             String extendsName = getExtendsName().name;
 
             if (System.getProperty("local") != null || System.getProperty("wwc") != null) {
-                actor_name += "State";
+                code += "State";
                 extendsName += "State";
             }
 
@@ -567,57 +567,57 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "public " + actor_name + "() { super(); }\n\n";
             code += CIndent.getIndent() + "public " + actor_name + "(SynchronousMailboxStage stage) { super(stage); }\n\n";
         }
+        if (System.getProperty("wwc") != null) {
+            code += CIndent.getIndent() + "public " + actor_name + "State() { super(); }\n\n";
+            code += CIndent.getIndent() + "public " + actor_name + "State(SynchronousMailboxStage stage) { super(stage); }\n\n";
+        }
 
         if (behavior_declaration != null && !behavior_declaration.is_abstract) {
             if (System.getProperty("wwc") != null) {
-                code += CIndent.getIndent() + "public " + actor_name + "(String identifier) { super(identifier); }\n\n";
+                code += CIndent.getIndent() + "public " + actor_name + "State(String identifier) { super(identifier); }\n\n";
             }
 
-            if (System.getProperty("local_noref") != null || System.getProperty("local_fcs") != null) {
+            if (System.getProperty("local_fcs") != null) {
                 if (behavior_declaration != null) {
                     int act_constructor = behavior_declaration.getActConstructor();
                     if (act_constructor >= 0) {
                         code += CIndent.getIndent() + "public static void main(String[] arguments) {\n";
-                        if (System.getProperty("local_fcs") != null) {
-                            code += CIndent.getIndent() + "\tconstruct(" + act_constructor + ", new Object[]{arguments}, StageService.getStage(0));\n";
-                        } else {
+//                        if (System.getProperty("local_fcs") != null) {
+//                            code += CIndent.getIndent() + "\tconstruct(" + act_constructor + ", new Object[]{arguments}, StageService.getStage(0));\n";
+//                        } else {
                             code += CIndent.getIndent() + "\tStageService.sendMessage(new Message(Message.CONSTRUCT_MESSAGE, new " + actor_name + "(), " + act_constructor + ", new Object[]{arguments}));\n";
-                        }
+//                        }
                         code += CIndent.getIndent() + "}\n\n";
                     }
                 }
 
-    //			if (System.getProperty("local_fcs") == null) {
-                    code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions) {\n";
-                    code += CIndent.getIndent() + "\t" + actor_name + " actor = new " + actor_name + "();\n";
-                    code += CIndent.getIndent() + "\tTokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);\n";
-                    code += CIndent.getIndent() + "\tMessage input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
-                    code += CIndent.getIndent() + "\tMessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions});\n";
-                    code += CIndent.getIndent() + "\treturn output_continuation;\n";
-                    code += CIndent.getIndent() + "}\n\n";
+                code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions) {\n";
+                code += CIndent.getIndent() + "\t" + actor_name + " actor = new " + actor_name + "();\n";
+                code += CIndent.getIndent() + "\tTokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);\n";
+                code += CIndent.getIndent() + "\tMessage input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
+                code += CIndent.getIndent() + "\tMessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions});\n";
+                code += CIndent.getIndent() + "\treturn output_continuation;\n";
+                code += CIndent.getIndent() + "}\n\n";
 
-                    code += CIndent.getIndent() + "public static " + actor_name + " construct(int constructor_id, Object[] arguments) {\n";
-                    code += CIndent.getIndent() + "\t" + actor_name + " actor = new " + actor_name + "();\n";
-                    code += CIndent.getIndent() + "\tStageService.sendMessage(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
-                    code += CIndent.getIndent() + "\treturn actor;\n";
-                    code += CIndent.getIndent() + "}\n";
-    //			}
+                code += CIndent.getIndent() + "public static " + actor_name + " construct(int constructor_id, Object[] arguments) {\n";
+                code += CIndent.getIndent() + "\t" + actor_name + " actor = new " + actor_name + "();\n";
+                code += CIndent.getIndent() + "\tStageService.sendMessage(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
+                code += CIndent.getIndent() + "\treturn actor;\n";
+                code += CIndent.getIndent() + "}\n";
 
-                if (System.getProperty("local_fcs") != null) {
-                    code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, SynchronousMailboxStage target_stage) {\n";
-                    code += CIndent.getIndent() + "\t" + actor_name + " actor = new " + actor_name + "(target_stage);\n";
-                    code += CIndent.getIndent() + "\tTokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage);\n";
-                    code += CIndent.getIndent() + "\tMessage input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
-                    code += CIndent.getIndent() + "\tMessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage);\n";
-                    code += CIndent.getIndent() + "\treturn output_continuation;\n";
-                    code += CIndent.getIndent() + "}\n\n";
+                code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, SynchronousMailboxStage target_stage) {\n";
+                code += CIndent.getIndent() + "\t" + actor_name + " actor = new " + actor_name + "(target_stage);\n";
+                code += CIndent.getIndent() + "\tTokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage);\n";
+                code += CIndent.getIndent() + "\tMessage input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
+                code += CIndent.getIndent() + "\tMessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage);\n";
+                code += CIndent.getIndent() + "\treturn output_continuation;\n";
+                code += CIndent.getIndent() + "}\n\n";
 
-                    code += CIndent.getIndent() + "public static " + actor_name + " construct(int constructor_id, Object[] arguments, SynchronousMailboxStage target_stage) {\n";
-                    code += CIndent.getIndent() + "\t" + actor_name + " actor = new " + actor_name + "(target_stage);\n";
-                    code += CIndent.getIndent() + "\ttarget_stage.putMessageInMailbox(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
-                    code += CIndent.getIndent() + "\treturn actor;\n";
-                    code += CIndent.getIndent() + "}\n";
-                }
+                code += CIndent.getIndent() + "public static " + actor_name + " construct(int constructor_id, Object[] arguments, SynchronousMailboxStage target_stage) {\n";
+                code += CIndent.getIndent() + "\t" + actor_name + " actor = new " + actor_name + "(target_stage);\n";
+                code += CIndent.getIndent() + "\ttarget_stage.putMessageInMailbox(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
+                code += CIndent.getIndent() + "\treturn actor;\n";
+                code += CIndent.getIndent() + "}\n";
             }
         }
 

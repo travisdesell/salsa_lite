@@ -27,13 +27,7 @@ public class CBehaviorDeclaration extends CErrorInformation {
 
 	public CName getExtendsName() {
 		if (this.extends_name == null) {
-			if (System.getProperty("local_fcs") != null) {
-                return new CName("salsa_lite.local_fcs.LocalActor");
-            } else if (System.getProperty("wwc") != null) {
-                return new CName("salsa_lite.wwc.WWCActor");
-            } else {
-                return new CName("");
-            }
+            return new CName("salsa_lite.runtime.Actor");
 		} else {
 			return extends_name;
 		}

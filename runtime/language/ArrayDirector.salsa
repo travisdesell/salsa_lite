@@ -1,0 +1,76 @@
+module salsa_lite.runtime.language;
+
+import object java.util.ArrayList;
+
+behavior ArrayDirector<T> extends SynchronizationDirector {
+
+	int valueCount = 0;
+    T[] values;
+
+	ArrayList<Director> directors = new ArrayList<Director>();
+    ArrayList<Integer> requiredTokens = new ArrayList<Integer>();
+
+	ArrayDirector(T[] values) { 
+        self.values = values;
+
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] instanceof TokenDirector) {
+                ((TokenDirector)values[i])<-addDirector(self, i);
+            } else {
+                valueCount++;
+            }
+        }
+	}
+
+	ack setValue(int position, Object value) {
+        if (values[position] != null) {
+            values[position] = (T)value;
+		    valueCount++;
+        } else {
+            System.err.println("WARNING: resetting value of ArrayDirector.");
+            System.err.println("WARNING: " + self + "[" + position + "] is already '" + values[position] + "' trying ro set it to '" + value);
+            System.err.println("WARNING: ArrayDirectors are single-assignment, previous value will not be overwritten.");
+        }
+
+
+        for (int i = requiredTokens.size() - 1; i >= 0; i--) {
+            int reqTokens = requiredTokens.get(i);
+
+            if (valueCount >= reqTokens) {
+                Director director = directors.get(i);
+                if (director instanceof ValueDirector) {
+                    //Do not need to deep copy here
+                    ((ValueDirector)director)<-setValue(values);
+                } else {
+                    ((ContinuationDirector)director)<-resolve();
+                }
+
+                requiredTokens.remove(i);
+                directors.remove(i);
+            }
+        }
+	}
+
+    T[] resolve() {
+        int reqTokens = values.length;
+   		if (valueCount < reqTokens) {
+            self.directors.add(stage.message.continuationDirector);
+            self.requiredTokens.add(reqTokens);
+			pass later;
+		} else {
+            //Do not need to deep copy here
+            pass values;
+        }
+    }
+
+	T[] resolveAfter(int reqTokens) {
+		if (valueCount < reqTokens) {
+            self.directors.add(stage.message.continuationDirector);
+            self.requiredTokens.add(reqTokens);
+			pass later;
+		} else {
+            pass values;
+            //Do not need to deep copy here
+        }
+	}
+}

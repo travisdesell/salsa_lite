@@ -380,7 +380,7 @@ public class CValue extends CErrorInformation {
                     String expression_director_code = "";
                     pre_code += "Message(";
 
-                    if (currentType.isInterface) code = "(LocalActor)" + code;
+                    if (currentType.isInterface) code = "(Actor)" + code;
                     code = pre_code + code + ", ";
 
 

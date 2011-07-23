@@ -186,7 +186,7 @@ public class ActorType extends TypeSymbol {
             this.superType = SymbolTable.getTypeSymbol(cu.getExtendsName().name);
             if (this.superType.isInterface) this.isInterface = true;
         } else {
-            this.superType = SymbolTable.getTypeSymbol("LocalActor");
+            this.superType = SymbolTable.getTypeSymbol("Actor");
             this.isInterface = true;
         }
 
@@ -197,7 +197,7 @@ public class ActorType extends TypeSymbol {
         if (declaredGenericTypes.size() == 0) {
             for (CGenericType gt : cu.getName().generic_types) {
                 declaredGenericTypes.add(gt.toString());
-                addGenericType( gt.toString(), "LocalActor" );
+                addGenericType( gt.toString(), "Actor" );
 
                 TypeSymbol ts = SymbolTable.getTypeSymbol(gt.toString());
 //                System.err.println("adding generic actor type: " + ts + ", supertype: " + ts.superType);
@@ -230,7 +230,7 @@ public class ActorType extends TypeSymbol {
                     CompilerErrors.printErrorMessage("Compiler problem, '?' in generic type not currently supported.", generic_type);
                     ot = new ObjectType(SymbolTable.getCurrentModule() + generic_type.name.name);
                 } else {
-                    ot = new ObjectType(SymbolTable.getCurrentModule() + generic_type.name.name, SymbolTable.getTypeSymbol("LocalActor"));
+                    ot = new ObjectType(SymbolTable.getCurrentModule() + generic_type.name.name, SymbolTable.getTypeSymbol("Actor"));
                 }
             }
 

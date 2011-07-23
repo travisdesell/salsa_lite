@@ -217,7 +217,7 @@ public abstract class TypeSymbol implements Comparable<TypeSymbol> {
             if (fromObject) {
                 ts = SymbolTable.getTypeSymbol(generic_type, "java.lang.Object");
             } else {
-                ts = SymbolTable.getTypeSymbol(generic_type, "LocalActor");
+                ts = SymbolTable.getTypeSymbol(generic_type, "Actor");
             }
             instantiatedGenericTypes.add(ts);
 
