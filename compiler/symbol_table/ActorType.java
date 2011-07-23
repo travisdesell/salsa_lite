@@ -262,11 +262,11 @@ public class ActorType extends TypeSymbol {
                 constructors.add( cs );
             }
             if (cv.size() == 0) {
-                ConstructorSymbol cs = new ConstructorSymbol(0, this, new TypeSymbol[]{});
-                constructors.add( cs );
+//                ConstructorSymbol cs = new ConstructorSymbol(0, this, new TypeSymbol[]{});
+//                constructors.add( cs );
             } else if (cv.size() == 1 && cv.get(0).getArgumentTypes().length == 1 && cv.get(0).getArgumentTypes()[0].equals("String[]")) {
-                ConstructorSymbol cs = new ConstructorSymbol(0, this, new TypeSymbol[]{});
-                constructors.add( cs );
+//                ConstructorSymbol cs = new ConstructorSymbol(0, this, new TypeSymbol[]{});
+//                constructors.add( cs );
             }
         }
 

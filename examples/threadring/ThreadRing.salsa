@@ -6,7 +6,7 @@ behavior ThreadRing {
 	
 	ThreadRing(int id) {
 		self.id = id;
-        System.out.println("created threadring: " + id);
+//        System.out.println("created threadring: " + id);
 	}
 
 	ThreadRing(String[] args) {

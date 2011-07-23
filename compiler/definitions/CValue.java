@@ -440,7 +440,7 @@ public class CValue extends CErrorInformation {
 
                     code += argument_code;
                     if (ms.message_property != null && ms.message_property.name.equals("waitfor")) {
-                        code += ", new ContinuationDirector[]{";
+                        code += ", new Director[]{";
 
                         for (int i = 0; i < ms.message_property.arguments.size(); i++) {
                             CExpression arg = ms.message_property.arguments.get(i);

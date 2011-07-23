@@ -426,6 +426,7 @@ public class CCompilationUnit {
 			code += "import salsa_lite.local_fcs.Message;\n";
 			code += "import salsa_lite.local_fcs.StageService;\n";
             if (module_string == null || !module_string.equals("salsa_lite.local_fcs.language.")) {
+                code += "import salsa_lite.local_fcs.language.Director;\n";
                 code += "import salsa_lite.local_fcs.language.JoinDirector;\n";
                 code += "import salsa_lite.local_fcs.language.MessageDirector;\n";
                 code += "import salsa_lite.local_fcs.language.ContinuationDirector;\n";

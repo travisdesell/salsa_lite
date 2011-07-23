@@ -5,6 +5,7 @@ import salsa_lite.local_fcs.SynchronousMailboxStage;
 import salsa_lite.local_fcs.LocalActor;
 import salsa_lite.local_fcs.Message;
 import salsa_lite.local_fcs.StageService;
+import salsa_lite.local_fcs.language.Director;
 import salsa_lite.local_fcs.language.JoinDirector;
 import salsa_lite.local_fcs.language.MessageDirector;
 import salsa_lite.local_fcs.language.ContinuationDirector;
@@ -42,7 +43,6 @@ public class ThreadRing extends salsa_lite.local_fcs.LocalActor {
 
 	public void construct(int id) {
 		this.id = id;
-		System.out.println("created threadring: " + id);
 	}
 
 	public void construct(String[] args) {
