@@ -37,8 +37,6 @@ public class ContinuationDirector extends Director {
 	public void invokeConstructor(int messageId, Object[] arguments) throws ConstructorNotFoundException {
 		switch(messageId) {
 			case 0: construct(); return;
-			/* Overloaded Constructors */
-			case 1: super.construct(); return;
 			default: throw new ConstructorNotFoundException(messageId, arguments);
 		}
 	}

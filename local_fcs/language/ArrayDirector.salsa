@@ -39,6 +39,7 @@ behavior ArrayDirector<T> extends SynchronizationDirector {
             if (valueCount >= reqTokens) {
                 Director director = directors.get(i);
                 if (director instanceof ValueDirector) {
+                    //Do not need to deep copy here
                     ((ValueDirector)director)<-setValue(values);
                 } else {
                     ((ContinuationDirector)director)<-resolve();
@@ -57,6 +58,7 @@ behavior ArrayDirector<T> extends SynchronizationDirector {
             self.requiredTokens.add(reqTokens);
 			pass later;
 		} else {
+            //Do not need to deep copy here
             pass values;
         }
     }
@@ -68,6 +70,7 @@ behavior ArrayDirector<T> extends SynchronizationDirector {
 			pass later;
 		} else {
             pass values;
+            //Do not need to deep copy here
         }
 	}
 }

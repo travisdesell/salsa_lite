@@ -270,21 +270,6 @@ public class CCompilationUnit {
             }
 		}
 
-        if (at.overloaded_constructors.size() > 0) {
-            code += CIndent.getIndent() + "/* Overloaded Constructors */\n";
-            for (int j = 0; j < at.overloaded_constructors.size(); j++) {
-                ConstructorSymbol cm = at.getOverloadedConstructor(j);
-
-                try {
-                    code += CIndent.getIndent() + "case " + cm.getId() + ": super.construct" + getCaseInvocation(cm.parameterTypes) + "; return;\n";
-                } catch (SalsaNotFoundException snfe) {
-                    CompilerErrors.printErrorMessage("[CCompilationUnit.getInvokeConstructorCode]: Error getting parameter types for constructor. " + snfe.toString(), getConstructors().get(j));
-                    throw new RuntimeException(snfe);
-                }
-            }
-        }
-
-
 		code += CIndent.getIndent() + "default: throw new ConstructorNotFoundException(messageId, arguments);\n";
 		CIndent.decreaseIndent();
 		code += CIndent.getIndent() + "}\n";

@@ -29,7 +29,9 @@ behavior TokenDirector extends ValueDirector {
             director = directors.removeFirst();
 			position = positions.removeFirst();
 
-            director<-setValue(position, value);
+            //need to do this explicitly so the runtime doesn't add a deep copy (which is unnecessary)
+            //director<-setValue(position, value);
+            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 0 /*setValue*/, new Object[]{position, value}));
 		}
 	}
 
@@ -38,7 +40,9 @@ behavior TokenDirector extends ValueDirector {
 			directors.add(director);
 			positions.add(position);
 		} else {
-            director<-setValue(position, value);
+            //need to do this explicitly so the runtime doesn't add a deep copy (which is unnecessary)
+            //director<-setValue(position, value);
+            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 0 /*setValue*/, new Object[]{position, value}));
 		}
 	}
 

@@ -111,7 +111,7 @@ public class StageService {
 		MessageDirector md = MessageDirector.construct(2, new Object[]{input_message, arguments, token_positions, input_continuation}, target.stage);
 	}
 
-	public final static void sendMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector[] input_continuations) {
+	public final static void sendMessage(LocalActor target, int message_id, Object[] arguments, Director[] input_continuations) {
 		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
 		MessageDirector md = MessageDirector.construct(1, new Object[]{input_message, input_continuations}, target.stage);
 	}

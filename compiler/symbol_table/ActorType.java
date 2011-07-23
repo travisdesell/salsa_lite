@@ -37,7 +37,7 @@ public class ActorType extends TypeSymbol {
 		this.superType = superType;
 	}
 
-    private ActorType(String module, String name, TypeSymbol superType, ArrayList<TypeSymbol> implementsTypes, ArrayList<String> declaredGenericTypes, ArrayList<FieldSymbol> fields, ArrayList<ConstructorSymbol> constructors, ArrayList<ConstructorSymbol> overloaded_constructors, ArrayList<MessageSymbol> message_handlers, ArrayList<MessageSymbol> overloaded_message_handlers) {
+    private ActorType(String module, String name, TypeSymbol superType, ArrayList<TypeSymbol> implementsTypes, ArrayList<String> declaredGenericTypes, ArrayList<FieldSymbol> fields, ArrayList<ConstructorSymbol> constructors, ArrayList<MessageSymbol> message_handlers, ArrayList<MessageSymbol> overloaded_message_handlers) {
         this.module = module;
         this.name = name;
         this.superType = superType;
@@ -45,16 +45,14 @@ public class ActorType extends TypeSymbol {
         this.declaredGenericTypes = declaredGenericTypes;
         this.fields = fields;
         this.constructors = constructors;
-        this.overloaded_constructors = overloaded_constructors;
         this.message_handlers = message_handlers;
         this.overloaded_message_handlers = overloaded_message_handlers;
     }
 
     public TypeSymbol copy() {
-        ActorType copy = new ActorType(module, name, superType, new ArrayList<TypeSymbol>(implementsTypes), new ArrayList<String>(declaredGenericTypes), new ArrayList<FieldSymbol>(fields), new ArrayList<ConstructorSymbol>(constructors), new ArrayList<ConstructorSymbol>(overloaded_constructors), new ArrayList<MessageSymbol>(message_handlers), new ArrayList<MessageSymbol>(overloaded_message_handlers));
+        ActorType copy = new ActorType(module, name, superType, new ArrayList<TypeSymbol>(implementsTypes), new ArrayList<String>(declaredGenericTypes), new ArrayList<FieldSymbol>(fields), new ArrayList<ConstructorSymbol>(constructors), new ArrayList<MessageSymbol>(message_handlers), new ArrayList<MessageSymbol>(overloaded_message_handlers));
 
         for (ConstructorSymbol cs : copy.constructors)   cs.enclosingType = copy;
-        for (ConstructorSymbol cs : copy.overloaded_constructors)   cs.enclosingType = copy;
         for (MessageSymbol ms : copy.message_handlers)  ms.enclosingType = copy;
         for (MessageSymbol ms : copy.overloaded_message_handlers)  ms.enclosingType = copy;
         for (FieldSymbol fs : copy.fields)              fs.enclosingType = copy;
@@ -86,7 +84,6 @@ public class ActorType extends TypeSymbol {
         }
 
         for (int i = 0; i < copy.constructors.size(); i++)       copy.constructors.set(i, copy.constructors.get(i).replaceGenerics(declaredGenericTypes, instantiatedGenericTypes));
-        for (int i = 0; i < copy.overloaded_constructors.size(); i++)       copy.overloaded_constructors.set(i, copy.overloaded_constructors.get(i).replaceGenerics(declaredGenericTypes, instantiatedGenericTypes));
         for (int i = 0; i < copy.message_handlers.size(); i++)   copy.message_handlers.set(i, copy.message_handlers.get(i).replaceGenerics(declaredGenericTypes, instantiatedGenericTypes));
         for (int i = 0; i < copy.overloaded_message_handlers.size(); i++)   copy.overloaded_message_handlers.set(i, copy.overloaded_message_handlers.get(i).replaceGenerics(declaredGenericTypes, instantiatedGenericTypes));
         for (int i = 0; i < copy.fields.size(); i++)             copy.fields.set(i, copy.fields.get(i).replaceGenerics(declaredGenericTypes, instantiatedGenericTypes));
@@ -98,12 +95,9 @@ public class ActorType extends TypeSymbol {
         return copy;
     }
 
-    public ArrayList<ConstructorSymbol> overloaded_constructors = new ArrayList<ConstructorSymbol>();
-
 	public ArrayList<MessageSymbol> message_handlers = new ArrayList<MessageSymbol>();
 	public ArrayList<MessageSymbol> overloaded_message_handlers = new ArrayList<MessageSymbol>();
 
-    public ConstructorSymbol    getOverloadedConstructor(int i)         { return overloaded_constructors.get(i); }
 	public MessageSymbol        getMessageHandler(int i)                { return message_handlers.get(i); }
 	public MessageSymbol        getOverloadedMessageHandler(int i)      { return overloaded_message_handlers.get(i); }
 
@@ -245,12 +239,10 @@ public class ActorType extends TypeSymbol {
         }
 
         ArrayList<MessageSymbol> superclassMessageHandlers = null;
-        ArrayList<ConstructorSymbol> superclassConstructors = null;
         if (getSuperType() instanceof ActorType) {
             ActorType superType = (ActorType)getSuperType();
 
             superclassMessageHandlers = new ArrayList<MessageSymbol>();
-            superclassConstructors = new ArrayList<ConstructorSymbol>();
 
             for (MessageSymbol ms : superType.message_handlers) superclassMessageHandlers.add(ms.copy());
             for (MessageSymbol ms : superType.overloaded_message_handlers) {
@@ -259,63 +251,24 @@ public class ActorType extends TypeSymbol {
                 superclassMessageHandlers.add(copy);
             }
 
-            for (ConstructorSymbol cs : superType.constructors) superclassConstructors.add(cs.copy());
-            for (ConstructorSymbol cs : superType.overloaded_constructors) {
-                ConstructorSymbol copy = cs.copy();
-                copy.isOverloadedByParent = true;
-                superclassConstructors.add(cs.copy());
-            }
-
         } else {
             superclassMessageHandlers = new ArrayList<MessageSymbol>();
-            superclassConstructors = new ArrayList<ConstructorSymbol>();
         }
 
-        ArrayList<ConstructorSymbol> childConstructors = new ArrayList<ConstructorSymbol>();
 		Vector<CConstructor> cv = cu.getConstructors();
         if (cv != null) {
             for (i = 0; i < cv.size(); i++) {
                 ConstructorSymbol cs = new ConstructorSymbol(i, this, cv.get(i));
-                childConstructors.add( cs );
+                constructors.add( cs );
             }
             if (cv.size() == 0) {
                 ConstructorSymbol cs = new ConstructorSymbol(0, this, new TypeSymbol[]{});
-                childConstructors.add( cs );
+                constructors.add( cs );
             } else if (cv.size() == 1 && cv.get(0).getArgumentTypes().length == 1 && cv.get(0).getArgumentTypes()[0].equals("String[]")) {
                 ConstructorSymbol cs = new ConstructorSymbol(0, this, new TypeSymbol[]{});
-                childConstructors.add( cs );
+                constructors.add( cs );
             }
         }
-
-        for (i = 0; i < superclassConstructors.size(); i++) {
-            ConstructorSymbol scs = superclassConstructors.get(i);
-
-            ConstructorSymbol overloadedConstructor = null;
-            for (ConstructorSymbol ccs : childConstructors) {
-                if (scs.matches(ccs) == 0) {
-                    if (overloadedConstructor != null) {
-                        System.err.println("ERROR, multiple methods override parent method. Need to throw a good compiler error.");
-                        throw new RuntimeException();
-                    } else {
-                        overloadedConstructor = ccs;
-                    }
-                }
-            }
-
-            if (overloadedConstructor == null) {
-                constructors.add(scs);
-            } else {
-                constructors.add(overloadedConstructor);
-                childConstructors.remove(overloadedConstructor);
-                overloaded_constructors.add(scs.copy());
-            }
-        }
-        
-        for (ConstructorSymbol cs : childConstructors) constructors.add(cs);
-        int current = 0;
-        for (ConstructorSymbol cs : constructors) cs.id = current++;
-        for (ConstructorSymbol cs : overloaded_constructors) cs.id = current++; 
-
 
         ArrayList<MessageSymbol> childMessageHandlers = new ArrayList<MessageSymbol>();
 
@@ -356,7 +309,7 @@ public class ActorType extends TypeSymbol {
         }
 
         for (MessageSymbol ms : childMessageHandlers) message_handlers.add(ms);
-        current = 0;
+        int current = 0;
         for (MessageSymbol ms : message_handlers) ms.id = current++;
         for (MessageSymbol ms : overloaded_message_handlers) ms.id = current++; 
 
