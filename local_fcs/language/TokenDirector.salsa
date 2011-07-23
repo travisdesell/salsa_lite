@@ -2,9 +2,9 @@ module salsa_lite.local_fcs.language;
 
 import object java.util.LinkedList;
 
-behavior TokenDirector extends ContinuationDirector {
+behavior TokenDirector extends ValueDirector {
 
-	LinkedList<Director> directors = new LinkedList<Director>();
+	LinkedList<MessageDirector> directors = new LinkedList<MessageDirector>();
 	LinkedList<Integer> positions = new LinkedList<Integer>();
 
 	Object value;
@@ -19,30 +19,26 @@ behavior TokenDirector extends ContinuationDirector {
     }
 
 	ack setValue(Object value) {
-//        System.err.println("set value for token director: " + value + ", directors.size(): " + directors.size() + ", positions.size(): " + positions.size());
-
         self.unresolved = false;
 		self.value = value;
 
-		Director director;
+		MessageDirector director;
 		int position;
 
 		while (directors.size() > 0) {
             director = directors.removeFirst();
 			position = positions.removeFirst();
 
-            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, (LocalActor)director, 0 /*setValue*/, new Object[]{position, value}));
+            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 0 /*setValue*/, new Object[]{position, value}));
 		}
 	}
 
-	ack addDirector(Director director, int position) {
-//        System.err.println("adding message director with position: " + position + " to token director.");
-
+	ack addDirector(MessageDirector director, int position) {
 		if (unresolved) {
 			directors.add(director);
 			positions.add(position);
 		} else {
-            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, (LocalActor)director, 0 /*setValue*/, new Object[]{position, value}));
+            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 0 /*setValue*/, new Object[]{position, value}));
 		}
 	}
 

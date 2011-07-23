@@ -490,7 +490,11 @@ public class CCompilationUnit {
             throw new RuntimeException(snfe);
         }
         if (behavior_declaration != null) {
-            code += "public class " + actor_name;
+            if (behavior_declaration.is_abstract) {
+                code += "abstract public class " + actor_name;
+            } else {
+                code += "public class " + actor_name;
+            }
         } else {
             code += "public interface " + actor_name;
         }
@@ -519,8 +523,6 @@ public class CCompilationUnit {
 
 		code += " {\n";
 		CIndent.increaseIndent();
-
-		if (behavior_declaration != null && behavior_declaration.java_statement != null) code += CIndent.getIndent() + behavior_declaration.java_statement.toJavaCode() + "\n";
 
 //		System.err.println("ATTEMPTING TO ADD CONTAINED MESSAGE HANDLERS");
 		Vector<CMessageHandler> containedMessageHandlers = new Vector<CMessageHandler>();
@@ -563,22 +565,26 @@ public class CCompilationUnit {
 
         if (behavior_declaration != null) {
             code += getInvokeMessageCode() + "\n";
-            code += getInvokeConstructorCode() + "\n";
+            if (!behavior_declaration.is_abstract) {
+                code += getInvokeConstructorCode() + "\n";
+            }
         }
 
-		code += getConstructorCode() + "\n";
+        if (behavior_declaration != null && !behavior_declaration.is_abstract) {
+    		code += getConstructorCode() + "\n";
+        }
 		code += getMessageCode() + "\n";
 
         if (actor_name.contains("<")) actor_name = actor_name.substring(0, actor_name.indexOf('<'));
 
-        if (behavior_declaration != null) {
-            if (System.getProperty("local") != null) {
-                code += CIndent.getIndent() + "public " + actor_name + "(long identifier) { super(identifier); }\n\n";
-            } else if (System.getProperty("wwc") != null) {
+        if (System.getProperty("local_fcs") != null) {
+            code += CIndent.getIndent() + "public " + actor_name + "() { super(); }\n\n";
+            code += CIndent.getIndent() + "public " + actor_name + "(SynchronousMailboxStage stage) { super(stage); }\n\n";
+        }
+
+        if (behavior_declaration != null && !behavior_declaration.is_abstract) {
+            if (System.getProperty("wwc") != null) {
                 code += CIndent.getIndent() + "public " + actor_name + "(String identifier) { super(identifier); }\n\n";
-            } else if (System.getProperty("local_fcs") != null) {
-                code += CIndent.getIndent() + "public " + actor_name + "() { super(); }\n\n";
-                code += CIndent.getIndent() + "public " + actor_name + "(SynchronousMailboxStage stage) { super(stage); }\n\n";
             }
 
             if (System.getProperty("local_noref") != null || System.getProperty("local_fcs") != null) {

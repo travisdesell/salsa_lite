@@ -4,7 +4,7 @@
 
 package salsa_lite.local_fcs;
 
-import salsa_lite.local_fcs.language.ContinuationDirector;
+import salsa_lite.local_fcs.language.Director;
 
 import java.util.Arrays;
 
@@ -23,7 +23,7 @@ public class Message {
 	public int message_id;
 	public Object[] arguments;
 
-	public ContinuationDirector continuationDirector;
+	public Director continuationDirector;
 
 	public Message(int type, LocalActor target, int message_id, Object[] arguments) {
 		this.type = type;
@@ -32,7 +32,7 @@ public class Message {
 		this.arguments = arguments;
 	}
 
-	public Message(int type, LocalActor target, int message_id, Object[] arguments, ContinuationDirector continuationDirector) {
+	public Message(int type, LocalActor target, int message_id, Object[] arguments, Director continuationDirector) {
 		this.type = type;
 		this.target = target;
 		this.message_id = message_id;

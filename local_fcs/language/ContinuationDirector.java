@@ -21,7 +21,7 @@ import salsa_lite.local_fcs.language.exceptions.ConstructorNotFoundException;
 
 import java.util.LinkedList;
 
-public class ContinuationDirector extends salsa_lite.local_fcs.LocalActor {
+public class ContinuationDirector extends Director {
 	boolean unresolved = true;
 	LinkedList<Message> messages = new LinkedList<Message>(  );
 
@@ -37,6 +37,8 @@ public class ContinuationDirector extends salsa_lite.local_fcs.LocalActor {
 	public void invokeConstructor(int messageId, Object[] arguments) throws ConstructorNotFoundException {
 		switch(messageId) {
 			case 0: construct(); return;
+			/* Overloaded Constructors */
+			case 1: super.construct(); return;
 			default: throw new ConstructorNotFoundException(messageId, arguments);
 		}
 	}

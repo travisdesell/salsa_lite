@@ -1,0 +1,6 @@
+module salsa_lite.local_fcs.language;
+
+abstract behavior ValueDirector extends Director {
+    abstract ack setValue(Object value);
+    abstract ack addDirector(MessageDirector director, int position);
+}

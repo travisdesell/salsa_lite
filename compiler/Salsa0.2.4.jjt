@@ -111,7 +111,8 @@ MORE : {
 /* RESERVED WORDS AND LITERALS */
 
 TOKEN : {
-      < ACK: "ack" >
+      < ABSTRACT: "abstract" >
+    | < ACK: "ack" >
     | < AT: "at" >
     | < BEHAVIOR: "behavior" >
     | < BOOLEAN: "boolean" >
@@ -318,7 +319,7 @@ CCompilationUnit CompilationUnit() : {
         { compilation_unit.import_declarations.add(import_declaration); }
     )* 
 
-    (LOOKAHEAD("behavior") compilation_unit.behavior_declaration = BehaviorDeclaration() | compilation_unit.interface_declaration = InterfaceDeclaration() )
+    (LOOKAHEAD(["abstract"] "behavior") compilation_unit.behavior_declaration = BehaviorDeclaration() | compilation_unit.interface_declaration = InterfaceDeclaration() )
     <EOF>
     
     { 
@@ -451,6 +452,9 @@ CBehaviorDeclaration BehaviorDeclaration() : {
     CLocalVariableDeclaration variable_declaration;
     CEnumeration enumeration;
 } {
+    [
+        "abstract"                                                                              { behavior_declaration.is_abstract = true; }
+    ]
     "behavior" behavior_name = Name()                                                           { behavior_declaration.behavior_name = behavior_name; }
     [
         "extends" name = Name()                                                                 { behavior_declaration.extends_name = name; }
@@ -466,7 +470,7 @@ CBehaviorDeclaration BehaviorDeclaration() : {
         (
            LOOKAHEAD("enum") enumeration = Enumeration()                                        { behavior_declaration.enumerations.add(enumeration); }
           | LOOKAHEAD(<IDENTIFIER> FormalParameters()) constructor = ConstructorDeclaration()   { behavior_declaration.constructors.add(constructor); }
-          | LOOKAHEAD(Type() <IDENTIFIER> "(") message_handler = MessageHandlerDeclaration()    { behavior_declaration.message_handlers.add(message_handler); }
+          | LOOKAHEAD(["abstract"] Type() <IDENTIFIER> "(") message_handler = MessageHandlerDeclaration()    { behavior_declaration.message_handlers.add(message_handler); }
           | variable_declaration = LocalVariableDeclaration() ";"                               { behavior_declaration.variable_declarations.add(variable_declaration); }
         )* 
     t2 = "}"
@@ -545,13 +549,13 @@ CMessageHandler InterfaceMessageHandlerDeclaration() : {
     CMessageHandler message_handler = new CMessageHandler();
     CType pass_type;
     String name;
-    Token t, t2;
+    Token t, t2 = null;
     Vector<CFormalParameter> parameters;
 } {
     pass_type = Type()
     t = <IDENTIFIER>
     parameters = FormalParameters()
-   t2 = ";"
+    t2 = ";"
     {
         message_handler.pass_type = pass_type;
         message_handler.name = t.image;
@@ -565,20 +569,39 @@ CMessageHandler MessageHandlerDeclaration() : {
     CMessageHandler message_handler = new CMessageHandler();
     CType pass_type;
     String name;
-    Token t;
+    Token t, t2 = null;
     Vector<CFormalParameter> parameters;
-    CBlock block;
+    CBlock block = null;
 } {
+    [
+        "abstract"              { message_handler.is_abstract = true; }
+    ]
     pass_type = Type()
     t = <IDENTIFIER>
     parameters = FormalParameters()
-    block = Block()
+    (
+          block = Block()
+        | t2 = ";"
+    )
     {
         message_handler.pass_type = pass_type;
         message_handler.name = t.image;
         message_handler.parameters = parameters;
-        message_handler.block = block;
-        message_handler.initLineAndColumn(pass_type, block);
+
+        if (block == null) {
+            message_handler.initLineAndColumn(pass_type, t2);
+        } else {
+            message_handler.block = block;
+            message_handler.initLineAndColumn(pass_type, block);
+        }
+
+        if (message_handler.is_abstract && block != null) {
+            CompilerErrors.printErrorMessage("abstract method cannot have a body", message_handler);
+        }
+        if (!message_handler.is_abstract && block == null) {
+            CompilerErrors.printErrorMessage("non-abstract method must have a body", message_handler);
+        }
+
         return message_handler;
     }
 }
@@ -596,7 +619,7 @@ CConstructor ConstructorDeclaration() : {
         constructor.name = t.image;
         constructor.parameters = parameters;
         constructor.block = block;
-      constructor.initLineAndColumn(t, block);
+        constructor.initLineAndColumn(t, block);
         return constructor;
     }
 }

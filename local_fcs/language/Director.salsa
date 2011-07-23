@@ -1,0 +1,4 @@
+module salsa_lite.local_fcs.language;
+
+behavior Director {
+}

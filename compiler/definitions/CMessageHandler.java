@@ -11,6 +11,8 @@ import java.util.Vector;
 
 public class CMessageHandler extends CErrorInformation {
 
+    public boolean is_abstract = false;
+
 	public CType pass_type;
 	public String name;
 
@@ -35,7 +37,13 @@ public class CMessageHandler extends CErrorInformation {
 	public String toJavaCode() {
 		SymbolTable.currentMessageName = name;
 
-		String definition_code = CIndent.getIndent() + "public ";
+		String definition_code = "";
+        
+        if (is_abstract) {
+            definition_code += CIndent.getIndent() + "abstract public ";
+        } else {
+            definition_code += CIndent.getIndent() + "public ";
+        }
 
         if (pass_type.name.equals("void")) {
             CompilerErrors.printErrorMessage("[CMessageHandler.toJavaCode] 'void' is not a valid pass type for a message. Use 'ack' instead.", pass_type);
@@ -61,10 +69,11 @@ public class CMessageHandler extends CErrorInformation {
 
 			if (i != parameters.size() - 1) definition_code += ", ";
 		}
-		definition_code += ") ";
+		definition_code += ")";
 
-		String block_code = ";";
+		String block_code = ";\n";
         if (block != null) {
+            definition_code += " ";
             block_code = block.toJavaCode() + "\n";
         }
 

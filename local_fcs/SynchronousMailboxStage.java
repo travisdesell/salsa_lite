@@ -58,6 +58,7 @@ public class SynchronousMailboxStage extends Thread {
 			message = getMessage();
 
 			try {
+//                System.err.println("invoking message: " + message);
 				switch (message.type) {
 					case Message.CONSTRUCT_MESSAGE:
 						message.target.invokeConstructor(message.message_id, message.arguments);

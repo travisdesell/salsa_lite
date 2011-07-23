@@ -8,6 +8,8 @@ import salsa_lite.compiler.definitions.CMessageHandler;
 
 public class MessageSymbol extends Invokable {
 
+    public boolean is_abstract = false;
+
     TypeSymbol passType;
     public TypeSymbol getPassType()     { return passType; }
 
@@ -42,6 +44,8 @@ public class MessageSymbol extends Invokable {
     public MessageSymbol(int id, TypeSymbol enclosingType, CMessageHandler messageHandler) {
         super(id, messageHandler.name, enclosingType);
 
+        if (messageHandler.is_abstract) this.is_abstract = true;
+
         try {
             this.passType = SymbolTable.getTypeSymbol( messageHandler.pass_type.name );
         } catch (SalsaNotFoundException snfe) {
@@ -66,6 +70,7 @@ public class MessageSymbol extends Invokable {
     public MessageSymbol copy() {
         MessageSymbol copy = new MessageSymbol(this.id, this.name, this.enclosingType, this.passType, this.parameterTypes);
         copy.isOverloadedByParent = this.isOverloadedByParent;
+        copy.is_abstract = this.is_abstract;
         return copy;
     }
 }

@@ -25,8 +25,7 @@ public class DeepCopy {
         Object obj = null;
         try {
             // Write the object out to a byte array
-            FastByteArrayOutputStream fbos =
-                    new FastByteArrayOutputStream();
+            FastByteArrayOutputStream fbos = new FastByteArrayOutputStream();
             ObjectOutputStream out = new ObjectOutputStream(fbos);
             out.writeObject(object);
             out.flush();
@@ -34,8 +33,7 @@ public class DeepCopy {
 
             // Retrieve an input stream from the byte array and read
             // a copy of the object back in.
-            ObjectInputStream in =
-                new ObjectInputStream(fbos.getInputStream());
+            ObjectInputStream in = new ObjectInputStream(fbos.getInputStream());
             obj = in.readObject();
         }
         catch(IOException e) {

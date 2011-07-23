@@ -1,7 +1,6 @@
 module salsa_lite.local_fcs.language;
 
-behavior MessageDirector implements Director {
-
+behavior MessageDirector {
 	Message message;
 	int required_tokens;
 
@@ -12,15 +11,15 @@ behavior MessageDirector implements Director {
         input_continuation<-setMessage( new Message(Message.SIMPLE_MESSAGE, self, 0 /*resolve*/, new Object[]{-1, null}) );
 	}
 
-    MessageDirector(Message message, ContinuationDirector[] input_continuations) {
+    MessageDirector(Message message, Director[] input_continuations) {
         self.message = message;
         self.required_tokens = input_continuations.length;
 
         for (int i = 0; i < input_continuations.length; i++) {
-            if (input_continuations[i] instanceof TokenDirector) {
-                ((TokenDirector)input_continuations[i])<-addDirector(self, -1);
+            if (input_continuations[i] instanceof ValueDirector) {
+                ((ValueDirector)input_continuations[i])<-addDirector(self, -1);
             } else {
-                input_continuations[i]<-setMessage( new Message(Message.SIMPLE_MESSAGE, self, 0 /*resolve*/, new Object[]{-1, null}) );
+                ((ContinuationDirector)input_continuations[i])<-setMessage( new Message(Message.SIMPLE_MESSAGE, self, 0 /*setValue*/, new Object[]{-1, null}) );
             }
         }
 
@@ -33,7 +32,7 @@ behavior MessageDirector implements Director {
         input_continuation<-setMessage( new Message(Message.SIMPLE_MESSAGE, self, 0 /*setValue*/, new Object[]{-1, null}) );
 
         for (int i = 0; i < token_positions.length; i++) {
-            ((TokenDirector)arguments[token_positions[i]])<-addDirector(self, token_positions[i]);
+            ((ValueDirector)arguments[token_positions[i]])<-addDirector(self, token_positions[i]);
         }
     }
 
@@ -42,23 +41,23 @@ behavior MessageDirector implements Director {
         self.required_tokens = token_positions.length;
 
         for (int i = 0; i < token_positions.length; i++) {
-            ((TokenDirector)arguments[token_positions[i]])<-addDirector(self, token_positions[i]);
+            ((ValueDirector)arguments[token_positions[i]])<-addDirector(self, token_positions[i]);
         }
     }
 
-    MessageDirector(Message message, Object[] arguments, int[] token_positions, ContinuationDirector[] input_continuations) {
+    MessageDirector(Message message, Object[] arguments, int[] token_positions, Director[] input_continuations) {
         self.message = message;
         self.required_tokens = token_positions.length + input_continuations.length;
 
         for (int i = 0; i < token_positions.length; i++) {
-            ((TokenDirector)arguments[token_positions[i]])<-addDirector(self, token_positions[i]);
+            ((ValueDirector)arguments[token_positions[i]])<-addDirector(self, token_positions[i]);
         }
 
         for (int i = 0; i < input_continuations.length; i++) {
-            if (input_continuations[i] instanceof TokenDirector) {
-                ((TokenDirector)input_continuations[i])<-addDirector(self, -1);
+            if (input_continuations[i] instanceof ValueDirector) {
+                ((ValueDirector)input_continuations[i])<-addDirector(self, -1);
             } else {
-                input_continuations[i]<-setMessage( new Message(Message.SIMPLE_MESSAGE, self, 0 /*setValue*/, new Object[]{-1, null}) );
+                ((ContinuationDirector)input_continuations[i])<-setMessage( new Message(Message.SIMPLE_MESSAGE, self, 0 /*setValue*/, new Object[]{-1, null}) );
             }
         }
     }

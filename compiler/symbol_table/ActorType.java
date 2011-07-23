@@ -348,7 +348,9 @@ public class ActorType extends TypeSymbol {
                 childMessageHandlers.remove(overloadedMessageHandler);
 //                System.err.println("child message handlers: " + childMessageHandlers.toString() + " (after remove)");
 
-                overloaded_message_handlers.add(sms.copy());
+                if (!sms.is_abstract) {
+                    overloaded_message_handlers.add(sms.copy());
+                }
 //                System.err.println("adding to overloaded message handlers for: " + toString() + " -- " + sms.toString());
             }
         }

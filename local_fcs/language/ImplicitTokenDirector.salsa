@@ -1,12 +1,11 @@
 module salsa_lite.local_fcs.language;
 
 
-behavior ImplicitTokenDirector extends TokenDirector {
+behavior ImplicitTokenDirector extends ValueDirector {
 
 	Object value;
-	Director director;
+	MessageDirector director;
 	int position;
-	TokenDirector forward_director;
 
 	ImplicitTokenDirector() {
 	}
@@ -15,26 +14,16 @@ behavior ImplicitTokenDirector extends TokenDirector {
 		self.value = value;
 
 		if (director != null) {
-            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, (LocalActor)director, 0 /*setValue*/, new Object[]{position, value}));
+            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 0 /*setValue*/, new Object[]{position, value}));
 		}
 	}
 
-	ack addDirector(Director director, int position) {
-		if (forward_director != null) {
-			forward_director<-addDirector(director, position);
-		} else if (value == null) {
+	ack addDirector(MessageDirector director, int position) {
+        if (value == null) {
 			self.director = director;
 			self.position = position;
 		} else {
-            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, (LocalActor)director, 0 /*setValue*/, new Object[]{position, value}));
+            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 0 /*setValue*/, new Object[]{position, value}));
 		}       
 	}       
-
-	ack forwardTarget(TokenDirector forward_director) {
-		if (director != null) {
-			forward_director<-addDirector(director, position);
-		} else {
-			self.forward_director = forward_director;
-		}
-	}
 }

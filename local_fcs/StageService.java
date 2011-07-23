@@ -4,6 +4,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import salsa_lite.local_fcs.language.ContinuationDirector;
+import salsa_lite.local_fcs.language.Director;
 import salsa_lite.local_fcs.language.MessageDirector;
 import salsa_lite.local_fcs.language.ImplicitTokenDirector;
 import salsa_lite.local_fcs.language.TokenDirector;
@@ -54,32 +55,32 @@ public class StageService {
 	/**
 	 *	Create a message to be used in a pass statement (first class continuation)
 	 */
-	public final static void sendPassMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector currentContinuation) {
+	public final static void sendPassMessage(LocalActor target, int message_id, Object[] arguments, Director currentContinuation) {
         Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
 		target.stage.putMessageInMailbox(input_message);
 	}
 
-	public final static void sendPassMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector input_continuation, ContinuationDirector currentContinuation) {
+	public final static void sendPassMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector input_continuation, Director currentContinuation) {
         Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
 		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 1 /*setMessage()*/, new Object[]{input_message}));
 	}
 
-	public final static void sendPassMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector[] input_continuations, ContinuationDirector currentContinuation) {
+	public final static void sendPassMessage(LocalActor target, int message_id, Object[] arguments, Director[] input_continuations, Director currentContinuation) {
         Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
 		MessageDirector md = MessageDirector.construct(1, new Object[]{input_message, input_continuations}, target.stage);
 	}
 
-	public final static void sendPassMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector currentContinuation) {
+	public final static void sendPassMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, Director currentContinuation) {
 		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
 		MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target.stage);
 	}
 
-	public final static void sendPassMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation, ContinuationDirector currentContinuation) {
+	public final static void sendPassMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation, Director currentContinuation) {
 		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
 		MessageDirector md = MessageDirector.construct(2, new Object[]{input_message, arguments, token_positions, input_continuation}, target.stage);
 	}
 
-	public final static void sendPassMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector[] input_continuations, ContinuationDirector currentContinuation) {
+	public final static void sendPassMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, Director[] input_continuations, Director currentContinuation) {
 		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
 		MessageDirector md = MessageDirector.construct(4, new Object[]{input_message, arguments, token_positions, input_continuations}, target.stage);
 	}
@@ -115,7 +116,7 @@ public class StageService {
 		MessageDirector md = MessageDirector.construct(1, new Object[]{input_message, input_continuations}, target.stage);
 	}
 
-	public final static void sendMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector[] input_continuations) {
+	public final static void sendMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, Director[] input_continuations) {
 		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
 		MessageDirector md = MessageDirector.construct(4, new Object[]{input_message, arguments, token_positions, input_continuations}, target.stage);
 	}
@@ -143,7 +144,7 @@ public class StageService {
 		return output_continuation;
 	}
 
-	public final static ContinuationDirector sendContinuationMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector[] input_continuations) {
+	public final static ContinuationDirector sendContinuationMessage(LocalActor target, int message_id, Object[] arguments, Director[] input_continuations) {
 		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, target.stage);
 
 		Message input_message = new Message(Message.CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
@@ -170,7 +171,7 @@ public class StageService {
 		return output_continuation;
 	}
 
-	public final static ContinuationDirector sendContinuationMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector[] input_continuations) {
+	public final static ContinuationDirector sendContinuationMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, Director[] input_continuations) {
 		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, target.stage);
 
 		Message input_message = new Message(Message.CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
@@ -203,7 +204,7 @@ public class StageService {
 		return output_continuation;
 	}
 
-	public final static TokenDirector sendTokenMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector[] input_continuations) {
+	public final static TokenDirector sendTokenMessage(LocalActor target, int message_id, Object[] arguments, Director[] input_continuations) {
 		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target.stage);
 
 		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
@@ -231,7 +232,7 @@ public class StageService {
 		return output_continuation;
 	}
 
-	public final static TokenDirector sendTokenMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector[] input_continuations) {
+	public final static TokenDirector sendTokenMessage(LocalActor target, int message_id, Object[] arguments, int[] token_positions, Director[] input_continuations) {
 		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target.stage);
 
 		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
@@ -259,7 +260,7 @@ public class StageService {
 		return output_continuation;
 	}
 
-	public final static ImplicitTokenDirector sendImplicitTokenMessage(LocalActor target, int message_id, Object[] arguments, ContinuationDirector[] input_continuations) {
+	public final static ImplicitTokenDirector sendImplicitTokenMessage(LocalActor target, int message_id, Object[] arguments, Director[] input_continuations) {
 		ImplicitTokenDirector output_continuation = ImplicitTokenDirector.construct(0 /*construct()*/, null, target.stage);
 
 		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);

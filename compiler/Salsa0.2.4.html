@@ -105,7 +105,8 @@
   <TD>
    <PRE>
 &lt;DEFAULT&gt; TOKEN : {
-&lt;ACK: "ack"&gt;
+&lt;ABSTRACT: "abstract"&gt;
+| &lt;ACK: "ack"&gt;
 | &lt;AT: "at"&gt;
 | &lt;BEHAVIOR: "behavior"&gt;
 | &lt;BOOLEAN: "boolean"&gt;
@@ -333,7 +334,7 @@
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod4">BehaviorDeclaration</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>"behavior" <A HREF="#prod6">Name</A> ( "extends" <A HREF="#prod6">Name</A> )? ( "implements" <A HREF="#prod6">Name</A> ( "," <A HREF="#prod6">Name</A> )* )? "{" ( <A HREF="#prod11">Enumeration</A> | <A HREF="#prod12">ConstructorDeclaration</A> | <A HREF="#prod13">MessageHandlerDeclaration</A> | <A HREF="#prod10">LocalVariableDeclaration</A> ";" )* "}"</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( "abstract" )? "behavior" <A HREF="#prod6">Name</A> ( "extends" <A HREF="#prod6">Name</A> )? ( "implements" <A HREF="#prod6">Name</A> ( "," <A HREF="#prod6">Name</A> )* )? "{" ( <A HREF="#prod11">Enumeration</A> | <A HREF="#prod12">ConstructorDeclaration</A> | <A HREF="#prod13">MessageHandlerDeclaration</A> | <A HREF="#prod10">LocalVariableDeclaration</A> ";" )* "}"</TD>
 </TR>
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod11">Enumeration</A></TD>
@@ -358,7 +359,7 @@
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod13">MessageHandlerDeclaration</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE><A HREF="#prod14">Type</A> &lt;IDENTIFIER&gt; <A HREF="#prod16">FormalParameters</A> <A HREF="#prod17">Block</A></TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( "abstract" )? <A HREF="#prod14">Type</A> &lt;IDENTIFIER&gt; <A HREF="#prod16">FormalParameters</A> ( <A HREF="#prod17">Block</A> | ";" )</TD>
 </TR>
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod12">ConstructorDeclaration</A></TD>

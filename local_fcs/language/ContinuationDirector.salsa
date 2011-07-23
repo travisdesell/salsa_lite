@@ -2,7 +2,7 @@ module salsa_lite.local_fcs.language;
 
 import object java.util.LinkedList;
 
-behavior ContinuationDirector {
+behavior ContinuationDirector extends Director {
 
 	boolean unresolved = true;
 	LinkedList<Message> messages = new LinkedList<Message>();
@@ -26,4 +26,5 @@ behavior ContinuationDirector {
 			StageService.sendMessage(message);
 		}
 	}
+
 }

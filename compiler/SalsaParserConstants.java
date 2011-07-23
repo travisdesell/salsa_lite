@@ -17,207 +17,209 @@ public interface SalsaParserConstants {
   /** RegularExpression Id. */
   int MULTI_LINE_COMMENT = 11;
   /** RegularExpression Id. */
-  int ACK = 13;
+  int ABSTRACT = 13;
   /** RegularExpression Id. */
-  int AT = 14;
+  int ACK = 14;
   /** RegularExpression Id. */
-  int BEHAVIOR = 15;
+  int AT = 15;
   /** RegularExpression Id. */
-  int BOOLEAN = 16;
+  int BEHAVIOR = 16;
   /** RegularExpression Id. */
-  int BREAK = 17;
+  int BOOLEAN = 17;
   /** RegularExpression Id. */
-  int BYTE = 18;
+  int BREAK = 18;
   /** RegularExpression Id. */
-  int CASE = 19;
+  int BYTE = 19;
   /** RegularExpression Id. */
-  int CHAR = 20;
+  int CASE = 20;
   /** RegularExpression Id. */
-  int CONST = 21;
+  int CHAR = 21;
   /** RegularExpression Id. */
-  int _DEFAULT = 22;
+  int CONST = 22;
   /** RegularExpression Id. */
-  int DELAY = 23;
+  int _DEFAULT = 23;
   /** RegularExpression Id. */
-  int DOUBLE = 24;
+  int DELAY = 24;
   /** RegularExpression Id. */
-  int ENUM = 25;
+  int DOUBLE = 25;
   /** RegularExpression Id. */
-  int ELSE = 26;
+  int ENUM = 26;
   /** RegularExpression Id. */
-  int ENDIF = 27;
+  int ELSE = 27;
   /** RegularExpression Id. */
-  int EXTENDS = 28;
+  int ENDIF = 28;
   /** RegularExpression Id. */
-  int FALSE = 29;
+  int EXTENDS = 29;
   /** RegularExpression Id. */
-  int FLOAT = 30;
+  int FALSE = 30;
   /** RegularExpression Id. */
-  int FOR = 31;
+  int FLOAT = 31;
   /** RegularExpression Id. */
-  int IF = 32;
+  int FOR = 32;
   /** RegularExpression Id. */
-  int IMPLEMENTS = 33;
+  int IF = 33;
   /** RegularExpression Id. */
-  int IMPORT = 34;
+  int IMPLEMENTS = 34;
   /** RegularExpression Id. */
-  int INSTANCEOF = 35;
+  int IMPORT = 35;
   /** RegularExpression Id. */
-  int INT = 36;
+  int INSTANCEOF = 36;
   /** RegularExpression Id. */
-  int INTERFACE = 37;
+  int INT = 37;
   /** RegularExpression Id. */
-  int LATER = 38;
+  int INTERFACE = 38;
   /** RegularExpression Id. */
-  int LONG = 39;
+  int LATER = 39;
   /** RegularExpression Id. */
-  int LOOP = 40;
+  int LONG = 40;
   /** RegularExpression Id. */
-  int MODULE = 41;
+  int LOOP = 41;
   /** RegularExpression Id. */
-  int NEW = 42;
+  int MODULE = 42;
   /** RegularExpression Id. */
-  int NULL = 43;
+  int NEW = 43;
   /** RegularExpression Id. */
-  int OBJECT = 44;
+  int NULL = 44;
   /** RegularExpression Id. */
-  int PASS = 45;
+  int OBJECT = 45;
   /** RegularExpression Id. */
-  int PARENT = 46;
+  int PASS = 46;
   /** RegularExpression Id. */
-  int PUBLIC = 47;
+  int PARENT = 47;
   /** RegularExpression Id. */
-  int REFERENCE = 48;
+  int PUBLIC = 48;
   /** RegularExpression Id. */
-  int SELF = 49;
+  int REFERENCE = 49;
   /** RegularExpression Id. */
-  int SHORT = 50;
+  int SELF = 50;
   /** RegularExpression Id. */
-  int SUPER = 51;
+  int SHORT = 51;
   /** RegularExpression Id. */
-  int SWITCH = 52;
+  int SUPER = 52;
   /** RegularExpression Id. */
-  int _TOKEN = 53;
+  int SWITCH = 53;
   /** RegularExpression Id. */
-  int TRUE = 54;
+  int _TOKEN = 54;
   /** RegularExpression Id. */
-  int WAITFOR = 55;
+  int TRUE = 55;
   /** RegularExpression Id. */
-  int WHILE = 56;
+  int WAITFOR = 56;
   /** RegularExpression Id. */
-  int INTEGER_LITERAL = 57;
+  int WHILE = 57;
   /** RegularExpression Id. */
-  int DECIMAL_LITERAL = 58;
+  int INTEGER_LITERAL = 58;
   /** RegularExpression Id. */
-  int HEX_LITERAL = 59;
+  int DECIMAL_LITERAL = 59;
   /** RegularExpression Id. */
-  int OCTAL_LITERAL = 60;
+  int HEX_LITERAL = 60;
   /** RegularExpression Id. */
-  int FLOATING_POINT_LITERAL = 61;
+  int OCTAL_LITERAL = 61;
   /** RegularExpression Id. */
-  int EXPONENT = 62;
+  int FLOATING_POINT_LITERAL = 62;
   /** RegularExpression Id. */
-  int CHARACTER_LITERAL = 63;
+  int EXPONENT = 63;
   /** RegularExpression Id. */
-  int STRING_LITERAL = 64;
+  int CHARACTER_LITERAL = 64;
   /** RegularExpression Id. */
-  int IDENTIFIER = 65;
+  int STRING_LITERAL = 65;
   /** RegularExpression Id. */
-  int LETTER = 66;
+  int IDENTIFIER = 66;
   /** RegularExpression Id. */
-  int DIGIT = 67;
+  int LETTER = 67;
   /** RegularExpression Id. */
-  int LPAREN = 68;
+  int DIGIT = 68;
   /** RegularExpression Id. */
-  int RPAREN = 69;
+  int LPAREN = 69;
   /** RegularExpression Id. */
-  int LBRACE = 70;
+  int RPAREN = 70;
   /** RegularExpression Id. */
-  int RBRACE = 71;
+  int LBRACE = 71;
   /** RegularExpression Id. */
-  int LBRACKET = 72;
+  int RBRACE = 72;
   /** RegularExpression Id. */
-  int RBRACKET = 73;
+  int LBRACKET = 73;
   /** RegularExpression Id. */
-  int SEMICOLON = 74;
+  int RBRACKET = 74;
   /** RegularExpression Id. */
-  int COMMA = 75;
+  int SEMICOLON = 75;
   /** RegularExpression Id. */
-  int DOT = 76;
+  int COMMA = 76;
   /** RegularExpression Id. */
-  int MSG = 77;
+  int DOT = 77;
   /** RegularExpression Id. */
-  int ASSIGN = 78;
+  int MSG = 78;
   /** RegularExpression Id. */
-  int GT = 79;
+  int ASSIGN = 79;
   /** RegularExpression Id. */
-  int LT = 80;
+  int GT = 80;
   /** RegularExpression Id. */
-  int BANG = 81;
+  int LT = 81;
   /** RegularExpression Id. */
-  int TILDE = 82;
+  int BANG = 82;
   /** RegularExpression Id. */
-  int COLON = 83;
+  int TILDE = 83;
   /** RegularExpression Id. */
-  int EQ = 84;
+  int COLON = 84;
   /** RegularExpression Id. */
-  int LE = 85;
+  int EQ = 85;
   /** RegularExpression Id. */
-  int GE = 86;
+  int LE = 86;
   /** RegularExpression Id. */
-  int NE = 87;
+  int GE = 87;
   /** RegularExpression Id. */
-  int SC_OR = 88;
+  int NE = 88;
   /** RegularExpression Id. */
-  int SC_AND = 89;
+  int SC_OR = 89;
   /** RegularExpression Id. */
-  int INCR = 90;
+  int SC_AND = 90;
   /** RegularExpression Id. */
-  int DECR = 91;
+  int INCR = 91;
   /** RegularExpression Id. */
-  int PLUS = 92;
+  int DECR = 92;
   /** RegularExpression Id. */
-  int MINUS = 93;
+  int PLUS = 93;
   /** RegularExpression Id. */
-  int STAR = 94;
+  int MINUS = 94;
   /** RegularExpression Id. */
-  int SLASH = 95;
+  int STAR = 95;
   /** RegularExpression Id. */
-  int BIT_AND = 96;
+  int SLASH = 96;
   /** RegularExpression Id. */
-  int BIT_OR = 97;
+  int BIT_AND = 97;
   /** RegularExpression Id. */
-  int XOR = 98;
+  int BIT_OR = 98;
   /** RegularExpression Id. */
-  int REM = 99;
+  int XOR = 99;
   /** RegularExpression Id. */
-  int LSHIFT = 100;
+  int REM = 100;
   /** RegularExpression Id. */
-  int RSIGNEDSHIFT = 101;
+  int LSHIFT = 101;
   /** RegularExpression Id. */
-  int RUNSIGNEDSHIFT = 102;
+  int RSIGNEDSHIFT = 102;
   /** RegularExpression Id. */
-  int PLUSASSIGN = 103;
+  int RUNSIGNEDSHIFT = 103;
   /** RegularExpression Id. */
-  int MINUSASSIGN = 104;
+  int PLUSASSIGN = 104;
   /** RegularExpression Id. */
-  int STARASSIGN = 105;
+  int MINUSASSIGN = 105;
   /** RegularExpression Id. */
-  int SLASHASSIGN = 106;
+  int STARASSIGN = 106;
   /** RegularExpression Id. */
-  int ANDASSIGN = 107;
+  int SLASHASSIGN = 107;
   /** RegularExpression Id. */
-  int ORASSIGN = 108;
+  int ANDASSIGN = 108;
   /** RegularExpression Id. */
-  int XORASSIGN = 109;
+  int ORASSIGN = 109;
   /** RegularExpression Id. */
-  int REMASSIGN = 110;
+  int XORASSIGN = 110;
   /** RegularExpression Id. */
-  int LSHIFTASSIGN = 111;
+  int REMASSIGN = 111;
   /** RegularExpression Id. */
-  int RSIGNEDSHIFTASSIGN = 112;
+  int LSHIFTASSIGN = 112;
   /** RegularExpression Id. */
-  int RUNSIGNEDSHIFTASSIGN = 113;
+  int RSIGNEDSHIFTASSIGN = 113;
+  /** RegularExpression Id. */
+  int RUNSIGNEDSHIFTASSIGN = 114;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -243,6 +245,7 @@ public interface SalsaParserConstants {
     "\"*/\"",
     "\"*/\"",
     "<token of kind 12>",
+    "\"abstract\"",
     "\"ack\"",
     "\"at\"",
     "\"behavior\"",

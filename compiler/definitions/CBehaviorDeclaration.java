@@ -12,6 +12,8 @@ public class CBehaviorDeclaration extends CErrorInformation {
 	int added_message_handlers = 0;
 	int added_constructors = 0;
 
+    public boolean is_abstract = false;
+
 	public CName behavior_name;
 	public CName extends_name;
 	public Vector<CName> implements_names = new Vector<CName>();
@@ -56,53 +58,6 @@ public class CBehaviorDeclaration extends CErrorInformation {
 		return code;
 	}
 
-    /*
-	public String getInvokeMessageCode() {
-		String code = "";
-
-		code += CIndent.getIndent() + "public Object invokeMessage(int messageId, Object[] arguments) throws ContinuationPassException, TokenPassException, MessageHandlerNotFoundException {\n";
-		CIndent.increaseIndent();
-		code += CIndent.getIndent() + "switch(messageId) {\n";
-		CIndent.increaseIndent();
-
-		for (int i = 0; i < message_handlers.size(); i++) {
-			CMessageHandler mh = message_handlers.get(i);
-
-			code += CIndent.getIndent() + "case " + i + ": " + mh.getCaseInvocation() + "\n";
-//			SymbolTable.addMessageId(i, behavior_name, mh.name, mh.getArgumentTypes(), mh.pass_type);
-		}
-
-		code += CIndent.getIndent() + "default: throw new MessageHandlerNotFoundException(messageId, arguments);\n";
-		CIndent.decreaseIndent();
-		code += CIndent.getIndent() + "}\n";
-//		code += CIndent.getIndent() + "return null;\n";
-		CIndent.decreaseIndent();
-		code += CIndent.getIndent() + "}\n";
-		return code;
-	}
-
-	public String getInvokeConstructorCode() {
-		String code = "";
-
-		code += CIndent.getIndent() + "public void invokeConstructor(int constructorId, Object[] arguments) throws ConstructorNotFoundException {\n";
-		CIndent.increaseIndent();
-		code += CIndent.getIndent() + "switch(constructorId) {\n";
-		CIndent.increaseIndent();
-
-		for (int i = 0; i < constructors.size(); i++) {
-			CConstructor con = constructors.get(i);
-			code += CIndent.getIndent() + "case " + i + ": " + con.getCaseInvocation() + " break;\n";
-//			SymbolTable.addConstructorId(i, behavior_name, con.getArgumentTypes());
-		}
-
-		code += CIndent.getIndent() + "default: throw new ConstructorNotFoundException(constructorId, arguments);\n";
-		CIndent.decreaseIndent();
-		code += CIndent.getIndent() + "}\n";
-		CIndent.decreaseIndent();
-		code += CIndent.getIndent() + "}\n";
-		return code;
-	}
-*/
 	public int getActConstructor() {
 		for (int i = 0; i < constructors.size(); i++) {
 			CConstructor con = constructors.get(i);

@@ -29,7 +29,7 @@ behavior JoinDirector {
 
 	ack resolveAfter(int reqTokens) {
 		if (valueCount < reqTokens) {
-            self.continuationDirectors.add(stage.message.continuationDirector);
+            self.continuationDirectors.add((ContinuationDirector)stage.message.continuationDirector);
             self.requiredTokens.add(reqTokens);
 			pass later;
 		}
