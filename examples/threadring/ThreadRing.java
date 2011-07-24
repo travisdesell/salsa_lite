@@ -1,26 +1,26 @@
 /****** SALSA LANGUAGE IMPORTS ******/
 import salsa_lite.common.DeepCopy;
-import salsa_lite.local_fcs.Acknowledgement;
-import salsa_lite.local_fcs.SynchronousMailboxStage;
-import salsa_lite.local_fcs.LocalActor;
-import salsa_lite.local_fcs.Message;
-import salsa_lite.local_fcs.StageService;
-import salsa_lite.local_fcs.language.Director;
-import salsa_lite.local_fcs.language.JoinDirector;
-import salsa_lite.local_fcs.language.MessageDirector;
-import salsa_lite.local_fcs.language.ContinuationDirector;
-import salsa_lite.local_fcs.language.TokenDirector;
+import salsa_lite.runtime.Acknowledgement;
+import salsa_lite.runtime.SynchronousMailboxStage;
+import salsa_lite.runtime.Actor;
+import salsa_lite.runtime.Message;
+import salsa_lite.runtime.StageService;
+import salsa_lite.runtime.language.Director;
+import salsa_lite.runtime.language.JoinDirector;
+import salsa_lite.runtime.language.MessageDirector;
+import salsa_lite.runtime.language.ContinuationDirector;
+import salsa_lite.runtime.language.TokenDirector;
 
-import salsa_lite.local_fcs.language.exceptions.ContinuationPassException;
-import salsa_lite.local_fcs.language.exceptions.TokenPassException;
-import salsa_lite.local_fcs.language.exceptions.MessageHandlerNotFoundException;
-import salsa_lite.local_fcs.language.exceptions.ConstructorNotFoundException;
+import salsa_lite.runtime.language.exceptions.ContinuationPassException;
+import salsa_lite.runtime.language.exceptions.TokenPassException;
+import salsa_lite.runtime.language.exceptions.MessageHandlerNotFoundException;
+import salsa_lite.runtime.language.exceptions.ConstructorNotFoundException;
 
 /****** END SALSA LANGUAGE IMPORTS ******/
 
-import salsa_lite.local_fcs.language.JoinDirector;
+import salsa_lite.runtime.language.JoinDirector;
 
-public class ThreadRing extends salsa_lite.local_fcs.LocalActor {
+public class ThreadRing extends salsa_lite.runtime.Actor {
 	ThreadRing next;
 	int id;
 
@@ -94,7 +94,7 @@ public class ThreadRing extends salsa_lite.local_fcs.LocalActor {
 	public ThreadRing(SynchronousMailboxStage stage) { super(stage); }
 
 	public static void main(String[] arguments) {
-		construct(1, new Object[]{arguments}, StageService.getStage(0));
+		StageService.sendMessage(new Message(Message.CONSTRUCT_MESSAGE, new ThreadRing(), 1, new Object[]{arguments}));
 	}
 
 	public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions) {

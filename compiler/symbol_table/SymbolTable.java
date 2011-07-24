@@ -550,11 +550,7 @@ public class SymbolTable {
 
 
             ActorType localActorType = null;
-            if (System.getProperty("wwc") != null) {
-                localActorType = new ActorType(runtimeModule + ".WWCActor", SymbolTable.getTypeSymbol("Object"));
-            } else {
-                localActorType = new ActorType(runtimeModule + ".Actor", SymbolTable.getTypeSymbol("Object"));
-            }
+            localActorType = new ActorType(runtimeModule + ".Actor", SymbolTable.getTypeSymbol("Object"));
 
             FieldSymbol stageField = new FieldSymbol(localActorType, "stage", SymbolTable.getTypeSymbol("Stage"));
             localActorType.fields.add(stageField);
@@ -564,11 +560,7 @@ public class SymbolTable {
             addVariableType("stage", "Stage", false, true);     //should add an actor's parent fields to namespace as well instead of this hack
 
             FieldSymbol targetField = null;
-            if (System.getProperty("wwc") != null) {
-                targetField = new FieldSymbol(messageType, "target", SymbolTable.getTypeSymbol("WWCActor"));
-            } else {
-                targetField = new FieldSymbol(messageType, "target", SymbolTable.getTypeSymbol("Actor"));
-            }
+            targetField = new FieldSymbol(messageType, "target", SymbolTable.getTypeSymbol("Actor"));
             messageType.fields.add(targetField);
 
             if (!cu.getName().equals("ContinuationDirector")) {

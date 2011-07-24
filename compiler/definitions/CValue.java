@@ -462,13 +462,7 @@ public class CValue extends CErrorInformation {
                     }
 
                     if (SymbolTable.continuesToPass && !SymbolTable.withinArguments) {
-                        if (System.getProperty("local_noref") != null) {
-                            code += ", StageService.getCurrentContinuationDirector(this)";
-                        } else if (System.getProperty("local_fcs") != null) {
-                            code += ", this.stage.message.continuationDirector";
-                        } else {
-                            code += ", StageService.getCurrentContinuationDirector(self)";
-                        }
+                        code += ", this.stage.message.continuationDirector";
                     }
                     code += ")";
 

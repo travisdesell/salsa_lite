@@ -70,26 +70,11 @@ public class CExpressionDirector {
 
 		String code = "";
 		code += "class " + expression_director_name + " extends "; 
-		if (System.getProperty("local") != null) {
-			code += "ActorReference";
-		} else if (System.getProperty("local_noref") != null || System.getProperty("local_fcs") != null) {
-			code += "Actor";
-		} else if (System.getProperty("wwc") != null) {
-			code += "WWCActorReference";
-		}
+        code += "Actor";
 
 		code += " {\n";
-		if (System.getProperty("local") != null) {
-			code += CIndent.getIndent() + "\tpublic " + expression_director_name + "(long identifier) { super(identifier); }\n";
-		} else if (System.getProperty("wwc") != null) {
-			code += CIndent.getIndent() + "\tpublic " + expression_director_name + "(String identifier) { super(identifier); }\n";
-		} else if (System.getProperty("local_noref") != null) {
-			code += CIndent.getIndent() + "\tpublic " + expression_director_name + "() {}\n";
-			code += CIndent.getIndent() + "\tpublic void invokeConstructor(int id, Object[] arguments) {}\n";
-		} else if (System.getProperty("local_fcs") != null) {
-			code += CIndent.getIndent() + "\tpublic " + expression_director_name + "(SynchronousMailboxStage stage) { super(stage); }\n";
-			code += CIndent.getIndent() + "\tpublic void invokeConstructor(int id, Object[] arguments) {}\n";
-		}
+        code += CIndent.getIndent() + "\tpublic " + expression_director_name + "(SynchronousMailboxStage stage) { super(stage); }\n";
+        code += CIndent.getIndent() + "\tpublic void invokeConstructor(int id, Object[] arguments) {}\n";
 
 		code += CIndent.getIndent() + "\tpublic Object invokeMessage(int messageId, Object[] arguments) {\n";
 		for (int i = 0; i < input_parameter_types.size(); i++) {
@@ -112,21 +97,11 @@ public class CExpressionDirector {
 			code += "StageService.sendImplicitTokenMessage(new " + expression_director_name + "(";
 		}
 
-		if (System.getProperty("local") != null || System.getProperty("wwc") != null) {
-			code += "StageService.generateUniqueId()";
-		} else if (System.getProperty("local_fcs") != null) {
-			code += "this.stage";
-		}
+        code += "this.stage";
 		code += "), 0, new Object[]{" + arguments_code + "}, new int[]{" + token_position_code + "}";
 
 		if (SymbolTable.continuesToPass && !SymbolTable.withinArguments) {
-			if (System.getProperty("local_noref") != null) {
-				code += ", StageService.getCurrentContinuationDirector(this)";
-			} else if (System.getProperty("local_fcs") != null) {
-				code += ", this.stage.message.continuationDirector";
-			} else {
-				code += ", StageService.getCurrentContinuationDirector(self)";
-			}
+            code += ", this.stage.message.continuationDirector";
 		}
 		
 		code += ")";

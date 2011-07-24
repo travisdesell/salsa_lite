@@ -35,7 +35,6 @@
             try {
                 CCompilationUnit cu = parser.CompilationUnit();
                 System.out.println("\u005cn\u005cnSTATE CODE:\u005cn\u005cn" + cu.getStateCode());
-                System.out.println("\u005cn\u005cnREFERENCE CODE:\u005cn\u005cn" + cu.getReferenceCode());
 
                 System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Salsa program parsed successfully.");
             } catch (ParseException e) {
@@ -3963,6 +3962,22 @@
     finally { jj_save(29, xla); }
   }
 
+  static private boolean jj_3R_45() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_67()) {
+    jj_scanpos = xsp;
+    if (jj_3R_68()) return true;
+    }
+    if (jj_3R_32()) return true;
+    return false;
+  }
+
+  static private boolean jj_3R_66() {
+    if (jj_scan_token(DECR)) return true;
+    return false;
+  }
+
   static private boolean jj_3R_46() {
     if (jj_scan_token(LT)) return true;
     if (jj_3R_69()) return true;
@@ -3972,11 +3987,6 @@
       if (jj_3R_70()) { jj_scanpos = xsp; break; }
     }
     if (jj_scan_token(GT)) return true;
-    return false;
-  }
-
-  static private boolean jj_3R_66() {
-    if (jj_scan_token(DECR)) return true;
     return false;
   }
 
@@ -5051,17 +5061,6 @@
     xsp = jj_scanpos;
     if (jj_3R_119()) jj_scanpos = xsp;
     if (jj_scan_token(RPAREN)) return true;
-    return false;
-  }
-
-  static private boolean jj_3R_45() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_67()) {
-    jj_scanpos = xsp;
-    if (jj_3R_68()) return true;
-    }
-    if (jj_3R_32()) return true;
     return false;
   }
 

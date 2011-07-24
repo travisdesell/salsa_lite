@@ -82,22 +82,7 @@ public class CAllocation extends CVariableInit {
                     }
 
                     if (first_expression != null) {
-                        if (System.getProperty("local_fcs") != null) {
-        //					if (first_expression.getType().equals("int") || first_expression.getType().equals("Integer")) {
-                                code += ", StageService.getStage(" + first_expression.toJavaCode() + ")";
-        //					}
-                        } else {
-                            code += ", " + first_expression.toJavaCode();
-
-                            if (second_expression != null) {
-                                code += ", " + second_expression.toJavaCode() + ", " + third_expression.toJavaCode();
-                            }
-                        }
-           
-                    } else {
-        //				if (System.getProperty("local_fcs") != null) {
-        //					code += ", StageService.getStage()";
-        //				}
+                        code += ", StageService.getStage(" + first_expression.toJavaCode() + ")";
                     }
                     
                     code += ")";

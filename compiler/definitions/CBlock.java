@@ -32,10 +32,10 @@ public class CBlock extends CStatement {
 			SymbolTable.newJoinDirector();
 			join_director = SymbolTable.getJoinDirector();
 			code += "ContinuationDirector " + join_director + "_continuation = ContinuationDirector.construct(0, null";
-			if (System.getProperty("local_fcs") != null) code += ", this.stage";
+			code += ", this.stage";
 			code += ");\n";
 			code += CIndent.getIndent() + "JoinDirector " + join_director + " = JoinDirector.construct(0, new Object[]{" + join_director + "_continuation}";
-			if (System.getProperty("local_fcs") != null) code += ", this.stage";
+			code += ", this.stage";
 			code += ");\n";
 			code += CIndent.getIndent() + "int " + join_director + "_message_count = 0;\n";
 			code +=	CIndent.getIndent();

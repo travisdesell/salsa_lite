@@ -49,7 +49,6 @@ PARSER_BEGIN(SalsaParser)
             try {
                 CCompilationUnit cu = parser.CompilationUnit();
                 System.out.println("\n\nSTATE CODE:\n\n" + cu.getStateCode());
-                System.out.println("\n\nREFERENCE CODE:\n\n" + cu.getReferenceCode());
                 
                 System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Salsa program parsed successfully.");
             } catch (ParseException e) {

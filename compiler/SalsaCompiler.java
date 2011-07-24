@@ -126,19 +126,9 @@ public class SalsaCompiler {
 						}
 
 						if (referenceFile != null) {
-							if (System.getProperty("local_noref") != null || System.getProperty("local_fcs") != null) {
-								new FileOutputStream(referenceFile).write(cu.getStateCode().getBytes());
-							} else {
-								new FileOutputStream(referenceFile).write(cu.getReferenceCode().getBytes());
-								new FileOutputStream(stateFile).write(cu.getStateCode().getBytes());
-							} 
+                            new FileOutputStream(referenceFile).write(cu.getStateCode().getBytes());
 						} else {
-							if (System.getProperty("local_noref") != null || System.getProperty("local_fcs") != null) {
-								System.out.println(cu.getStateCode());
-							} else {
-								System.out.println(cu.getReferenceCode());
-								System.out.println(cu.getStateCode());
-							}
+                            System.out.println(cu.getStateCode());
 						}
 
 						if (System.getProperty("silent") == null) {
