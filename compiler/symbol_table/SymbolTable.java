@@ -345,6 +345,11 @@ public class SymbolTable {
 		else return type1;
 	}
 
+    public static void importDefaultPrimitive(String name, boolean isToken) throws SalsaNotFoundException {
+        loadPrimitive(name);
+        addVariableType(name, name, isToken, true);
+    }
+
     public static void importDefaultPrimitive(String name) throws SalsaNotFoundException {
         loadPrimitive(name);
         addVariableType(name, name, false, true);
@@ -378,7 +383,6 @@ public class SymbolTable {
              */
             importDefaultPrimitive("void");
             importDefaultPrimitive("null");
-            importDefaultPrimitive("ack");
             importDefaultPrimitive("boolean");
             importDefaultPrimitive("byte");
             importDefaultPrimitive("char");
@@ -387,6 +391,8 @@ public class SymbolTable {
             importDefaultPrimitive("long");
             importDefaultPrimitive("float");
             importDefaultPrimitive("double");
+
+            importDefaultPrimitive("ack", true);
 
             /**
              * Make sure we know the symbols from everything in java.lang as these are imported by default

@@ -35,8 +35,8 @@ public class CVariableInit extends CErrorInformation {
                 CompilerErrors.printErrorMessage("Conflicting types.  Cannot assign '" + expression.getType().getLongSignature() + "' to '" + ts.getLongSignature() + "'", expression);
             }
 
-            if (is_token && expression.isToken()) {
-                CompilerErrors.printErrorMessage("Cannot assign a token to a non-token.", expression);
+            if (!is_token && expression.isToken()) {
+                CompilerErrors.printErrorMessage("Cannot assign a token to a non-token: '" + expression.getType().getLongSignature() + "'.", expression);
             }
 
             if (expression.isToken()) {

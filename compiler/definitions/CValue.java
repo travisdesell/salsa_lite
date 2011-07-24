@@ -190,7 +190,9 @@ public class CValue extends CErrorInformation {
                 CArrayAccess array_access = (CArrayAccess)modification;
                 if (array_access.expression.isToken()) return true;
             }
-            if (modification instanceof CMessageSend) return true;
+            if (modification instanceof CMessageSend) {
+                return true;
+            }
         }
 
         try {

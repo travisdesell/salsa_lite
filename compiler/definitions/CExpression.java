@@ -35,7 +35,7 @@ public class CExpression extends CVariableInit {
 			}
 
             if (!value.isToken() && operator_expression.isToken()) {
-                CompilerErrors.printErrorMessage("Cannot assign a token to a non-token.", operator_expression);
+                CompilerErrors.printErrorMessage("Cannot assign a token to a non-token: '" + expression.getType().getLongSignature() + "'.", operator_expression);
             }
 
 			return value_type;
