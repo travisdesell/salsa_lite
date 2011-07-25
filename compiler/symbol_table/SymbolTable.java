@@ -281,6 +281,7 @@ public class SymbolTable {
 	public static boolean continuesToPass = false;
 	public static boolean token_pass_exception = false;
 	public static boolean continuation_pass_exception = false;
+    public static boolean continuationTokenMessage = false;
 	public static boolean messageContinues;
 	public static boolean messageRequiresContinuation;
 	public static boolean withinArguments = false;

@@ -26,8 +26,9 @@ behavior DeepCopyTest {
         for (DeepCopyTest dct : list) {
             t = standardOutput<-println( dct<-getValue() ) : waitfor(t);
         }
-        t = standardOutput<-println() : waitfor(t);
-        pass t;
+        pass standardOutput<-println() : waitfor(t);
+//        t = standardOutput<-println() : waitfor(t);
+//        pass t;
     }
 
     DeepCopyTest(int value) {
@@ -49,18 +50,40 @@ behavior DeepCopyTest {
         list.add(dct4);
         list.add(dct5);
 
+        StandardOutput standardOutput = new StandardOutput();
+        standardOutput<-println("dct1 value: " + dct1<-getValue()) @
+        standardOutput<-println("dct2 value: " + dct2<-getValue()) @
+        standardOutput<-println("dct3 value: " + dct3<-getValue()) @
+        standardOutput<-println("dct4 value: " + dct4<-getValue()) @
+        standardOutput<-println("dct5 value: " + dct5<-getValue()) @
+
         dct1<-setList(list) @
         dct2<-setList(list) @
         dct3<-setList(list) @
         dct4<-setList(list) @
         dct5<-setList(list) @
 
-        dct1<-setValue(6) @
-        dct1<-setValue(7) @
-        dct1<-setValue(8) @
-        dct1<-setValue(9) @
-        dct1<-setValue(10) @
+        standardOutput<-println("\nsetLists.") @
+        standardOutput<-println("dct1 value: " + dct1<-getValue()) @
+        standardOutput<-println("dct2 value: " + dct2<-getValue()) @
+        standardOutput<-println("dct3 value: " + dct3<-getValue()) @
+        standardOutput<-println("dct4 value: " + dct4<-getValue()) @
+        standardOutput<-println("dct5 value: " + dct5<-getValue()) @
 
+        dct1<-setValue(6) @
+        dct2<-setValue(7) @
+        dct3<-setValue(8) @
+        dct4<-setValue(9) @
+        dct5<-setValue(10) @
+
+        standardOutput<-println("\nupdated values.") @
+        standardOutput<-println("dct1 value: " + dct1<-getValue()) @
+        standardOutput<-println("dct2 value: " + dct2<-getValue()) @
+        standardOutput<-println("dct3 value: " + dct3<-getValue()) @
+        standardOutput<-println("dct4 value: " + dct4<-getValue()) @
+        standardOutput<-println("dct5 value: " + dct5<-getValue()) @
+
+        standardOutput<-println("\nprinting lists.") @
         dct1<-printList() @
         dct2<-printList() @
         dct3<-printList() @

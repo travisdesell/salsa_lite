@@ -1,5 +1,8 @@
 package salsa_lite.runtime;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -9,7 +12,15 @@ import salsa_lite.runtime.language.exceptions.MessageHandlerNotFoundException;
 import salsa_lite.runtime.language.exceptions.TokenPassException;
 
 
-public abstract class Actor {
+public abstract class Actor implements Serializable {
+
+    public Object writeReplace() throws ObjectStreamException {
+        /**
+         *  Create a temporary entry in the actor registry, so we don't copy this actor when it gets 'copied' as an object reference in a deep copy.
+         */
+        ActorRegistry.addEntry(this.hashCode(), this);
+        return new SerializedActor( this.hashCode() );
+    }
 
 	public SynchronousMailboxStage stage;
 

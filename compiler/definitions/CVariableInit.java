@@ -39,11 +39,14 @@ public class CVariableInit extends CErrorInformation {
                 CompilerErrors.printErrorMessage("Cannot assign a token to a non-token: '" + expression.getType().getLongSignature() + "'.", expression);
             }
 
+            boolean previous_continues = SymbolTable.continuationTokenMessage;
+            SymbolTable.continuationTokenMessage = true;
             if (expression.isToken()) {
                 code += " = " + expression.toJavaCode();
             } else {
     			code += " = TokenDirector.construct(1, new Object[]{" + expression.toJavaCode() + "})";
             }
+            SymbolTable.continuationTokenMessage = previous_continues;
 		}
 		return code;
 	}
@@ -71,6 +74,7 @@ public class CVariableInit extends CErrorInformation {
 
 			code += " = " + expression.toJavaCode();
 		}
+
 		return code;
 	}
 

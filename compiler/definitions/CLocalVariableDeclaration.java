@@ -26,7 +26,11 @@ public class CLocalVariableDeclaration extends CStatement {
                  *  Need to implement tokens
                  */
 
-				code += "TokenDirector ";
+                if (type.name.equals("ack")) {
+    				code += "ContinuationDirector ";
+                } else {
+				    code += "TokenDirector ";
+                }
 				code += variables.get(i).toJavaCodeAsToken(type.name, is_token);
 
                 try {

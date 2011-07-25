@@ -132,11 +132,21 @@ public class CExpression extends CVariableInit {
 			code += " " + operator + " ";
 
             boolean isExpressionContinuation = SymbolTable.isExpressionContinuation;
+            boolean continuationTokenMessage = SymbolTable.continuationTokenMessage;
 
+//            System.err.println("java code of expression, value.getType(): " + value.getType());
+
+            if (value.getType().getLongSignature().equals("ack")) {
+//                System.err.println("continuation token message is true!");
+                SymbolTable.continuationTokenMessage = true;
+            }
             if (operator.equals("=")) SymbolTable.isExpressionContinuation = true;
 
 			code += operator_expression.toJavaCode();
 
+//            System.err.println("code is: " + code);
+
+            SymbolTable.continuationTokenMessage = continuationTokenMessage;
             if (operator.equals("=")) SymbolTable.isExpressionContinuation = isExpressionContinuation;
 		}
 

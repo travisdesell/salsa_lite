@@ -360,13 +360,10 @@ public class CValue extends CErrorInformation {
                     String pre_code = "";
                     if (SymbolTable.continuesToPass && !SymbolTable.withinArguments) {
                         pre_code += "StageService.sendPass";
-
                     } else if (SymbolTable.withinArguments) {
-                        pre_code += "StageService.send";
-    //					if (SymbolTable.implicitMessage) {
-                            pre_code += "Implicit";
-    //					}
-                        pre_code += "Token";
+                        pre_code += "StageService.sendImplicitToken";
+                    } else if (SymbolTable.continuationTokenMessage) {
+                        pre_code += "StageService.sendContinuation";
                     } else if (SymbolTable.isExpressionContinuation) {
                         pre_code += "StageService.sendToken";
                     } else if (SymbolTable.messageContinues || joinDirector != null) {
