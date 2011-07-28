@@ -25,12 +25,14 @@ import java.util.LinkedList;
 public class ContinuationDirector extends Director {
 	boolean unresolved = true;
 	LinkedList<Message> messages = new LinkedList<Message>(  );
+	ContinuationDirector currentContinuation = null;
 
 
 	public Object invokeMessage(int messageId, Object[] arguments) throws ContinuationPassException, TokenPassException, MessageHandlerNotFoundException {
 		switch(messageId) {
 			case 0: resolve(); return null;
 			case 1: setMessage( (Message)arguments[0] ); return null;
+			case 2: forwardTo( (Director)arguments[0] ); return null;
 			default: throw new MessageHandlerNotFoundException(messageId, arguments);
 		}
 	}
@@ -48,16 +50,17 @@ public class ContinuationDirector extends Director {
 
 
 	public void resolve() {
-		if (messages.size() > 0) {
-			for (Message message : messages){
-				StageService.sendMessage(message);
-			}
-
-		}
-		else {
+		if (unresolved) {
 			unresolved = false;
+		} 
+		while (messages.size() > 0) {
+			Message message = messages.removeFirst();
+			StageService.sendMessage(message);
 		}
 
+		if (currentContinuation != null) {
+			StageService.sendMessage(currentContinuation, 0 /*resolve*/, null);
+		} 
 	}
 
 	public void setMessage(Message message) {
@@ -66,6 +69,17 @@ public class ContinuationDirector extends Director {
 		}
 		else {
 			StageService.sendMessage(message);
+		}
+
+	}
+
+	public void forwardTo(Director director) {
+		System.err.println("ContinuationDirector forwarding value to: " + director);
+		if (unresolved) {
+			currentContinuation = (ContinuationDirector)director;
+		}
+		else {
+			StageService.sendMessage(((ContinuationDirector)director), 0 /*resolve*/, null);
 		}
 
 	}

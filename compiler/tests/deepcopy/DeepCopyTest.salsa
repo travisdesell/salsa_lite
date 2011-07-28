@@ -26,9 +26,9 @@ behavior DeepCopyTest {
         for (DeepCopyTest dct : list) {
             t = standardOutput<-println( dct<-getValue() ) : waitfor(t);
         }
-        pass standardOutput<-println() : waitfor(t);
-//        t = standardOutput<-println() : waitfor(t);
-//        pass t;
+//        pass standardOutput<-println() : waitfor(t);
+        t = standardOutput<-println() : waitfor(t);
+        pass t;
     }
 
     DeepCopyTest(int value) {

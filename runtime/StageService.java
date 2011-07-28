@@ -52,36 +52,65 @@ public class StageService {
 		message.target.stage.putMessageInMailbox(message);
 	}
 
+    /**
+     *  Create a message to forward a token to the current continuation.
+     *
+     *  Used in first class continuations ie:
+     *
+     *  token ack t = standardOutput<-println();
+     *  pass t;
+     */
+
+    public final static void passToken(TokenDirector token, Director currentContinuation) {
+        if (currentContinuation == null) return;
+
+//      token<-forwardTo(currentContinuation);
+        token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, token, 2 /*forwardTo*/, new Object[]{currentContinuation}, null));
+    }
+
+    public final static void passToken(ContinuationDirector token, Director currentContinuation) {
+        if (currentContinuation == null) return;
+
+//      token<-forwardTo(currentContinuation);
+        token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, token, 2 /*forwardTo*/, new Object[]{currentContinuation}, null));
+    }
+
 	/**
 	 *	Create a message to be used in a pass statement (first class continuation)
 	 */
 	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, Director currentContinuation) {
+        int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
         Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
-		target.stage.putMessageInMailbox(input_message);
+        target.stage.putMessageInMailbox(input_message);
 	}
 
 	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, ContinuationDirector input_continuation, Director currentContinuation) {
+        int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
         Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
 		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 1 /*setMessage()*/, new Object[]{input_message}));
 	}
 
 	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, Director[] input_continuations, Director currentContinuation) {
+        int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
         Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
 		MessageDirector md = MessageDirector.construct(1, new Object[]{input_message, input_continuations}, target.stage);
 	}
 
 	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, Director currentContinuation) {
-		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
+        int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
+        Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
 		MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target.stage);
 	}
 
 	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation, Director currentContinuation) {
-		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
+        int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
+        Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
 		MessageDirector md = MessageDirector.construct(2, new Object[]{input_message, arguments, token_positions, input_continuation}, target.stage);
 	}
 
 	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, Director[] input_continuations, Director currentContinuation) {
-		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
+        int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
+        Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
 		MessageDirector md = MessageDirector.construct(4, new Object[]{input_message, arguments, token_positions, input_continuations}, target.stage);
 	}
 

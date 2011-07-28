@@ -9,6 +9,7 @@ behavior TokenDirector extends ValueDirector {
 
 	Object value;
     boolean unresolved = true;
+    TokenDirector currentContinuation = null;
 
 	TokenDirector() {
 	}
@@ -18,6 +19,7 @@ behavior TokenDirector extends ValueDirector {
         self.unresolved = false;
     }
 
+    //this should only ever get called once
 	ack setValue(Object value) {
         self.unresolved = false;
 		self.value = value;
@@ -33,6 +35,8 @@ behavior TokenDirector extends ValueDirector {
             //director<-setValue(position, value);
             StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 0 /*setValue*/, new Object[]{position, value}));
 		}
+
+        if (currentContinuation != null) currentContinuation<-setValue(value);
 	}
 
 	ack addDirector(SynchronizationDirector director, int position) {
@@ -46,4 +50,11 @@ behavior TokenDirector extends ValueDirector {
 		}
 	}
 
+    ack forwardTo(Director director) {
+        if (unresolved) {
+            currentContinuation = (TokenDirector)director;
+        } else {
+            ((TokenDirector)director)<-setValue(value);
+        }
+    }
 }
