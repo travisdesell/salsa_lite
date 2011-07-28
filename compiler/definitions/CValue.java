@@ -214,6 +214,13 @@ public class CValue extends CErrorInformation {
 		return false;
 	}
 
+    public boolean containsMessageSends() {
+        for (CModification modification : modifications) {
+            if (modification instanceof CMessageSend) return true;
+        }
+        return false;
+    }
+
     public String toJavaCode() {
         return toJavaCode(null);
     }

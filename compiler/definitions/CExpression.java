@@ -24,6 +24,14 @@ public class CExpression extends CVariableInit {
 		return argumentTypes;
 	}
 
+    public boolean containsMessageSends() {
+        if (operator_expression != null) {
+            return value.containsMessageSends() || operator_expression.containsMessageSends();
+        } else {
+            return value.containsMessageSends();
+        }
+    }
+
 	public TypeSymbol getType() {
 		TypeSymbol value_type = value.getType();
 

@@ -18,16 +18,23 @@ public class CPassStatement extends CStatement {
 		}
 
 		if (expression != null && expression.isToken()) {
-			SymbolTable.continuesToPass = true;
-			SymbolTable.withinArguments = false;
-			String code = expression.getExpressionDirectorCode();
-			code += expression.toJavaCode() + ";\n";
-			code += CIndent.getIndent() + "throw new TokenPassException();";
-			SymbolTable.continuesToPass = false;
-			SymbolTable.withinArguments = false;
+            if (expression.containsMessageSends()) {
+                SymbolTable.continuesToPass = true;
+                SymbolTable.withinArguments = false;
+                String code = expression.getExpressionDirectorCode();
+                code += expression.toJavaCode() + ";\n";
+                code += CIndent.getIndent() + "throw new TokenPassException();";
+                SymbolTable.continuesToPass = false;
+                SymbolTable.withinArguments = false;
 
-			SymbolTable.token_pass_exception = true;
-			return code;
+                SymbolTable.token_pass_exception = true;
+                return code;
+            } else {
+                String code = "StageService.passToken(" + expression.toJavaCode() + ", this.stage.message.continuationDirector);\n";
+                code += CIndent.getIndent() + "throw new TokenPassException();";
+                SymbolTable.token_pass_exception = true;
+                return code;
+            }
 
 		} else if (continuedFromToken) {
 			String code = "throw new TokenPassException();";
