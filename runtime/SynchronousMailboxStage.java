@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Vector;
 
 import salsa_lite.runtime.language.exceptions.TokenPassException;
-import salsa_lite.runtime.language.exceptions.ContinuationPassException;
+import salsa_lite.runtime.language.exceptions.RemoteMessageException;
 import salsa_lite.runtime.language.exceptions.ConstructorNotFoundException;
 
 //import salsa_lite.runtime.language.ContinuationDirector;
@@ -39,15 +39,6 @@ public class SynchronousMailboxStage extends Thread {
 			}
 		}
 		return mailbox.removeFirst();
-	}
-
-	public synchronized void putActorOnStage(Actor actor, int constructor_id, Object[] arguments) {
-		try {
-			actor.invokeConstructor(constructor_id, arguments);
-		} catch (Exception e) {
-			System.err.println("Exception while invoking constructor: " + e);
-			e.printStackTrace();
-		}
 	}
 
 	public Message message;
@@ -87,9 +78,8 @@ public class SynchronousMailboxStage extends Thread {
 			} catch (TokenPassException tpe) {
 				//Don't need to do anything here.
 				
-			} catch (ContinuationPassException cpe) {
-				//Don't need to do anything here.
-
+			} catch (RemoteMessageException exception) {
+                //Don't need to do anything here, the message was sent to another theater.
 
 			} catch (Exception exception) {
 				System.err.println("Message processing exception:");

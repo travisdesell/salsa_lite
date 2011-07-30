@@ -7,20 +7,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import salsa_lite.runtime.language.exceptions.ConstructorNotFoundException;
-import salsa_lite.runtime.language.exceptions.ContinuationPassException;
+import salsa_lite.runtime.language.exceptions.RemoteMessageException;
 import salsa_lite.runtime.language.exceptions.MessageHandlerNotFoundException;
 import salsa_lite.runtime.language.exceptions.TokenPassException;
 
 
-public abstract class Actor implements Serializable {
-
-    public Object writeReplace() throws ObjectStreamException {
-        /**
-         *  Create a temporary entry in the actor registry, so we don't copy this actor when it gets 'copied' as an object reference in a deep copy.
-         */
-        ActorRegistry.addEntry(this.hashCode(), this);
-        return new SerializedActor( this.hashCode() );
-    }
+public abstract class Actor {
 
 	public SynchronousMailboxStage stage;
 
@@ -36,9 +28,9 @@ public abstract class Actor implements Serializable {
         return "actor[stage: " + stage.getId() + ", type: " + getClass().getName() + "]";
     }
 
-	public abstract void invokeConstructor(int messageId, Object[] arguments) throws ContinuationPassException, TokenPassException, ConstructorNotFoundException;
+	public abstract void invokeConstructor(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, ConstructorNotFoundException;
 
-	public abstract Object invokeMessage(int messageId, Object[] arguments) throws ContinuationPassException, TokenPassException, MessageHandlerNotFoundException;
+	public abstract Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException;
 	
 	
 	private Message currentMessage = null;

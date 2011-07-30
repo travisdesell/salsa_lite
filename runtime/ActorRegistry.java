@@ -4,13 +4,32 @@ import java.util.HashMap;
 
 public class ActorRegistry {
 
-    private static HashMap<Integer,Actor> serializedActors = new HashMap<Integer,Actor>();
+    private static final int numberRegistries;
+    private static final HashMap<Integer,Actor>[] serializedActors;
 
-    protected static synchronized final Actor removeEntry(int hashCode) {
-        return serializedActors.remove(hashCode);
+    static {
+        if (System.getProperty("nregistries") != null) numberRegistries = Integer.parseInt(System.getProperty("nregistries"));
+        else numberRegistries = 1;
+
+        serializedActors = (HashMap<Integer,Actor>[])new HashMap[numberRegistries];
+        for (int i = 0; i < numberRegistries; i++) {
+            serializedActors[i] = new HashMap<Integer,Actor>();
+        }
     }
 
-    protected static synchronized final void addEntry(int hashCode, Actor actor) {
-        serializedActors.put(hashCode, actor);
+    public static final Object getLock(int hashCode) {
+        return serializedActors[hashCode % numberRegistries];
+    }
+
+    public static final Actor getEntry(int hashCode) {
+        return serializedActors[hashCode % numberRegistries].get(hashCode);
+    }
+
+    public static final Actor removeEntry(int hashCode) {
+        return serializedActors[hashCode % numberRegistries].remove(hashCode);
+    }
+
+    public static final void addEntry(int hashCode, Actor actor) {
+        serializedActors[hashCode % numberRegistries].put(hashCode, actor);
     }
 }

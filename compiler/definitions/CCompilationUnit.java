@@ -45,6 +45,15 @@ public class CCompilationUnit {
         }
     }
 
+    public boolean isMobile() {
+        for (CName name : getImplementsNames()) {
+            if (name.name.equals("MobileActor")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 	public Vector<CEnumeration> getEnumerations() {
 		if (behavior_declaration != null) return behavior_declaration.enumerations;
 		else return null;
@@ -150,7 +159,7 @@ public class CCompilationUnit {
 	public String getInvokeMessageCode() {
 		String code = "";
 
-		code += CIndent.getIndent() + "public Object invokeMessage(int messageId, Object[] arguments) throws ContinuationPassException, TokenPassException, MessageHandlerNotFoundException {\n";
+		code += CIndent.getIndent() + "public Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException {\n";
 		CIndent.increaseIndent();
 		code += CIndent.getIndent() + "switch(messageId) {\n";
 		CIndent.increaseIndent();
@@ -231,7 +240,7 @@ public class CCompilationUnit {
 	public String getInvokeConstructorCode() {
 		String code = "";
 
-		code += CIndent.getIndent() + "public void invokeConstructor(int messageId, Object[] arguments) throws ConstructorNotFoundException {\n";
+		code += CIndent.getIndent() + "public void invokeConstructor(int messageId, Object[] arguments) throws RemoteMessageException, ConstructorNotFoundException {\n";
 		CIndent.increaseIndent();
 		code += CIndent.getIndent() + "switch(messageId) {\n";
 		CIndent.increaseIndent();
@@ -305,11 +314,13 @@ public class CCompilationUnit {
 
 		code += "/****** SALSA LANGUAGE IMPORTS ******/\n";
         code += "import salsa_lite.common.DeepCopy;\n";
+        code += "import salsa_lite.runtime.ActorRegistry;\n";
         code += "import salsa_lite.runtime.Acknowledgement;\n";
         code += "import salsa_lite.runtime.SynchronousMailboxStage;\n";
         code += "import salsa_lite.runtime.Actor;\n";
         code += "import salsa_lite.runtime.Message;\n";
         code += "import salsa_lite.runtime.StageService;\n";
+        code += "import salsa_lite.runtime.TransportService;\n";
         if (module_string == null || !module_string.equals("salsa_lite.runtime.language.")) {
             code += "import salsa_lite.runtime.language.Director;\n";
             code += "import salsa_lite.runtime.language.JoinDirector;\n";
@@ -318,7 +329,7 @@ public class CCompilationUnit {
             code += "import salsa_lite.runtime.language.TokenDirector;\n";
         }
         code += "\n";
-        code += "import salsa_lite.runtime.language.exceptions.ContinuationPassException;\n";
+        code += "import salsa_lite.runtime.language.exceptions.RemoteMessageException;\n";
         code += "import salsa_lite.runtime.language.exceptions.TokenPassException;\n";
         code += "import salsa_lite.runtime.language.exceptions.MessageHandlerNotFoundException;\n";
         code += "import salsa_lite.runtime.language.exceptions.ConstructorNotFoundException;\n";
@@ -357,15 +368,84 @@ public class CCompilationUnit {
             code += " extends " + extendsName;
         }
 
-
 		String implementsNames = null;
         if (behavior_declaration != null) implementsNames = behavior_declaration.getImplementsNames();
         else if (interface_declaration.extends_names.size() > 0) implementsNames = interface_declaration.getImplementsNames();
 
-		if (implementsNames != null) code += " implements " + implementsNames;
+		if (implementsNames != null) {
+            code += " implements " + implementsNames;
+            
+            if (behavior_declaration != null && !behavior_declaration.is_abstract) {
+                code += ", java.io.Serializable";
+            }
+        }
+        else {
+            code += " implements java.io.Serializable";
+        }
 
 		code += " {\n";
 		CIndent.increaseIndent();
+
+        if (behavior_declaration != null && !behavior_declaration.is_abstract) {
+            String tmp_name = actor_name;
+            if (tmp_name.contains("<")) tmp_name = tmp_name.substring(0, tmp_name.indexOf('<'));
+
+            if (isMobile()) {
+            } else {
+                code += "\n";
+                code += CIndent.getIndent() + "public Object writeReplace() throws java.io.ObjectStreamException {\n";
+                code += CIndent.getIndent() + "\tint hashCode = this.hashCode();\n";
+                code += CIndent.getIndent() + "\tsynchronized (ActorRegistry.getLock(hashCode)) {\n";
+                code += CIndent.getIndent() + "\t\tActorRegistry.addEntry(hashCode, this);\n";
+                code += CIndent.getIndent() + "\t}\n";
+                code += CIndent.getIndent() + "\treturn new Serialized" + tmp_name + "( this.hashCode(), TransportService.getHost(), TransportService.getPort() );\n";
+                code += CIndent.getIndent() + "}\n";
+
+                code += CIndent.getIndent() + "public static class " + tmp_name + "RemoteReference extends " + tmp_name + " {\n";
+                code += CIndent.getIndent() + "\tint hashCode;\n";
+                code += CIndent.getIndent() + "\tString host;\n";
+                code += CIndent.getIndent() + "\tint port;\n";
+                code += CIndent.getIndent() + "\t" + tmp_name + "RemoteReference(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }\n";
+                code += "\n";
+                code += CIndent.getIndent() + "\tpublic Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException {\n";
+                code += CIndent.getIndent() + "\t\tTransportService.sendMessage(host, port, this.stage.message);\n";
+                code += CIndent.getIndent() + "\t\tthrow new RemoteMessageException();\n";
+                code += CIndent.getIndent() + "\t}\n";
+                code += "\n";
+                code += CIndent.getIndent() + "\tpublic void invokeConstructor(int messageId, Object[] arguments) throws RemoteMessageException, ConstructorNotFoundException {\n";
+                code += CIndent.getIndent() + "\t\tTransportService.sendMessage(host, port, this.stage.message);\n";
+                code += CIndent.getIndent() + "\t\tthrow new RemoteMessageException();\n";
+                code += CIndent.getIndent() + "\t}\n";
+                code += "\n";
+                code += CIndent.getIndent() + "\tpublic Object writeReplace() throws java.io.ObjectStreamException {\n";
+                code += CIndent.getIndent() + "\t\treturn new Serialized" + tmp_name + "( this.hashCode(), TransportService.getHost(), TransportService.getPort() );\n";
+                code += CIndent.getIndent() + "\t}\n";
+                code += CIndent.getIndent() + "}\n";
+
+                code += CIndent.getIndent() + "public static class Serialized" + tmp_name + " implements java.io.Serializable {\n";
+                code += CIndent.getIndent() + "\tint hashCode;\n";
+                code += CIndent.getIndent() + "\tString host;\n";
+                code += CIndent.getIndent() + "\tint port;\n";
+                code += "\n";
+                code += CIndent.getIndent() + "\tSerialized" + tmp_name + "(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }\n";
+                code += "\n";
+                code += CIndent.getIndent() + "\tpublic Object readResolve() throws java.io.ObjectStreamException {\n";
+                code += CIndent.getIndent() + "\t\tsynchronized (ActorRegistry.getLock(hashCode)) {\n";
+                code += CIndent.getIndent() + "\t\t\t" + tmp_name + " actor = (" + tmp_name +")ActorRegistry.getEntry(hashCode);\n";
+                code += CIndent.getIndent() + "\t\t\tif (actor == null) {\n";
+                code += CIndent.getIndent() + "\t\t\t\tSystem.err.println(\"DESERIALIZING A REMOTE REFERENCE TO A LOCAL ACTOR\");\n";
+                code += CIndent.getIndent() + "\t\t\t\t" + tmp_name + "RemoteReference remoteReference = new " + tmp_name + "RemoteReference(hashCode, host, port);\n";
+                code += CIndent.getIndent() + "\t\t\t\tActorRegistry.addEntry(hashCode, remoteReference);\n";
+                code += CIndent.getIndent() + "\t\t\t\treturn remoteReference;\n";
+                code += CIndent.getIndent() + "\t\t\t} else {\n";
+                code += CIndent.getIndent() + "\t\t\t\treturn actor;\n";
+                code += CIndent.getIndent() + "\t\t\t}\n";
+                code += CIndent.getIndent() + "\t\t}\n";
+                code += CIndent.getIndent() + "\t}\n";
+                code += CIndent.getIndent() + "}\n";
+                code += "\n";
+            }
+        }
 
 //		System.err.println("ATTEMPTING TO ADD CONTAINED MESSAGE HANDLERS");
 		Vector<CMessageHandler> containedMessageHandlers = new Vector<CMessageHandler>();

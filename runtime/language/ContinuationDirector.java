@@ -2,18 +2,20 @@ package salsa_lite.runtime.language;
 
 /****** SALSA LANGUAGE IMPORTS ******/
 import salsa_lite.common.DeepCopy;
+import salsa_lite.runtime.ActorRegistry;
 import salsa_lite.runtime.Acknowledgement;
 import salsa_lite.runtime.SynchronousMailboxStage;
 import salsa_lite.runtime.Actor;
 import salsa_lite.runtime.Message;
 import salsa_lite.runtime.StageService;
+import salsa_lite.runtime.TransportService;
 import salsa_lite.runtime.language.Director;
 import salsa_lite.runtime.language.JoinDirector;
 import salsa_lite.runtime.language.MessageDirector;
 import salsa_lite.runtime.language.ContinuationDirector;
 import salsa_lite.runtime.language.TokenDirector;
 
-import salsa_lite.runtime.language.exceptions.ContinuationPassException;
+import salsa_lite.runtime.language.exceptions.RemoteMessageException;
 import salsa_lite.runtime.language.exceptions.TokenPassException;
 import salsa_lite.runtime.language.exceptions.MessageHandlerNotFoundException;
 import salsa_lite.runtime.language.exceptions.ConstructorNotFoundException;
@@ -22,13 +24,63 @@ import salsa_lite.runtime.language.exceptions.ConstructorNotFoundException;
 
 import java.util.LinkedList;
 
-public class ContinuationDirector extends Director {
+public class ContinuationDirector extends Director implements java.io.Serializable {
+
+	public Object writeReplace() throws java.io.ObjectStreamException {
+		int hashCode = this.hashCode();
+		synchronized (ActorRegistry.getLock(hashCode)) {
+			ActorRegistry.addEntry(hashCode, this);
+		}
+		return new SerializedContinuationDirector( this.hashCode(), TransportService.getHost(), TransportService.getPort() );
+	}
+	public static class ContinuationDirectorRemoteReference extends ContinuationDirector {
+		int hashCode;
+		String host;
+		int port;
+		ContinuationDirectorRemoteReference(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }
+
+		public Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException {
+			TransportService.sendMessage(host, port, this.stage.message);
+			throw new RemoteMessageException();
+		}
+
+		public void invokeConstructor(int messageId, Object[] arguments) throws RemoteMessageException, ConstructorNotFoundException {
+			TransportService.sendMessage(host, port, this.stage.message);
+			throw new RemoteMessageException();
+		}
+
+		public Object writeReplace() throws java.io.ObjectStreamException {
+			return new SerializedContinuationDirector( this.hashCode(), TransportService.getHost(), TransportService.getPort() );
+		}
+	}
+	public static class SerializedContinuationDirector implements java.io.Serializable {
+		int hashCode;
+		String host;
+		int port;
+
+		SerializedContinuationDirector(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }
+
+		public Object readResolve() throws java.io.ObjectStreamException {
+			synchronized (ActorRegistry.getLock(hashCode)) {
+				ContinuationDirector actor = (ContinuationDirector)ActorRegistry.getEntry(hashCode);
+				if (actor == null) {
+					System.err.println("DESERIALIZING A REMOTE REFERENCE TO A LOCAL ACTOR");
+					ContinuationDirectorRemoteReference remoteReference = new ContinuationDirectorRemoteReference(hashCode, host, port);
+					ActorRegistry.addEntry(hashCode, remoteReference);
+					return remoteReference;
+				} else {
+					return actor;
+				}
+			}
+		}
+	}
+
 	boolean unresolved = true;
 	LinkedList<Message> messages = new LinkedList<Message>(  );
 	ContinuationDirector currentContinuation = null;
 
 
-	public Object invokeMessage(int messageId, Object[] arguments) throws ContinuationPassException, TokenPassException, MessageHandlerNotFoundException {
+	public Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException {
 		switch(messageId) {
 			case 0: resolve(); return null;
 			case 1: setMessage( (Message)arguments[0] ); return null;
@@ -37,7 +89,7 @@ public class ContinuationDirector extends Director {
 		}
 	}
 
-	public void invokeConstructor(int messageId, Object[] arguments) throws ConstructorNotFoundException {
+	public void invokeConstructor(int messageId, Object[] arguments) throws RemoteMessageException, ConstructorNotFoundException {
 		switch(messageId) {
 			case 0: construct(); return;
 			default: throw new ConstructorNotFoundException(messageId, arguments);
@@ -74,7 +126,6 @@ public class ContinuationDirector extends Director {
 	}
 
 	public void forwardTo(Director director) {
-		System.err.println("ContinuationDirector forwarding value to: " + director);
 		if (unresolved) {
 			currentContinuation = (ContinuationDirector)director;
 		}

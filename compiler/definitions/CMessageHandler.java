@@ -77,9 +77,10 @@ public class CMessageHandler extends CErrorInformation {
             block_code = block.toJavaCode() + "\n";
         }
 
-		if (SymbolTable.token_pass_exception && SymbolTable.continuation_pass_exception) definition_code += "throws TokenPassException, ContinuationPassException ";
+		if (SymbolTable.token_pass_exception && SymbolTable.continuation_pass_exception) definition_code += "throws TokenPassException";
+//		if (SymbolTable.token_pass_exception && SymbolTable.continuation_pass_exception) definition_code += "throws TokenPassException, ContinuationPassException ";
 		else if (SymbolTable.token_pass_exception) definition_code += "throws TokenPassException ";
-		else if (SymbolTable.continuation_pass_exception) definition_code += "throws ContinuationPassException ";
+//		else if (SymbolTable.continuation_pass_exception) definition_code += "throws ContinuationPassException ";
 
 		SymbolTable.token_pass_exception = false;
 		SymbolTable.continuation_pass_exception = false;
