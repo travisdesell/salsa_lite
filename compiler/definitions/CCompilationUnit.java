@@ -429,9 +429,7 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "\t\t\tif (actor == null) {\n";
             code += CIndent.getIndent() + "\t\t\t\tSystem.err.println(\"DESERIALIZING A REMOTE REFERENCE TO A LOCAL ACTOR\");\n";
             code += CIndent.getIndent() + "\t\t\t\t" + tmp_name + "RemoteReference remoteReference = new " + tmp_name + "RemoteReference(hashCode, host, port);\n";
-            code += CIndent.getIndent() + "\t\t\t\tsynchronized (ActorRegistry.getLock(hashCode)) {\n";
-            code += CIndent.getIndent() + "\t\t\t\t\tActorRegistry.addEntry(hashCode, remoteReference);\n";
-            code += CIndent.getIndent() + "\t\t\t\t}\n";
+            code += CIndent.getIndent() + "\t\t\t\tActorRegistry.addEntry(hashCode, remoteReference);\n";
             code += CIndent.getIndent() + "\t\t\t\treturn remoteReference;\n";
             code += CIndent.getIndent() + "\t\t\t} else {\n";
             code += CIndent.getIndent() + "\t\t\t\treturn actor;\n";
