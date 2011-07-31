@@ -1,6 +1,6 @@
 module salsa_lite.examples.fibonacci;
 
-behavior FibonacciSimple {
+behavior FibonacciSimple extends MobileActor {
 	int n;
 	int result = 0;
 	int received = 0;

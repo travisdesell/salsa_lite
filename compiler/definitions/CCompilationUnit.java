@@ -512,7 +512,7 @@ public class CCompilationUnit {
 
             code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions) {\n";
             code += CIndent.getIndent() + "\t" + tmp_name + " actor = new " + tmp_name + "();\n";
-            code += CIndent.getIndent() + "\tState state = new State();\n";
+            code += CIndent.getIndent() + "\tState state = new State(actor.stage);\n";
             code += CIndent.getIndent() + "\tActorRegistry.addEntry(actor.hashCode(), state);\n";
             code += CIndent.getIndent() + "\tTokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);\n";
             code += CIndent.getIndent() + "\tMessage input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
@@ -522,7 +522,7 @@ public class CCompilationUnit {
 
             code += CIndent.getIndent() + "public static " + tmp_name + " construct(int constructor_id, Object[] arguments) {\n";
             code += CIndent.getIndent() + "\t" + tmp_name + " actor = new " + tmp_name + "();\n";
-            code += CIndent.getIndent() + "\tState state = new State();\n";
+            code += CIndent.getIndent() + "\tState state = new State(actor.stage);\n";
             code += CIndent.getIndent() + "\tActorRegistry.addEntry(actor.hashCode(), state);\n";
             code += CIndent.getIndent() + "\tStageService.sendMessage(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
             code += CIndent.getIndent() + "\treturn actor;\n";

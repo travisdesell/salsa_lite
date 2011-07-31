@@ -82,22 +82,25 @@ public class SynchronousMailboxStage extends Thread {
                 //Don't need to do anything here, the message was sent to another theater.
 
 			} catch (Exception exception) {
-				System.err.println("Message processing exception:");
-				System.err.println("\tMessage: " + message);
-				System.err.println("\ttarget: " + message.target);
-				System.err.println("\tmessage_id: " + message.message_id);
-				System.err.println("\tmessage_type: " + message.type);
-				System.err.print("\targuments: ");
-				if (message.arguments == null) System.err.println("null");
+                StringBuilder errorMessage = new StringBuilder("Message processing exception:\n");
+				errorMessage.append("\tMessage: " + message + "\n");
+				errorMessage.append("\ttarget: " + message.target + "\n");
+				errorMessage.append("\tmessage_id: " + message.message_id + "\n");
+				errorMessage.append("\tmessage_type: " + message.type + "\n");
+				errorMessage.append("\targuments: ");
+				if (message.arguments == null) errorMessage.append("null");
 				else {
 					for (int i = 0; i < message.arguments.length; i++) {
-						System.err.print(" " + message.arguments[i]);
+						errorMessage.append(" " + message.arguments[i]);
 					}
-					System.err.println("\n");
 				}
+                errorMessage.append("\n");
 
-				System.err.println("\tThrew exception: " + exception);
-				exception.printStackTrace();
+				errorMessage.append("\tThrew exception: " + exception + "\n");
+                for (StackTraceElement ste : exception.getStackTrace()) {
+                    errorMessage.append("\t" + ste.toString() + "\n");
+                }
+                System.err.println(errorMessage.toString());
 				return;
 			}
 		}
