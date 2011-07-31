@@ -18,14 +18,21 @@ public abstract class Actor {
 
 	public Actor() {
 		this.stage = StageService.stages[Math.abs(this.hashCode() % StageService.number_stages)];
+        hashCode = ActorRegistry.generateUniqueHashCode(super.hashCode());
 	}
 
 	public Actor(SynchronousMailboxStage stage) {
 		this.stage = stage;
+        hashCode = ActorRegistry.generateUniqueHashCode(super.hashCode());
 	}
 
     public String toString() {
         return "actor[stage: " + stage.getStageId() + ", type: " + getClass().getName() + ", hashCode: " + hashCode() + "]";
+    }
+
+    int hashCode;
+    public int hashCode() {
+        return hashCode;
     }
 
 	public abstract void invokeConstructor(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, ConstructorNotFoundException;
