@@ -12,6 +12,12 @@ behavior MigrationLocalReferenceTest extends MobileActor {
     ArrayList<DeepCopyTest> list = new ArrayList<DeepCopyTest>();
 
     MigrationLocalReferenceTest(String[] arguments) {
+        if (arguments.length != 2) {
+            System.err.println("Wrong arguments, usage:");
+            System.err.println("\tjava MigrationLocalReferenceTest <target host> <target port>");
+            System.exit(0);
+        }
+
         list.add(dct1);
         list.add(dct2);
         list.add(dct3);
