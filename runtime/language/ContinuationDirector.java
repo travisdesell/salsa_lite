@@ -7,6 +7,7 @@ import salsa_lite.runtime.Acknowledgement;
 import salsa_lite.runtime.SynchronousMailboxStage;
 import salsa_lite.runtime.Actor;
 import salsa_lite.runtime.Message;
+import salsa_lite.runtime.MobileActor;
 import salsa_lite.runtime.StageService;
 import salsa_lite.runtime.TransportService;
 import salsa_lite.runtime.language.Director;
@@ -33,6 +34,7 @@ public class ContinuationDirector extends Director implements java.io.Serializab
 		}
 		return new SerializedContinuationDirector( this.hashCode(), TransportService.getHost(), TransportService.getPort() );
 	}
+
 	public static class ContinuationDirectorRemoteReference extends ContinuationDirector {
 		int hashCode;
 		String host;
@@ -53,6 +55,7 @@ public class ContinuationDirector extends Director implements java.io.Serializab
 			return new SerializedContinuationDirector( this.hashCode(), TransportService.getHost(), TransportService.getPort() );
 		}
 	}
+
 	public static class SerializedContinuationDirector implements java.io.Serializable {
 		int hashCode;
 		String host;
@@ -74,6 +77,9 @@ public class ContinuationDirector extends Director implements java.io.Serializab
 			}
 		}
 	}
+
+	public ContinuationDirector() { super(); }
+	public ContinuationDirector(SynchronousMailboxStage stage) { super(stage); }
 
 	boolean unresolved = true;
 	LinkedList<Message> messages = new LinkedList<Message>(  );
@@ -135,10 +141,6 @@ public class ContinuationDirector extends Director implements java.io.Serializab
 
 	}
 
-
-	public ContinuationDirector() { super(); }
-
-	public ContinuationDirector(SynchronousMailboxStage stage) { super(stage); }
 
 	public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions) {
 		ContinuationDirector actor = new ContinuationDirector();

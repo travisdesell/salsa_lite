@@ -32,39 +32,4 @@ public abstract class Actor {
 
 	public abstract Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException;
 	
-	
-	private Message currentMessage = null;
-
-	public Message getCurrentMessage() {
-		return currentMessage;
-	}
-
-	public void setCurrentMessage(Message currentMessage) {
-		this.currentMessage = currentMessage;
-	}
-	
-	private boolean isActive = false;
-	
-	public boolean isActive() {
-		return isActive;
-	}
-
-	public void setActive(boolean isActive) {
-		this.isActive = isActive;
-	}
-
-	private List<Message> mailbox = new LinkedList<Message>();
-	
-	public synchronized void putMessageInMailbox(Message message) {
-		mailbox.add(message);
-	}
-	
-	public synchronized Message getNextMessage() {
-		if (mailbox.size() == 0) {
-			System.err.println("Should not happen!");
-			return null;
-		}
-		else
-			return mailbox.remove(0);
-	}
 }

@@ -22,14 +22,17 @@ public class ActorRegistry {
     }
 
     public static final Actor getEntry(int hashCode) {
+        System.err.println("getting entry[" + hashCode + "]: " + serializedActors[hashCode % numberRegistries].get(hashCode));
         return serializedActors[hashCode % numberRegistries].get(hashCode);
     }
 
     public static final Actor removeEntry(int hashCode) {
+        System.err.println("removing entry[" + hashCode + "]: " + serializedActors[hashCode % numberRegistries].get(hashCode));
         return serializedActors[hashCode % numberRegistries].remove(hashCode);
     }
 
     public static final void addEntry(int hashCode, Actor actor) {
+        System.err.println("adding entry[" + hashCode + "]: " + actor);
         serializedActors[hashCode % numberRegistries].put(hashCode, actor);
     }
 }

@@ -46,12 +46,7 @@ public class CCompilationUnit {
     }
 
     public boolean isMobile() {
-        for (CName name : getImplementsNames()) {
-            if (name.name.equals("MobileActor")) {
-                return true;
-            }
-        }
-        return false;
+        return getExtendsName() != null && getExtendsName().name.equals("MobileActor");
     }
 
 	public Vector<CEnumeration> getEnumerations() {
@@ -319,6 +314,7 @@ public class CCompilationUnit {
         code += "import salsa_lite.runtime.SynchronousMailboxStage;\n";
         code += "import salsa_lite.runtime.Actor;\n";
         code += "import salsa_lite.runtime.Message;\n";
+        code += "import salsa_lite.runtime.MobileActor;\n";
         code += "import salsa_lite.runtime.StageService;\n";
         code += "import salsa_lite.runtime.TransportService;\n";
         if (module_string == null || !module_string.equals("salsa_lite.runtime.language.")) {
@@ -390,61 +386,58 @@ public class CCompilationUnit {
             String tmp_name = actor_name;
             if (tmp_name.contains("<")) tmp_name = tmp_name.substring(0, tmp_name.indexOf('<'));
 
-            if (isMobile()) {
-            } else {
-                code += "\n";
-                code += CIndent.getIndent() + "public Object writeReplace() throws java.io.ObjectStreamException {\n";
-                code += CIndent.getIndent() + "\tint hashCode = this.hashCode();\n";
-                code += CIndent.getIndent() + "\tsynchronized (ActorRegistry.getLock(hashCode)) {\n";
-                code += CIndent.getIndent() + "\t\tActorRegistry.addEntry(hashCode, this);\n";
-                code += CIndent.getIndent() + "\t}\n";
-                code += CIndent.getIndent() + "\treturn new Serialized" + tmp_name + "( this.hashCode(), TransportService.getHost(), TransportService.getPort() );\n";
-                code += CIndent.getIndent() + "}\n";
+            code += "\n";
+            code += CIndent.getIndent() + "public Object writeReplace() throws java.io.ObjectStreamException {\n";
+            code += CIndent.getIndent() + "\tint hashCode = this.hashCode();\n";
+            code += CIndent.getIndent() + "\tsynchronized (ActorRegistry.getLock(hashCode)) {\n";
+            code += CIndent.getIndent() + "\t\tActorRegistry.addEntry(hashCode, this);\n";
+            code += CIndent.getIndent() + "\t}\n";
+            code += CIndent.getIndent() + "\treturn new Serialized" + tmp_name + "( this.hashCode(), TransportService.getHost(), TransportService.getPort() );\n";
+            code += CIndent.getIndent() + "}\n\n";
 
-                code += CIndent.getIndent() + "public static class " + tmp_name + "RemoteReference extends " + tmp_name + " {\n";
-                code += CIndent.getIndent() + "\tint hashCode;\n";
-                code += CIndent.getIndent() + "\tString host;\n";
-                code += CIndent.getIndent() + "\tint port;\n";
-                code += CIndent.getIndent() + "\t" + tmp_name + "RemoteReference(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }\n";
-                code += "\n";
-                code += CIndent.getIndent() + "\tpublic Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException {\n";
-                code += CIndent.getIndent() + "\t\tTransportService.sendMessage(host, port, this.stage.message);\n";
-                code += CIndent.getIndent() + "\t\tthrow new RemoteMessageException();\n";
-                code += CIndent.getIndent() + "\t}\n";
-                code += "\n";
-                code += CIndent.getIndent() + "\tpublic void invokeConstructor(int messageId, Object[] arguments) throws RemoteMessageException, ConstructorNotFoundException {\n";
-                code += CIndent.getIndent() + "\t\tTransportService.sendMessage(host, port, this.stage.message);\n";
-                code += CIndent.getIndent() + "\t\tthrow new RemoteMessageException();\n";
-                code += CIndent.getIndent() + "\t}\n";
-                code += "\n";
-                code += CIndent.getIndent() + "\tpublic Object writeReplace() throws java.io.ObjectStreamException {\n";
-                code += CIndent.getIndent() + "\t\treturn new Serialized" + tmp_name + "( this.hashCode(), TransportService.getHost(), TransportService.getPort() );\n";
-                code += CIndent.getIndent() + "\t}\n";
-                code += CIndent.getIndent() + "}\n";
+            code += CIndent.getIndent() + "public static class " + tmp_name + "RemoteReference extends " + tmp_name + " {\n";
+            code += CIndent.getIndent() + "\tint hashCode;\n";
+            code += CIndent.getIndent() + "\tString host;\n";
+            code += CIndent.getIndent() + "\tint port;\n";
+            code += CIndent.getIndent() + "\t" + tmp_name + "RemoteReference(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }\n";
+            code += "\n";
+            code += CIndent.getIndent() + "\tpublic Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException {\n";
+            code += CIndent.getIndent() + "\t\tTransportService.sendMessage(host, port, this.stage.message);\n";
+            code += CIndent.getIndent() + "\t\tthrow new RemoteMessageException();\n";
+            code += CIndent.getIndent() + "\t}\n";
+            code += "\n";
+            code += CIndent.getIndent() + "\tpublic void invokeConstructor(int messageId, Object[] arguments) throws RemoteMessageException, ConstructorNotFoundException {\n";
+            code += CIndent.getIndent() + "\t\tTransportService.sendMessage(host, port, this.stage.message);\n";
+            code += CIndent.getIndent() + "\t\tthrow new RemoteMessageException();\n";
+            code += CIndent.getIndent() + "\t}\n";
+            code += "\n";
+            code += CIndent.getIndent() + "\tpublic Object writeReplace() throws java.io.ObjectStreamException {\n";
+            code += CIndent.getIndent() + "\t\treturn new Serialized" + tmp_name + "( this.hashCode(), TransportService.getHost(), TransportService.getPort() );\n";
+            code += CIndent.getIndent() + "\t}\n";
+            code += CIndent.getIndent() + "}\n\n";
 
-                code += CIndent.getIndent() + "public static class Serialized" + tmp_name + " implements java.io.Serializable {\n";
-                code += CIndent.getIndent() + "\tint hashCode;\n";
-                code += CIndent.getIndent() + "\tString host;\n";
-                code += CIndent.getIndent() + "\tint port;\n";
-                code += "\n";
-                code += CIndent.getIndent() + "\tSerialized" + tmp_name + "(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }\n";
-                code += "\n";
-                code += CIndent.getIndent() + "\tpublic Object readResolve() throws java.io.ObjectStreamException {\n";
-                code += CIndent.getIndent() + "\t\tsynchronized (ActorRegistry.getLock(hashCode)) {\n";
-                code += CIndent.getIndent() + "\t\t\t" + tmp_name + " actor = (" + tmp_name +")ActorRegistry.getEntry(hashCode);\n";
-                code += CIndent.getIndent() + "\t\t\tif (actor == null) {\n";
-                code += CIndent.getIndent() + "\t\t\t\tSystem.err.println(\"DESERIALIZING A REMOTE REFERENCE TO A LOCAL ACTOR\");\n";
-                code += CIndent.getIndent() + "\t\t\t\t" + tmp_name + "RemoteReference remoteReference = new " + tmp_name + "RemoteReference(hashCode, host, port);\n";
-                code += CIndent.getIndent() + "\t\t\t\tActorRegistry.addEntry(hashCode, remoteReference);\n";
-                code += CIndent.getIndent() + "\t\t\t\treturn remoteReference;\n";
-                code += CIndent.getIndent() + "\t\t\t} else {\n";
-                code += CIndent.getIndent() + "\t\t\t\treturn actor;\n";
-                code += CIndent.getIndent() + "\t\t\t}\n";
-                code += CIndent.getIndent() + "\t\t}\n";
-                code += CIndent.getIndent() + "\t}\n";
-                code += CIndent.getIndent() + "}\n";
-                code += "\n";
-            }
+            code += CIndent.getIndent() + "public static class Serialized" + tmp_name + " implements java.io.Serializable {\n";
+            code += CIndent.getIndent() + "\tint hashCode;\n";
+            code += CIndent.getIndent() + "\tString host;\n";
+            code += CIndent.getIndent() + "\tint port;\n";
+            code += "\n";
+            code += CIndent.getIndent() + "\tSerialized" + tmp_name + "(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }\n";
+            code += "\n";
+            code += CIndent.getIndent() + "\tpublic Object readResolve() throws java.io.ObjectStreamException {\n";
+            code += CIndent.getIndent() + "\t\tsynchronized (ActorRegistry.getLock(hashCode)) {\n";
+            code += CIndent.getIndent() + "\t\t\t" + tmp_name + " actor = (" + tmp_name +")ActorRegistry.getEntry(hashCode);\n";
+            code += CIndent.getIndent() + "\t\t\tif (actor == null) {\n";
+            code += CIndent.getIndent() + "\t\t\t\tSystem.err.println(\"DESERIALIZING A REMOTE REFERENCE TO A LOCAL ACTOR\");\n";
+            code += CIndent.getIndent() + "\t\t\t\t" + tmp_name + "RemoteReference remoteReference = new " + tmp_name + "RemoteReference(hashCode, host, port);\n";
+            code += CIndent.getIndent() + "\t\t\t\tActorRegistry.addEntry(hashCode, remoteReference);\n";
+            code += CIndent.getIndent() + "\t\t\t\treturn remoteReference;\n";
+            code += CIndent.getIndent() + "\t\t\t} else {\n";
+            code += CIndent.getIndent() + "\t\t\t\treturn actor;\n";
+            code += CIndent.getIndent() + "\t\t\t}\n";
+            code += CIndent.getIndent() + "\t\t}\n";
+            code += CIndent.getIndent() + "\t}\n";
+            code += CIndent.getIndent() + "}\n";
+            code += "\n";
         }
 
 //		System.err.println("ATTEMPTING TO ADD CONTAINED MESSAGE HANDLERS");
@@ -483,6 +476,99 @@ public class CCompilationUnit {
             at.message_handlers.add( ms );
 		}
 
+        if (isMobile()) {
+            String tmp_name = actor_name;
+            if (tmp_name.contains("<")) tmp_name = tmp_name.substring(0, tmp_name.indexOf('<'));
+
+            code += CIndent.getIndent() + "public Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException {\n";
+            code += CIndent.getIndent() + "\tState state = (State)ActorRegistry.getEntry(this.hashCode());\n";
+            code += CIndent.getIndent() + "\tif (state == null) {\n";
+            code += CIndent.getIndent() + "\t\tTransportService.sendMessage(host, port, this.stage.message);\n";
+            code += CIndent.getIndent() + "\t\tthrow new RemoteMessageException();\n";
+            code += CIndent.getIndent() + "\t} else {\n";
+            code += CIndent.getIndent() + "\t\treturn state.invokeMessage(messageId, arguments);\n";
+            code += CIndent.getIndent() + "\t}\n";
+            code += CIndent.getIndent() + "}\n";
+            code += "\n";
+            code += CIndent.getIndent() + "public void invokeConstructor(int messageId, Object[] arguments) throws RemoteMessageException, ConstructorNotFoundException {\n";
+            code += CIndent.getIndent() + "\tState state = (State)ActorRegistry.getEntry(this.hashCode());\n";
+            code += CIndent.getIndent() + "\tif (state == null) {\n";
+            code += CIndent.getIndent() + "\t\tTransportService.sendMessage(host, port, this.stage.message);\n";
+            code += CIndent.getIndent() + "\t\tthrow new RemoteMessageException();\n";
+            code += CIndent.getIndent() + "\t} else {\n";
+            code += CIndent.getIndent() + "\t\tstate.invokeConstructor(messageId, arguments);\n";
+            code += CIndent.getIndent() + "\t}\n";
+            code += CIndent.getIndent() + "}\n\n\n";
+
+            code += CIndent.getIndent() + "public " + tmp_name + "() { super(); }\n";
+            code += CIndent.getIndent() + "public " + tmp_name + "(SynchronousMailboxStage stage) { super(stage); }\n\n";
+
+            int act_constructor = behavior_declaration.getActConstructor();
+            if (act_constructor >= 0) {
+                code += CIndent.getIndent() + "public static void main(String[] arguments) {\n";
+                code += CIndent.getIndent() + "\t" + tmp_name + ".construct(" + act_constructor + ", new Object[]{arguments});\n";
+                code += CIndent.getIndent() + "}\n\n";
+            }
+
+            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions) {\n";
+            code += CIndent.getIndent() + "\t" + tmp_name + " actor = new " + tmp_name + "();\n";
+            code += CIndent.getIndent() + "\tState state = new State();\n";
+            code += CIndent.getIndent() + "\tActorRegistry.addEntry(actor.hashCode(), state);\n";
+            code += CIndent.getIndent() + "\tTokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);\n";
+            code += CIndent.getIndent() + "\tMessage input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
+            code += CIndent.getIndent() + "\tMessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions});\n";
+            code += CIndent.getIndent() + "\treturn output_continuation;\n";
+            code += CIndent.getIndent() + "}\n\n";
+
+            code += CIndent.getIndent() + "public static " + tmp_name + " construct(int constructor_id, Object[] arguments) {\n";
+            code += CIndent.getIndent() + "\t" + tmp_name + " actor = new " + tmp_name + "();\n";
+            code += CIndent.getIndent() + "\tState state = new State();\n";
+            code += CIndent.getIndent() + "\tActorRegistry.addEntry(actor.hashCode(), state);\n";
+            code += CIndent.getIndent() + "\tStageService.sendMessage(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
+            code += CIndent.getIndent() + "\treturn actor;\n";
+            code += CIndent.getIndent() + "}\n";
+
+            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, SynchronousMailboxStage target_stage) {\n";
+            code += CIndent.getIndent() + "\t" + tmp_name + " actor = new " + tmp_name + "(target_stage);\n";
+            code += CIndent.getIndent() + "\tState state = new State(target_stage);\n";
+            code += CIndent.getIndent() + "\tActorRegistry.addEntry(actor.hashCode(), state);\n";
+            code += CIndent.getIndent() + "\tTokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage);\n";
+            code += CIndent.getIndent() + "\tMessage input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
+            code += CIndent.getIndent() + "\tMessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage);\n";
+            code += CIndent.getIndent() + "\treturn output_continuation;\n";
+            code += CIndent.getIndent() + "}\n\n";
+
+            code += CIndent.getIndent() + "public static " + tmp_name + " construct(int constructor_id, Object[] arguments, SynchronousMailboxStage target_stage) {\n";
+            code += CIndent.getIndent() + "\t" + tmp_name + " actor = new " + tmp_name + "(target_stage);\n";
+            code += CIndent.getIndent() + "\tState state = new State(target_stage);\n";
+            code += CIndent.getIndent() + "\tActorRegistry.addEntry(actor.hashCode(), state);\n";
+            code += CIndent.getIndent() + "\ttarget_stage.putMessageInMailbox(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
+            code += CIndent.getIndent() + "\treturn actor;\n";
+            code += CIndent.getIndent() + "}\n\n\n";
+
+            code += CIndent.getIndent() + "public static class State ";
+            if (getExtendsName() != null) code += "extends " + getExtendsName().name + ".State ";
+            code += "{\n";
+
+            CIndent.increaseIndent();
+        }
+
+        if (actor_name.contains("<")) actor_name = actor_name.substring(0, actor_name.indexOf('<'));
+
+        if (!isMobile()) {
+            code += CIndent.getIndent() + "public " + actor_name + "() { super(); }\n";
+            code += CIndent.getIndent() + "public " + actor_name + "(SynchronousMailboxStage stage) { super(stage); }\n\n";
+        } else {
+            code += CIndent.getIndent() + "public State() { super(); }\n";
+            code += CIndent.getIndent() + "public State(SynchronousMailboxStage stage) { super(stage); }\n\n";
+        }
+
+        if (isMobile()) {
+            code += CIndent.getIndent() + "public void migrate(String host, int port) {\n";
+            code += CIndent.getIndent() + "}\n\n";
+        }
+
+
 		code += getFieldCode() + "\n";
 		code += getEnumerationCode() + "\n";
 
@@ -498,45 +584,47 @@ public class CCompilationUnit {
         }
 		code += getMessageCode() + "\n";
 
-        if (actor_name.contains("<")) actor_name = actor_name.substring(0, actor_name.indexOf('<'));
-
-        code += CIndent.getIndent() + "public " + actor_name + "() { super(); }\n\n";
-        code += CIndent.getIndent() + "public " + actor_name + "(SynchronousMailboxStage stage) { super(stage); }\n\n";
-
         if (behavior_declaration != null && !behavior_declaration.is_abstract) {
-            int act_constructor = behavior_declaration.getActConstructor();
-            if (act_constructor >= 0) {
-                code += CIndent.getIndent() + "public static void main(String[] arguments) {\n";
-                code += CIndent.getIndent() + "\tStageService.sendMessage(new Message(Message.CONSTRUCT_MESSAGE, new " + actor_name + "(), " + act_constructor + ", new Object[]{arguments}));\n";
+            if (!isMobile()) {
+                int act_constructor = behavior_declaration.getActConstructor();
+                if (act_constructor >= 0) {
+                    code += CIndent.getIndent() + "public static void main(String[] arguments) {\n";
+                    code += CIndent.getIndent() + "\t" + actor_name + ".construct(" + act_constructor + ", new Object[]{arguments});\n";
+                    code += CIndent.getIndent() + "}\n\n";
+                }
+
+                code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions) {\n";
+                code += CIndent.getIndent() + "\t" + actor_name + " actor = new " + actor_name + "();\n";
+                code += CIndent.getIndent() + "\tTokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);\n";
+                code += CIndent.getIndent() + "\tMessage input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
+                code += CIndent.getIndent() + "\tMessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions});\n";
+                code += CIndent.getIndent() + "\treturn output_continuation;\n";
                 code += CIndent.getIndent() + "}\n\n";
+
+                code += CIndent.getIndent() + "public static " + actor_name + " construct(int constructor_id, Object[] arguments) {\n";
+                code += CIndent.getIndent() + "\t" + actor_name + " actor = new " + actor_name + "();\n";
+                code += CIndent.getIndent() + "\tStageService.sendMessage(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
+                code += CIndent.getIndent() + "\treturn actor;\n";
+                code += CIndent.getIndent() + "}\n";
+
+                code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, SynchronousMailboxStage target_stage) {\n";
+                code += CIndent.getIndent() + "\t" + actor_name + " actor = new " + actor_name + "(target_stage);\n";
+                code += CIndent.getIndent() + "\tTokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage);\n";
+                code += CIndent.getIndent() + "\tMessage input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
+                code += CIndent.getIndent() + "\tMessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage);\n";
+                code += CIndent.getIndent() + "\treturn output_continuation;\n";
+                code += CIndent.getIndent() + "}\n\n";
+
+                code += CIndent.getIndent() + "public static " + actor_name + " construct(int constructor_id, Object[] arguments, SynchronousMailboxStage target_stage) {\n";
+                code += CIndent.getIndent() + "\t" + actor_name + " actor = new " + actor_name + "(target_stage);\n";
+                code += CIndent.getIndent() + "\ttarget_stage.putMessageInMailbox(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
+                code += CIndent.getIndent() + "\treturn actor;\n";
+                code += CIndent.getIndent() + "}\n";
             }
+        }
 
-            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions) {\n";
-            code += CIndent.getIndent() + "\t" + actor_name + " actor = new " + actor_name + "();\n";
-            code += CIndent.getIndent() + "\tTokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);\n";
-            code += CIndent.getIndent() + "\tMessage input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
-            code += CIndent.getIndent() + "\tMessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions});\n";
-            code += CIndent.getIndent() + "\treturn output_continuation;\n";
-            code += CIndent.getIndent() + "}\n\n";
-
-            code += CIndent.getIndent() + "public static " + actor_name + " construct(int constructor_id, Object[] arguments) {\n";
-            code += CIndent.getIndent() + "\t" + actor_name + " actor = new " + actor_name + "();\n";
-            code += CIndent.getIndent() + "\tStageService.sendMessage(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
-            code += CIndent.getIndent() + "\treturn actor;\n";
-            code += CIndent.getIndent() + "}\n";
-
-            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, SynchronousMailboxStage target_stage) {\n";
-            code += CIndent.getIndent() + "\t" + actor_name + " actor = new " + actor_name + "(target_stage);\n";
-            code += CIndent.getIndent() + "\tTokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage);\n";
-            code += CIndent.getIndent() + "\tMessage input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
-            code += CIndent.getIndent() + "\tMessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage);\n";
-            code += CIndent.getIndent() + "\treturn output_continuation;\n";
-            code += CIndent.getIndent() + "}\n\n";
-
-            code += CIndent.getIndent() + "public static " + actor_name + " construct(int constructor_id, Object[] arguments, SynchronousMailboxStage target_stage) {\n";
-            code += CIndent.getIndent() + "\t" + actor_name + " actor = new " + actor_name + "(target_stage);\n";
-            code += CIndent.getIndent() + "\ttarget_stage.putMessageInMailbox(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
-            code += CIndent.getIndent() + "\treturn actor;\n";
+        if (isMobile()) {
+            CIndent.decreaseIndent();
             code += CIndent.getIndent() + "}\n";
         }
 

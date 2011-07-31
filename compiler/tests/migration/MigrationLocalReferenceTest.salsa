@@ -2,17 +2,16 @@ import salsa_lite.io.StandardOutput;
 
 import object java.util.ArrayList;
 
-behavior MigrationLocalReferenceTest implements MobileActor {
+behavior MigrationLocalReferenceTest extends MobileActor {
+    DeepCopyTest dct1 = new DeepCopyTest(1);
+    DeepCopyTest dct2 = new DeepCopyTest(2);
+    DeepCopyTest dct3 = new DeepCopyTest(3);
+    DeepCopyTest dct4 = new DeepCopyTest(4);
+    DeepCopyTest dct5 = new DeepCopyTest(5);
+
+    ArrayList<DeepCopyTest> list = new ArrayList<DeepCopyTest>();
 
     MigrationLocalReferenceTest(String[] arguments) {
-        DeepCopyTest dct1 = new DeepCopyTest(1);
-        DeepCopyTest dct2 = new DeepCopyTest(2);
-        DeepCopyTest dct3 = new DeepCopyTest(3);
-        DeepCopyTest dct4 = new DeepCopyTest(4);
-        DeepCopyTest dct5 = new DeepCopyTest(5);
-
-        ArrayList<DeepCopyTest> list = new ArrayList<DeepCopyTest>();
-
         list.add(dct1);
         list.add(dct2);
         list.add(dct3);
@@ -20,7 +19,7 @@ behavior MigrationLocalReferenceTest implements MobileActor {
         list.add(dct5);
 
         self<-migrate(arguments[0], Integer.parseInt(arguments[1])) @
-        finish();
+        self<-finish();
     }
 
 
