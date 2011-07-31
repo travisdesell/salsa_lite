@@ -17,23 +17,22 @@ public class ActorRegistry {
         }
     }
 
-    public static Object getLock(int hashCode) {
+    public final static Object getLock(int hashCode) {
         return serializedActors[hashCode % numberRegistries];
     }
 
-    public static Actor getEntry(int hashCode) {
+    public final static Actor getEntry(int hashCode) {
 //        System.err.println("getting entry[" + hashCode + "]: " + serializedActors[hashCode % numberRegistries].get(hashCode));
         return serializedActors[hashCode % numberRegistries].get(hashCode);
     }
 
-    public static Actor removeEntry(int hashCode) {
+    public final static Actor removeEntry(int hashCode) {
         System.err.println("removing entry[" + hashCode + "]: " + serializedActors[hashCode % numberRegistries].get(hashCode));
         return serializedActors[hashCode % numberRegistries].remove(hashCode);
     }
 
-    public static void addEntry(int hashCode, Actor actor) {
-        System.err.println("adding entry[" + hashCode + "]");
-//        : " + actor);
+    public final static void addEntry(int hashCode, Actor actor) {
+//        System.err.println("adding entry[" + hashCode + "]: " + actor);
 
         if (serializedActors[hashCode % numberRegistries].get(hashCode) != null) {
             System.err.println("error, overwriting registry entry: " + hashCode);

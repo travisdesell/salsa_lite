@@ -234,9 +234,18 @@ public class CValue extends CErrorInformation {
 		if (literal != null) {
             if (literal.value.equals("self")) {
                 code += "this";
+                if (modifications.size() == 0 || (modifications.size() > 0 && modifications.get(0) instanceof CMessageSend)) {
+                    if (SymbolTable.is_mobile_actor) {
+                        code += ".stage.message.target";        //kind of a hack, so that a mobile actor state doesn't need to have a self reference
+                    }
+                }
+
             } else if (literal.value.equals("parent")) {
                 if (modifications.size() > 0 && modifications.get(0) instanceof CMessageSend) {
                     code += "this";
+                    if (SymbolTable.is_mobile_actor) {
+                        code += ".stage.message.target";        //kind of a hack, so that a mobile actor state doesn't need to have a self reference
+                    }
                     isParentMessageSend = true;
                 } else {
                     code += "super";

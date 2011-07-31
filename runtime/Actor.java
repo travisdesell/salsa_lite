@@ -25,7 +25,7 @@ public abstract class Actor {
 	}
 
     public String toString() {
-        return "actor[stage: " + stage.getId() + ", type: " + getClass().getName() + "]";
+        return "actor[stage: " + stage.getStageId() + ", type: " + getClass().getName() + ", hashCode: " + hashCode() + "]";
     }
 
 	public abstract void invokeConstructor(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, ConstructorNotFoundException;

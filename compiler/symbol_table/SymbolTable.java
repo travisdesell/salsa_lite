@@ -31,6 +31,7 @@ public class SymbolTable {
     public static TreeMap<String,String> namespace = new TreeMap<String,String>();
 
     public static boolean isExpressionContinuation = false;
+    public static boolean is_mobile_actor = false;
 
     public static boolean isActor(String name) throws SalsaNotFoundException {
         TypeSymbol knownType = getTypeSymbol(name);
@@ -365,6 +366,8 @@ public class SymbolTable {
     public static void resetSymbolTable(CCompilationUnit cu) {
         knownTypes = new HashMap<String,TypeSymbol>();
         namespace = new TreeMap<String,String>();
+
+        is_mobile_actor = false;
 
         base_scope = null;
         scope = null;
