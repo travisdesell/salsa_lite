@@ -1,5 +1,3 @@
-module salsa_lite.examples.fibonacci;
-
 behavior Fibonacci {
 	int n;
 

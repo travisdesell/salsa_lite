@@ -27,12 +27,12 @@ public class SynchronousMailboxStage extends Thread {
 		mailbox = new LinkedList<Message>();
 	}
 
-	public synchronized void putMessageInMailbox(Message message) {
+	public final synchronized void putMessageInMailbox(Message message) {
 		mailbox.add(message);
 		notify();
 	}
 
-	private synchronized Message getMessage() {
+	private final synchronized Message getMessage() {
 		if (mailbox.isEmpty()) {
 			try {
 				wait();
@@ -46,7 +46,7 @@ public class SynchronousMailboxStage extends Thread {
 	}
 
 	public Message message;
-	public void run() {
+	public final void run() {
 		Object result;
 
 		while (true) {

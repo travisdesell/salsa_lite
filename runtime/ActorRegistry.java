@@ -6,8 +6,8 @@ public class ActorRegistry {
 
     private static final int numberRegistries;
     private static final Object[] idLocks;
-    private static int[] uniqueIdGenerators;
-    private static HashMap<Integer,Actor>[] serializedActors;
+    private static final int[] uniqueIdGenerators;
+    private static final HashMap<Integer,Actor>[] serializedActors;
 
     static {
         if (System.getProperty("nregistries") != null) numberRegistries = Integer.parseInt(System.getProperty("nregistries"));
