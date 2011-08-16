@@ -39,6 +39,7 @@ Notable changes from SALSA 1.x and before:
     *   It is possible to invoke methods on self.  Because of this, to prevent ambiguity, for an actor to send a message or invoke a method on itself, use either 'self<-message();' or 'self.method();'.  Using 'message()' or 'method()' will not work (we might want to change this, maybe make sending a message the default).
     *   Local actors have automatic garbage collection (using Java's garbage collector), so long as MobileActors with references to them are not migrated to another theater.
     *   You can specify what stage an actor runs on: 'NewActor na = new NewActor() at (<stage number>);' or 'NewActor na = newActor() at (StageService.getStage(anotherActor));' or 'NewActor na = new NewActor() at (StageService.getNewStage());'.
+    *   Actors can implement 'StagedActor' which will make them run on their own stage. This is useful for actors with blocking behavior or long running message handlers that may starve other actors running on the same stage.
 
 
 BUGS:

@@ -1,0 +1,47 @@
+module salsa_lite.runtime.wwc;
+
+import object java.util.HashMap;
+import object salsa_lite.runtime.TheaterReference;
+
+behavior NameServer extends RemoteActor {
+
+    HashMap<String,TheaterReference> entries = new HashMap<String,TheaterReference>();
+
+    NameServer(String[] arguments) {
+        if (System.getProperty("called") == null) {
+            System.err.println("Error starting nameserver: must specify a name with the '-Dcalled=<name>' system property.");
+            System.err.println("usage: (port is optional and 3030 by defaul)");
+            System.err.println("\tjava -Dcalled=mynameserver [-Dport=3030] salsa_lite.runtime.wwc.NameServer");
+            System.exit(0);
+        }
+    }
+
+    ack addEntry(String name, TheaterReference newEntry) {
+        if (entries.containsKey(name)) {
+            TheaterReference entry = entries.get(name);
+            System.err.println("Error: entry for actor already exists on nameserver.");
+            System.err.println("\texisting  entry name[" + name + "], host[" + entry.host + "], port[" + entry.port +"]");
+            System.err.println("\tattempted entry name[" + name + "], host[" + newEntry.host + "], port[" + newEntry.port +"]");
+        } else {
+            entries.put(name, newEntry);
+            System.err.println("[nameserver: " + self.getName() + "] PUT " + name + " -- " + newEntry);
+        }
+    }
+
+    ack updateEntry(String name, TheaterReference newEntry) {
+        if (!entries.containsKey(name)) {
+            System.err.println("Error: tried to update entry for actor that does not exist on nameserver.");
+            System.err.println("\tattempted entry name[" + name + "], host[" + newEntry.host + "], port[" + newEntry.port +"]");
+        } else {
+            entries.put(name, newEntry);
+        }
+    }
+
+    TheaterReference getEntry(String name) {
+        pass entries.get(name);
+    }
+
+    TheaterReference removeEntry(String name) {
+        pass entries.remove(name);
+    }
+}

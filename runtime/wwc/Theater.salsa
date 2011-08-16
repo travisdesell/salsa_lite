@@ -1,0 +1,30 @@
+module salsa_lite.runtime.wwc;
+
+import object java.net.ServerSocket;
+import object java.net.Socket;
+
+behavior Theater implements StagedActor {
+
+    int port = 4040;
+    ServerSocket serverSocket = null;
+
+    Theater(String[] arguments) {
+        if (System.getProperty("theater_port") != null) {
+            port = Integer.parseInt(System.getProperty("theater_port"));
+        } else if (arguments.length == 1) {
+            port = Integer.parseInt(arguments[0]);
+        }
+
+        serverSocket = new ServerSocket(port);
+
+        self-listen();
+    }
+
+    ack listen() {
+        Socket socket = serverSocket.accept();
+        
+        new IncomingTheaterConnection(socket);
+
+        self<-listen();
+    }
+}

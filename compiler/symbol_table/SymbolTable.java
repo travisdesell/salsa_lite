@@ -569,6 +569,17 @@ public class SymbolTable {
             namespace.put(localActorType.getName(), localActorType.getLongSignature());
             addVariableType("stage", "Stage", false, true);     //should add an actor's parent fields to namespace as well instead of this hack
 
+            ActorType remoteActorType = null;
+            remoteActorType = new ActorType(runtimeModule + ".RemoteActor", SymbolTable.getTypeSymbol("Actor"));
+            MessageSymbol getHostMessage = new MessageSymbol(0, "getHost", remoteActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
+            MessageSymbol getPortMessage = new MessageSymbol(1, "getPort", remoteActorType, SymbolTable.getTypeSymbol("int"), new TypeSymbol[]{});
+            MessageSymbol getNameMessage = new MessageSymbol(2, "getName", remoteActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
+            remoteActorType.message_handlers.add(getHostMessage);
+            remoteActorType.message_handlers.add(getPortMessage);
+            remoteActorType.message_handlers.add(getNameMessage);
+            knownTypes.put(remoteActorType.getLongSignature(), remoteActorType);
+            namespace.put(remoteActorType.getName(), remoteActorType.getLongSignature());
+
             ActorType mobileActorType = null;
             mobileActorType = new ActorType(runtimeModule + ".MobileActor", SymbolTable.getTypeSymbol("Actor"));
             MessageSymbol migrateMessage = new MessageSymbol(0, "migrate", mobileActorType, SymbolTable.getTypeSymbol("ack"), new TypeSymbol[]{ SymbolTable.getTypeSymbol("String"), SymbolTable.getTypeSymbol("int") });

@@ -1,0 +1,38 @@
+module salsa_lite.runtime.wwc;
+
+import object java.net.Socket;
+import object java.io.BufferedInputStream;
+import object java.io.ObjectInputStream;
+
+behavior IncomingTheaterConnection implements StagedActor {
+
+    Socket socket = null;
+    ObjectInputStream in = null;
+
+    IncomingTheaterConnection(Socket socket) {
+        self.socket = socket;
+        in = new ObjectInputStream(new BufferedInputStream(socket.getInputSTream()));
+
+        self<-listen();
+    }
+
+    ack listen() {
+        Object o = in.readObject();
+        in.reset();
+        
+        if (o insteanceof Actor) {
+            MobileActorRegistry.addEntry(...);
+        } else if (o insteanceof Message) {
+            //check to see if the target actor is here
+
+        } else {
+            StringBuffer sb = new StringBuffer();
+            sb.append("Error in IncomingTheaterConnection, received unknown object: " + o + "\n");
+            sb.append("\tremote host [" + socket.getHost() + "], local port [" + socket.getLocalSocketAddress() + "]\n");
+            sb.append("\tremote host [" + socket.getHost() + "], local port [" + socket.getLocalSocketAddress() + "]\n");
+            System.err.println(sb.toString());
+        }
+
+        self<-listen();
+    }
+}

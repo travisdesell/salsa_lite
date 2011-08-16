@@ -1,0 +1,26 @@
+module salsa_lite.runtime.wwc;
+
+import object java.net.Socket;
+import object java.io.BufferedOutputStream;
+import object java.io.ObjectOutputStream;
+
+behavior OutgoingTheaterConnection {
+
+    Socket socket = null;
+    ObjectOutputStream out = null;
+
+    OutgoingTheaterConnection(String host, int port) {
+        socket = new Socket(host, port);
+        out = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+    }
+
+    ack send(Message message) {
+        out.writeObject(message);
+        out.reset();
+    }
+
+    ack migrate(Actor actor) {
+        out.writeObject(actor);
+        out.reset();
+    }
+}

@@ -45,6 +45,10 @@ public class CCompilationUnit {
         }
     }
 
+    public boolean isRemote() {
+        return getExtendsName() != null && getExtendsName().name.equals("RemoteActor");
+    }
+
     public boolean isMobile() {
         return getExtendsName() != null && getExtendsName().name.equals("MobileActor");
     }
@@ -314,6 +318,7 @@ public class CCompilationUnit {
         code += "import salsa_lite.runtime.SynchronousMailboxStage;\n";
         code += "import salsa_lite.runtime.Actor;\n";
         code += "import salsa_lite.runtime.Message;\n";
+        code += "import salsa_lite.runtime.RemoteActor;\n";
         code += "import salsa_lite.runtime.MobileActor;\n";
         code += "import salsa_lite.runtime.StageService;\n";
         code += "import salsa_lite.runtime.TransportService;\n";
@@ -387,20 +392,46 @@ public class CCompilationUnit {
             String tmp_name = actor_name;
             if (tmp_name.contains("<")) tmp_name = tmp_name.substring(0, tmp_name.indexOf('<'));
 
+            if (isRemote()) {
+                code += "\n";
+                code += CIndent.getIndent() + "public static " + tmp_name + " getRemoteReference(String name, String host, int port) {\n";
+                code += CIndent.getIndent() + "\tint hashCode = ActorRegistry.getHashCodeFor(name, host, port);\n";
+                code += CIndent.getIndent() + "\tsynchronized (ActorRegistry.getLock(hashCode)) {\n";
+                code += CIndent.getIndent() + "\t\t" + tmp_name + " entry = (" + tmp_name + ")ActorRegistry.getEntry(hashCode);\n";
+                code += CIndent.getIndent() + "\t\tif (entry == null) {\n";
+                code += CIndent.getIndent() + "\t\t\treturn new " + tmp_name + "RemoteReference(hashCode, name, host, port);\n";
+                code += CIndent.getIndent() + "\t\t} else {\n";
+                code += CIndent.getIndent() + "\t\t\treturn entry;\n";
+                code += CIndent.getIndent() + "\t\t}\n";
+                code += CIndent.getIndent() + "\t}\n";
+                code += CIndent.getIndent() + "}\n";
+            }
+
             code += "\n";
             code += CIndent.getIndent() + "public Object writeReplace() throws java.io.ObjectStreamException {\n";
             code += CIndent.getIndent() + "\tint hashCode = this.hashCode();\n";
             code += CIndent.getIndent() + "\tsynchronized (ActorRegistry.getLock(hashCode)) {\n";
             code += CIndent.getIndent() + "\t\tActorRegistry.addEntry(hashCode, this);\n";
             code += CIndent.getIndent() + "\t}\n";
-            code += CIndent.getIndent() + "\treturn new Serialized" + tmp_name + "( this.hashCode(), TransportService.getHost(), TransportService.getPort() );\n";
+            if (isRemote() || isMobile()) {
+                code += CIndent.getIndent() + "\treturn new Serialized" + tmp_name + "( hashCode, this.getName(), this.getHost(), this.getPort() );\n";
+            } else {
+                code += CIndent.getIndent() + "\treturn new Serialized" + tmp_name + "( hashCode, TransportService.getHost(), TransportService.getPort() );\n";
+            }
             code += CIndent.getIndent() + "}\n\n";
 
             code += CIndent.getIndent() + "public static class " + tmp_name + "RemoteReference extends " + tmp_name + " {\n";
-            code += CIndent.getIndent() + "\tint hashCode;\n";
-            code += CIndent.getIndent() + "\tString host;\n";
-            code += CIndent.getIndent() + "\tint port;\n";
-            code += CIndent.getIndent() + "\t" + tmp_name + "RemoteReference(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }\n";
+            code += CIndent.getIndent() + "\tprivate int hashCode;\n";
+            if (isRemote() || isMobile()) {
+                code += CIndent.getIndent() + "\tprivate String name;\n";
+            }
+            code += CIndent.getIndent() + "\tprivate String host;\n";
+            code += CIndent.getIndent() + "\tprivate int port;\n";
+            if (isRemote() || isMobile()) {
+                code += CIndent.getIndent() + "\t" + tmp_name + "RemoteReference(int hashCode, String name, String host, int port) { this.hashCode = hashCode; this.name = name; this.host = host; this.port = port; }\n";
+            } else {
+                code += CIndent.getIndent() + "\t" + tmp_name + "RemoteReference(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }\n";
+            }
             code += "\n";
             code += CIndent.getIndent() + "\tpublic Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException {\n";
             code += CIndent.getIndent() + "\t\tTransportService.sendMessage(host, port, this.stage.message);\n";
@@ -413,23 +444,39 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "\t}\n";
             code += "\n";
             code += CIndent.getIndent() + "\tpublic Object writeReplace() throws java.io.ObjectStreamException {\n";
-            code += CIndent.getIndent() + "\t\treturn new Serialized" + tmp_name + "( this.hashCode(), TransportService.getHost(), TransportService.getPort() );\n";
+            if (isRemote() || isMobile()) {
+                code += CIndent.getIndent() + "\t\treturn new Serialized" + tmp_name + "( hashCode, name, host, port );\n";
+            } else {
+                code += CIndent.getIndent() + "\t\treturn new Serialized" + tmp_name + "( hashCode, TransportService.getHost(), TransportService.getPort() );\n";
+            }
             code += CIndent.getIndent() + "\t}\n";
             code += CIndent.getIndent() + "}\n\n";
 
             code += CIndent.getIndent() + "public static class Serialized" + tmp_name + " implements java.io.Serializable {\n";
             code += CIndent.getIndent() + "\tint hashCode;\n";
+            if (isRemote() || isMobile()) {
+                code += CIndent.getIndent() + "\tString name;\n";
+            }
             code += CIndent.getIndent() + "\tString host;\n";
             code += CIndent.getIndent() + "\tint port;\n";
             code += "\n";
-            code += CIndent.getIndent() + "\tSerialized" + tmp_name + "(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }\n";
+            if (isRemote() || isMobile()) {
+                code += CIndent.getIndent() + "\tSerialized" + tmp_name + "(int hashCode, String name, String host, int port) { this.hashCode = hashCode; this.name = name; this.host = host; this.port = port; }\n";
+            } else {
+                code += CIndent.getIndent() + "\tSerialized" + tmp_name + "(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }\n";
+            }
             code += "\n";
             code += CIndent.getIndent() + "\tpublic Object readResolve() throws java.io.ObjectStreamException {\n";
             code += CIndent.getIndent() + "\t\tsynchronized (ActorRegistry.getLock(hashCode)) {\n";
             code += CIndent.getIndent() + "\t\t\t" + tmp_name + " actor = (" + tmp_name +")ActorRegistry.getEntry(hashCode);\n";
             code += CIndent.getIndent() + "\t\t\tif (actor == null) {\n";
-            code += CIndent.getIndent() + "\t\t\t\tSystem.err.println(\"DESERIALIZING A REMOTE REFERENCE TO A LOCAL ACTOR\");\n";
-            code += CIndent.getIndent() + "\t\t\t\t" + tmp_name + "RemoteReference remoteReference = new " + tmp_name + "RemoteReference(hashCode, host, port);\n";
+            if (isRemote() || isMobile()) {
+                code += CIndent.getIndent() + "\t\t\t\tSystem.err.println(\"DESERIALIZING A REMOTE REFERENCE TO A REMOTE OR MOBILE ACTOR\");\n";
+                code += CIndent.getIndent() + "\t\t\t\t" + tmp_name + "RemoteReference remoteReference = new " + tmp_name + "RemoteReference(hashCode, name, host, port);\n";
+            } else {
+                code += CIndent.getIndent() + "\t\t\t\tSystem.err.println(\"DESERIALIZING A REMOTE REFERENCE TO A LOCAL ACTOR\");\n";
+                code += CIndent.getIndent() + "\t\t\t\t" + tmp_name + "RemoteReference remoteReference = new " + tmp_name + "RemoteReference(hashCode, host, port);\n";
+            }
             code += CIndent.getIndent() + "\t\t\t\tActorRegistry.addEntry(hashCode, remoteReference);\n";
             code += CIndent.getIndent() + "\t\t\t\treturn remoteReference;\n";
             code += CIndent.getIndent() + "\t\t\t} else {\n";
@@ -583,7 +630,6 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "public void migrate(String host, int port) {\n";
             code += CIndent.getIndent() + "}\n\n";
         }
-
 
 		code += getFieldCode() + "\n";
 		code += getEnumerationCode() + "\n";

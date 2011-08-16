@@ -2,6 +2,8 @@ package salsa_lite.runtime;
 
 import java.util.HashMap;
 
+import salsa_lite.common.HashCodeBuilder;
+
 public class ActorRegistry {
 
     private static final int numberRegistries;
@@ -31,6 +33,14 @@ public class ActorRegistry {
             uniqueIdGenerators[nonUniqueHashCode % numberRegistries] += numberRegistries;
         }
         return value;
+    }
+
+    public final static int getHashCodeFor(String name, String host, int port) {
+        HashCodeBuilder hcb = new HashCodeBuilder();
+        hcb.append(name);
+        hcb.append(host);
+        hcb.append(port);
+        return hcb.toHashCode();
     }
 
     public final static Object getLock(int hashCode) {

@@ -3,8 +3,16 @@ package salsa_lite.runtime;
 
 public abstract class MobileActor extends Actor {
 
-    public String host;
-    public int port;
+    private String name = null;
+    private String origin_host;
+    private int origin_port;
+
+    private String host;
+    private int port;
+
+    public String getName() { return name; }
+    public String getHost() { return host; }
+    public int getPort() { return port; }
 
     public MobileActor() { super(); }
     public MobileActor(SynchronousMailboxStage stage) { super(stage); }
