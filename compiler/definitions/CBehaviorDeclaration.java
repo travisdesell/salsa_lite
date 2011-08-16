@@ -38,8 +38,10 @@ public class CBehaviorDeclaration extends CErrorInformation {
 
 		String code = "";
 		for (int i = 0; i < implements_names.size(); i++) {
+            if (implements_names.get(i).name.equals("StagedActor")) continue;
+
 			code += implements_names.get(i).name;
-			if (i < implements_names.size() - 1) code += ", ";
+			if (i < implements_names.size() - 1 && !implements_names.get(i+1).name.equals("StagedActor")) code += ", ";
 		}
 		return code;
 	}

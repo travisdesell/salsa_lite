@@ -16,8 +16,13 @@ behavior Theater implements StagedActor {
         }
 
         serverSocket = new ServerSocket(port);
+        self<-listen();
+    }
 
-        self-listen();
+    Theater(int port) {
+        self.port = port;
+        serverSocket = new ServerSocket(port);
+        self<-listen();
     }
 
     ack listen() {

@@ -52,6 +52,18 @@ public class CCompilationUnit {
     public boolean isMobile() {
         return getExtendsName() != null && getExtendsName().name.equals("MobileActor");
     }
+    
+    public boolean isStaged() {
+        Vector<CName> implementsNames = getImplementsNames();
+
+        if (implementsNames != null) {
+            for (CName name : implementsNames) {
+                if (name.name.equals("StagedActor")) return true;
+            }
+
+        }
+        return false;
+    }
 
 	public Vector<CEnumeration> getEnumerations() {
 		if (behavior_declaration != null) return behavior_declaration.enumerations;
@@ -374,7 +386,7 @@ public class CCompilationUnit {
         if (behavior_declaration != null) implementsNames = behavior_declaration.getImplementsNames();
         else if (interface_declaration.extends_names.size() > 0) implementsNames = interface_declaration.getImplementsNames();
 
-		if (implementsNames != null) {
+		if (implementsNames != null && !implementsNames.equals("")) {
             code += " implements " + implementsNames;
             
             if (behavior_declaration != null && !behavior_declaration.is_abstract) {
@@ -555,7 +567,11 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "\t}\n";
             code += CIndent.getIndent() + "}\n\n\n";
 
-            code += CIndent.getIndent() + "public " + tmp_name + "() { super(); }\n";
+            if (isStaged()) {
+                code += CIndent.getIndent() + "public " + tmp_name + "() { super(); }\n";
+            } else {
+                code += CIndent.getIndent() + "public " + tmp_name + "() { super(StageService.getNewStage()); }\n";
+            }
             code += CIndent.getIndent() + "public " + tmp_name + "(SynchronousMailboxStage stage) { super(stage); }\n\n";
 
             int act_constructor = behavior_declaration.getActConstructor();

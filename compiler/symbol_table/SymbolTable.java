@@ -580,6 +580,10 @@ public class SymbolTable {
             knownTypes.put(remoteActorType.getLongSignature(), remoteActorType);
             namespace.put(remoteActorType.getName(), remoteActorType.getLongSignature());
 
+            ActorType stagedActorType = new ActorType(runtimeModule + ".StagedActor", SymbolTable.getTypeSymbol("Actor"));
+            knownTypes.put(stagedActorType.getLongSignature(), stagedActorType);
+            namespace.put(stagedActorType.getName(), stagedActorType.getLongSignature());
+
             ActorType mobileActorType = null;
             mobileActorType = new ActorType(runtimeModule + ".MobileActor", SymbolTable.getTypeSymbol("Actor"));
             MessageSymbol migrateMessage = new MessageSymbol(0, "migrate", mobileActorType, SymbolTable.getTypeSymbol("ack"), new TypeSymbol[]{ SymbolTable.getTypeSymbol("String"), SymbolTable.getTypeSymbol("int") });

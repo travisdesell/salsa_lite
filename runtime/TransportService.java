@@ -2,6 +2,8 @@ package salsa_lite.runtime;
 
 import salsa_lite.common.HashCodeBuilder;
 
+import java.util.HashMap;
+
 import salsa_lite.runtime.wwc.OutgoingTheaterConnection;
 import salsa_lite.runtime.wwc.Theater;
 
@@ -9,8 +11,7 @@ public class TransportService {
 
     HashMap<Integer,OutgoingTheaterConnection> outgoingSockets = new HashMap<Integer,OutgoingTheaterConnection>();
 
-    Theater theater;
-
+//    Theater theater = Theater.construct(;
 
     public static final int getPort() {
         return theater.getPort();

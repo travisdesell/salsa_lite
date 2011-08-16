@@ -11,7 +11,7 @@ behavior IncomingTheaterConnection implements StagedActor {
 
     IncomingTheaterConnection(Socket socket) {
         self.socket = socket;
-        in = new ObjectInputStream(new BufferedInputStream(socket.getInputSTream()));
+        in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
 
         self<-listen();
     }
@@ -20,16 +20,16 @@ behavior IncomingTheaterConnection implements StagedActor {
         Object o = in.readObject();
         in.reset();
         
-        if (o insteanceof Actor) {
-            MobileActorRegistry.addEntry(...);
-        } else if (o insteanceof Message) {
+        if (o instanceof Actor) {
+//            MobileActorRegistry.addEntry(...);
+        } else if (o instanceof Message) {
             //check to see if the target actor is here
 
         } else {
             StringBuffer sb = new StringBuffer();
             sb.append("Error in IncomingTheaterConnection, received unknown object: " + o + "\n");
-            sb.append("\tremote host [" + socket.getHost() + "], local port [" + socket.getLocalSocketAddress() + "]\n");
-            sb.append("\tremote host [" + socket.getHost() + "], local port [" + socket.getLocalSocketAddress() + "]\n");
+            sb.append("\tremote host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tremote host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
             System.err.println(sb.toString());
         }
 
