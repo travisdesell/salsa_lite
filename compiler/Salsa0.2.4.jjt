@@ -118,6 +118,7 @@ TOKEN : {
     | < BREAK: "break" >
     | < BYTE: "byte" >
     | < CASE: "case" >
+    | < CATCH: "catch" >
     | < CHAR: "char" >
     | < CONST: "const" >
     | < _DEFAULT: "default" >
@@ -153,6 +154,7 @@ TOKEN : {
     | < SWITCH: "switch" >
     | < _TOKEN: "token" >
     | < TRUE: "true" >
+    | < TRY: "try" >
     | < WAITFOR: "waitfor" >
     | < WHILE: "while" >
 }
@@ -680,6 +682,7 @@ CStatement Statement() : {
           statement = PassStatement()
         | statement = IfStatement()
         | statement = SwitchStatement()
+        | statement = TryStatement()
         | statement = Block()
         | statement = ForStatement()
         | statement = WhileStatement()
@@ -807,6 +810,27 @@ CIfStatement IfStatement() : {
     "if" "(" if_statement.expression = Expression() ")" if_statement.statement = Statement() [ LOOKAHEAD("else") "else" if_statement.else_statement = Statement() ]
 
     { return if_statement; }
+}
+
+CTryStatement TryStatement() : {
+    CTryStatement try_statement = new CTryStatement();
+    CBlock catch_block = null;
+    Vector<CFormalParameter> parameters = null;
+} {
+    "try" try_statement.try_block = Block()
+    "catch" parameters = FormalParameters() catch_block = Block()                       {
+                                                                                            try_statement.catch_blocks.add(catch_block);
+                                                                                            try_statement.catch_parameters.add(parameters);
+                                                                                        }
+                        
+    (
+        "catch" parameters = FormalParameters() catch_block = Block()                   {
+                                                                                            try_statement.catch_blocks.add(catch_block);
+                                                                                            try_statement.catch_parameters.add(parameters);
+                                                                                        }
+    )*
+
+    { return try_statement; }
 }
 
 CSwitchStatement SwitchStatement() : {

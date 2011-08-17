@@ -9,7 +9,7 @@ import salsa_lite.runtime.wwc.Theater;
 
 public class TransportService {
 
-    HashMap<Integer,OutgoingTheaterConnection> outgoingSockets = new HashMap<Integer,OutgoingTheaterConnection>();
+    private static final HashMap<Integer,OutgoingTheaterConnection> outgoingSockets = new HashMap<Integer,OutgoingTheaterConnection>();
 
 //    Theater theater = Theater.construct(;
 

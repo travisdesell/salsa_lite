@@ -65,6 +65,8 @@ public class CBlock extends CStatement {
 
 			if (statement instanceof CPassStatement) {
 				code += CIndent.getIndent() + statement.toJavaCode() + "\n";
+			} else if (statement instanceof CTryStatement) {
+				code += CIndent.getIndent() + statement.toJavaCode() + "\n";
 			} else if (statement instanceof CForStatement) {
 				code += CIndent.getIndent() + statement.toJavaCode() + "\n";
 			} else if (statement instanceof CWhileStatement) {
