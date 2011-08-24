@@ -1,35 +1,35 @@
 module salsa_lite.runtime.wwc;
 
+import object java.io.IOException;
 import object java.net.ServerSocket;
 import object java.net.Socket;
 
-behavior Theater implements StagedActor {
-
-    int port = 4040;
-    ServerSocket serverSocket = null;
+behavior Theater extends RemoteActor implements StagedActor {
 
     Theater(String[] arguments) {
-        if (System.getProperty("theater_port") != null) {
-            port = Integer.parseInt(System.getProperty("theater_port"));
-        } else if (arguments.length == 1) {
-            port = Integer.parseInt(arguments[0]);
-        }
-
-        serverSocket = new ServerSocket(port);
-        self<-listen();
-    }
-
-    Theater(int port) {
-        self.port = port;
-        serverSocket = new ServerSocket(port);
         self<-listen();
     }
 
     ack listen() {
-        Socket socket = serverSocket.accept();
-        
-        new IncomingTheaterConnection(socket);
+        try {
+            new IncomingTheaterConnection(TransportService.serverSocket.accept());
+        } catch (IOException ioe) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("Error in Theater, IOException: " + ioe + "\n");
+            for (StackTraceElement ste : ioe.getStackTrace()) {
+                sb.append("\t" + ste.toString() + "\n");
+            }
+            System.err.println(sb.toString());
+        }
 
         self<-listen();
+    }
+
+    int getPort() {
+        pass TransportService.getPort();
+    }
+
+    String getHost() {
+        pass TransportService.getHost();
     }
 }

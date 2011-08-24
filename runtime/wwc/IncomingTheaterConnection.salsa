@@ -17,8 +17,8 @@ behavior IncomingTheaterConnection implements StagedActor {
         } catch (IOException ioe) {
             StringBuffer sb = new StringBuffer();
             sb.append("Error in IncomingTheaterConnection, IOException: " + ioe + "\n");
-            sb.append("\tremote host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
-            sb.append("\tremote host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
             for (StackTraceElement ste : ioe.getStackTrace()) {
                 sb.append("\t" + ste.toString() + "\n");
             }
@@ -38,8 +38,8 @@ behavior IncomingTheaterConnection implements StagedActor {
         } catch (IOException ioe) {
             StringBuffer sb = new StringBuffer();
             sb.append("Error in IncomingTheaterConnection, IOException: " + ioe + "\n");
-            sb.append("\tremote host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
-            sb.append("\tremote host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
             for (StackTraceElement ste : ioe.getStackTrace()) {
                 sb.append("\t" + ste.toString() + "\n");
             }
@@ -48,8 +48,8 @@ behavior IncomingTheaterConnection implements StagedActor {
         } catch (ClassNotFoundException cnfe) {
             StringBuffer sb = new StringBuffer();
             sb.append("Error in IncomingTheaterConnection, ClassNotFoundException: " + cnfe + "\n");
-            sb.append("\tremote host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
-            sb.append("\tremote host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
             for (StackTraceElement ste : cnfe.getStackTrace()) {
                 sb.append("\t" + ste.toString() + "\n");
             }
@@ -64,8 +64,8 @@ behavior IncomingTheaterConnection implements StagedActor {
         } else {
             StringBuffer sb = new StringBuffer();
             sb.append("Error in IncomingTheaterConnection, received unknown object: " + o + "\n");
-            sb.append("\tremote host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
-            sb.append("\tremote host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
             System.err.println(sb.toString());
         }
 

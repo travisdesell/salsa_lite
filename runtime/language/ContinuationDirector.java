@@ -7,6 +7,7 @@ import salsa_lite.runtime.Acknowledgement;
 import salsa_lite.runtime.SynchronousMailboxStage;
 import salsa_lite.runtime.Actor;
 import salsa_lite.runtime.Message;
+import salsa_lite.runtime.RemoteActor;
 import salsa_lite.runtime.MobileActor;
 import salsa_lite.runtime.StageService;
 import salsa_lite.runtime.TransportService;
@@ -32,13 +33,13 @@ public class ContinuationDirector extends Director implements java.io.Serializab
 		synchronized (ActorRegistry.getLock(hashCode)) {
 			ActorRegistry.addEntry(hashCode, this);
 		}
-		return new SerializedContinuationDirector( this.hashCode(), TransportService.getHost(), TransportService.getPort() );
+		return new SerializedContinuationDirector( hashCode, TransportService.getHost(), TransportService.getPort() );
 	}
 
 	public static class ContinuationDirectorRemoteReference extends ContinuationDirector {
-		int hashCode;
-		String host;
-		int port;
+		private int hashCode;
+		private String host;
+		private int port;
 		ContinuationDirectorRemoteReference(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }
 
 		public Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException {
@@ -52,7 +53,7 @@ public class ContinuationDirector extends Director implements java.io.Serializab
 		}
 
 		public Object writeReplace() throws java.io.ObjectStreamException {
-			return new SerializedContinuationDirector( this.hashCode(), TransportService.getHost(), TransportService.getPort() );
+			return new SerializedContinuationDirector( hashCode, TransportService.getHost(), TransportService.getPort() );
 		}
 	}
 
@@ -88,9 +89,10 @@ public class ContinuationDirector extends Director implements java.io.Serializab
 
 	public Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException {
 		switch(messageId) {
-			case 0: resolve(); return null;
-			case 1: setMessage( (Message)arguments[0] ); return null;
-			case 2: forwardTo( (Director)arguments[0] ); return null;
+			case 0: return toString();
+			case 1: resolve(); return null;
+			case 2: setMessage( (Message)arguments[0] ); return null;
+			case 3: forwardTo( (Director)arguments[0] ); return null;
 			default: throw new MessageHandlerNotFoundException(messageId, arguments);
 		}
 	}
@@ -117,7 +119,7 @@ public class ContinuationDirector extends Director implements java.io.Serializab
 		}
 
 		if (currentContinuation != null) {
-			StageService.sendMessage(currentContinuation, 0 /*resolve*/, null);
+			StageService.sendMessage(currentContinuation, 1 /*resolve*/, null);
 		} 
 	}
 
@@ -136,7 +138,7 @@ public class ContinuationDirector extends Director implements java.io.Serializab
 			currentContinuation = (ContinuationDirector)director;
 		}
 		else {
-			StageService.sendMessage(((ContinuationDirector)director), 0 /*resolve*/, null);
+			StageService.sendMessage(((ContinuationDirector)director), 1 /*resolve*/, null);
 		}
 
 	}

@@ -11,6 +11,8 @@ public abstract class RemoteActor extends Actor {
     public String getHost() { return host; }
     public int getPort() { return port; }
 
+    public String toString() { return "Remote Actor[type: " + getClass().getName() + ", stage: " + stage.getStageId() + ", " + host + ":" + port + "/" + name + "]"; }
+
     public RemoteActor() { super(); }
     public RemoteActor(SynchronousMailboxStage stage) { super(stage); }
 }

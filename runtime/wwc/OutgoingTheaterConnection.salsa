@@ -1,6 +1,7 @@
 module salsa_lite.runtime.wwc;
 
 import object java.net.Socket;
+import object java.io.IOException;
 import object java.io.BufferedOutputStream;
 import object java.io.ObjectOutputStream;
 
@@ -10,17 +11,44 @@ behavior OutgoingTheaterConnection {
     ObjectOutputStream out = null;
 
     OutgoingTheaterConnection(String host, int port) {
-        socket = new Socket(host, port);
-        out = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+        try {
+            socket = new Socket(host, port);
+            out = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+        } catch (IOException ioe) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("Error in OutgoingTheaterConnection, IOException: " + ioe + "\n");
+            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            for (StackTraceElement ste : ioe.getStackTrace()) {
+                sb.append("\t" + ste.toString() + "\n");
+            }
+            System.err.println(sb.toString());
+
+//        } catch (HostNotFoundExcption hnfe) {
+//            StringBuffer sb = new StringBuffer();
+//            sb.append("Error in OutgoingTheaterConnection, HostNotFoundException: " + hnfe + "\n");
+//            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+//            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+//            for (StackTraceElement ste : hnfe.getStackTrace()) {
+//                sb.append("\t" + ste.toString() + "\n");
+//            }
+//            System.err.println(sb.toString());
+        }
     }
 
     ack send(Message message) {
-        out.writeObject(message);
-        out.reset();
+        try {
+            out.writeObject(message);
+            out.reset();
+        } catch (IOException ioe) {
+        }
     }
 
     ack migrate(Actor actor) {
-        out.writeObject(actor);
-        out.reset();
+        try {
+            out.writeObject(actor);
+            out.reset();
+        } catch (IOException ioe) {
+        }
     }
 }

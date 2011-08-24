@@ -27,7 +27,7 @@ public abstract class Actor {
 	}
 
     public String toString() {
-        return "actor[stage: " + stage.getStageId() + ", type: " + getClass().getName() + ", hashCode: " + hashCode() + "]";
+        return "Actor[stage: " + stage.getStageId() + ", type: " + getClass().getName() + ", hashCode: " + hashCode() + "]";
     }
 
     int hashCode;

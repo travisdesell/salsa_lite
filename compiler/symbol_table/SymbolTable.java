@@ -9,6 +9,7 @@ import java.util.TreeMap;
 
 import salsa_lite.compiler.definitions.CCompilationUnit;
 import salsa_lite.compiler.definitions.CompilerErrors;
+import salsa_lite.compiler.definitions.CMethodInvocation;
 
 public class SymbolTable {
 
@@ -79,6 +80,10 @@ public class SymbolTable {
         } else return (knownType instanceof ArrayType);
     }
 
+    public static boolean isReferenceMethod(CMethodInvocation methodInvocation) {
+        String method_name = methodInvocation.method_name;
+        return (method_name.equals("getHost") || method_name.equals("getPort") || method_name.equals("getName"));
+    }
 
     public static TypeSymbol getTypeSymbol(String name) throws SalsaNotFoundException {
         return getTypeSymbol(name, null);
@@ -544,7 +549,6 @@ public class SymbolTable {
             ObjectType stageServiceType = new ObjectType(runtimeModule + ".StageService");
             MethodSymbol sendMessageMethod = new MethodSymbol(0, stageServiceType, "sendMessage", SymbolTable.getTypeSymbol("void"), new TypeSymbol[]{ SymbolTable.getTypeSymbol("Message") }, true);
             stageServiceType.method_handlers.add(sendMessageMethod);
-
             knownTypes.put( stageServiceType.getLongSignature(), stageServiceType );
             namespace.put( stageServiceType.getName(), stageServiceType.getLongSignature() );
             addVariableType("StageService", "StageService", false, true);
@@ -553,14 +557,27 @@ public class SymbolTable {
             ObjectType stageType = new ObjectType(runtimeModule + ".Stage");
             FieldSymbol messageField = new FieldSymbol(stageType, "message", SymbolTable.getTypeSymbol("Message"));
             stageType.fields.add(messageField);
-
             knownTypes.put( stageType.getLongSignature(), stageType );
             namespace.put( stageType.getName(), stageType.getLongSignature() );
             addVariableType("Stage", "Stage", false, true);
 
+            ObjectType transportServiceType = new ObjectType(runtimeModule + ".TransportService");
+            FieldSymbol serverSocketField = new FieldSymbol(transportServiceType, "serverSocket", SymbolTable.getTypeSymbol("java.net.ServerSocket"));
+            transportServiceType.fields.add(serverSocketField);
+            MethodSymbol getHostMethod = new MethodSymbol(0, transportServiceType, "getHost", SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{}, true);
+            transportServiceType.method_handlers.add(getHostMethod);
+            MethodSymbol getPortMethod = new MethodSymbol(0, transportServiceType, "getPort", SymbolTable.getTypeSymbol("int"), new TypeSymbol[]{}, true);
+            transportServiceType.method_handlers.add(getPortMethod);
+            knownTypes.put( transportServiceType.getLongSignature(), transportServiceType );
+            namespace.put( transportServiceType.getName(), transportServiceType.getLongSignature() );
+            addVariableType("TransportService", "TransportService", false, true);
+            
+
 
             ActorType localActorType = null;
             localActorType = new ActorType(runtimeModule + ".Actor", SymbolTable.getTypeSymbol("Object"));
+            MessageSymbol toStringMessage = new MessageSymbol(0, "toString", localActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
+            localActorType.message_handlers.add(toStringMessage);
 
             FieldSymbol stageField = new FieldSymbol(localActorType, "stage", SymbolTable.getTypeSymbol("Stage"));
             localActorType.fields.add(stageField);
@@ -586,8 +603,18 @@ public class SymbolTable {
 
             ActorType mobileActorType = null;
             mobileActorType = new ActorType(runtimeModule + ".MobileActor", SymbolTable.getTypeSymbol("Actor"));
-            MessageSymbol migrateMessage = new MessageSymbol(0, "migrate", mobileActorType, SymbolTable.getTypeSymbol("ack"), new TypeSymbol[]{ SymbolTable.getTypeSymbol("String"), SymbolTable.getTypeSymbol("int") });
+            MessageSymbol getOriginPortMessage = new MessageSymbol(0, "getOriginPort", mobileActorType, SymbolTable.getTypeSymbol("int"), new TypeSymbol[]{});
+            MessageSymbol getOriginHostMessage = new MessageSymbol(1, "getOriginHost", mobileActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
+            MessageSymbol getMobilePortMessage = new MessageSymbol(0, "getPort", mobileActorType, SymbolTable.getTypeSymbol("int"), new TypeSymbol[]{});
+            MessageSymbol getMobileHostMessage = new MessageSymbol(1, "getHost", mobileActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
+            MessageSymbol getMobileNameMessage = new MessageSymbol(2, "getName", mobileActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
+            MessageSymbol migrateMessage = new MessageSymbol(3, "migrate", mobileActorType, SymbolTable.getTypeSymbol("ack"), new TypeSymbol[]{ SymbolTable.getTypeSymbol("String"), SymbolTable.getTypeSymbol("int") });
             mobileActorType.message_handlers.add(migrateMessage);
+            mobileActorType.message_handlers.add(getMobilePortMessage);
+            mobileActorType.message_handlers.add(getMobileHostMessage);
+            mobileActorType.message_handlers.add(getOriginPortMessage);
+            mobileActorType.message_handlers.add(getOriginHostMessage);
+            mobileActorType.message_handlers.add(getMobileNameMessage);
             knownTypes.put(mobileActorType.getLongSignature(), mobileActorType);
             namespace.put(mobileActorType.getName(), mobileActorType.getLongSignature());
 

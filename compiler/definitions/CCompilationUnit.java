@@ -567,7 +567,7 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "\t}\n";
             code += CIndent.getIndent() + "}\n\n\n";
 
-            if (isStaged()) {
+            if (!isStaged()) {
                 code += CIndent.getIndent() + "public " + tmp_name + "() { super(); }\n";
             } else {
                 code += CIndent.getIndent() + "public " + tmp_name + "() { super(StageService.getNewStage()); }\n";
@@ -577,6 +577,9 @@ public class CCompilationUnit {
             int act_constructor = behavior_declaration.getActConstructor();
             if (act_constructor >= 0) {
                 code += CIndent.getIndent() + "public static void main(String[] arguments) {\n";
+                if (isRemote()) {
+                    code += CIndent.getIndent() + "\tTransportService.initialize();\n";
+                }
                 code += CIndent.getIndent() + "\t" + tmp_name + ".construct(" + act_constructor + ", new Object[]{arguments});\n";
                 code += CIndent.getIndent() + "}\n\n";
             }
@@ -635,10 +638,18 @@ public class CCompilationUnit {
         if (actor_name.contains("<")) actor_name = actor_name.substring(0, actor_name.indexOf('<'));
 
         if (!isMobile()) {
-            code += CIndent.getIndent() + "public " + actor_name + "() { super(); }\n";
+            if (!isStaged()) {
+                code += CIndent.getIndent() + "public " + actor_name + "() { super(); }\n";
+            } else {
+                code += CIndent.getIndent() + "public " + actor_name + "() { super(StageService.getNewStage()); }\n";
+            }
             code += CIndent.getIndent() + "public " + actor_name + "(SynchronousMailboxStage stage) { super(stage); }\n\n";
         } else {
-            code += CIndent.getIndent() + "public State() { super(); }\n";
+            if (!isStaged()) {
+                code += CIndent.getIndent() + "public State() { super(); }\n";
+            } else {
+                code += CIndent.getIndent() + "public State() { super(StageService.getNewStage()); }\n";
+            }
             code += CIndent.getIndent() + "public State(SynchronousMailboxStage stage) { super(stage); }\n\n";
         }
 
@@ -667,6 +678,9 @@ public class CCompilationUnit {
                 int act_constructor = behavior_declaration.getActConstructor();
                 if (act_constructor >= 0) {
                     code += CIndent.getIndent() + "public static void main(String[] arguments) {\n";
+                    if (isRemote()) {
+                        code += CIndent.getIndent() + "\tTransportService.initialize();\n";
+                    }
                     code += CIndent.getIndent() + "\t" + actor_name + ".construct(" + act_constructor + ", new Object[]{arguments});\n";
                     code += CIndent.getIndent() + "}\n\n";
                 }

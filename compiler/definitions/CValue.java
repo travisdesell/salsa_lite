@@ -127,7 +127,7 @@ public class CValue extends CErrorInformation {
                         value_type = ((ObjectType)value_type).getMethod(method_invocation.method_name, method_invocation.arguments).getReturnType();
 
                     } else if (value_type instanceof ActorType) {
-                        if (modifications.getFirst().equals(modification) && (isSelf() || isParent())) {
+                        if (modifications.getFirst().equals(modification) && (isSelf() || isParent() || SymbolTable.isReferenceMethod((CMethodInvocation)modification))) {
                             value_type = ((ActorType)value_type).getMessage(method_invocation.method_name, method_invocation.arguments, isParentMessageSend).getPassType();
                         } else {
                             CompilerErrors.printErrorMessage("Cannot invoke a message on an actor that is not self or parent", method_invocation);
@@ -327,7 +327,7 @@ public class CValue extends CErrorInformation {
                         }
                         currentType = ms.getReturnType();
                     } else if (currentType instanceof ActorType) {
-                        if (modifications.getFirst().equals(modification) && (isSelf() || isParent())) {
+                        if (modifications.getFirst().equals(modification) && (isSelf() || isParent() || SymbolTable.isReferenceMethod((CMethodInvocation)modification))) {
                             currentType = ((ActorType)currentType).getMessage(mi.method_name, mi.arguments, isParentMessageSend).getPassType();
                         } else {
                             CompilerErrors.printErrorMessage("Cannot invoke a method on an actor that is not self or parent", mi);

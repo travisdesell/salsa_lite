@@ -49,6 +49,8 @@ public class SynchronousMailboxStage extends Thread {
 	public final void run() {
 		Object result;
 
+        System.err.println("Starting stage: " + id);
+
 		while (true) {
 			message = getMessage();
 
@@ -66,13 +68,13 @@ public class SynchronousMailboxStage extends Thread {
 					case Message.CONTINUATION_MESSAGE:
 						message.target.invokeMessage(message.message_id, message.arguments);
 //						System.err.println("sending resolve to continuation from continuation message!");
-						StageService.sendMessage(message.continuationDirector, 0 /*resolve*/, null); 
+						StageService.sendMessage(message.continuationDirector, 1 /*resolve*/, null); 
 						break;
 
 					case Message.TOKEN_MESSAGE:
 						result = message.target.invokeMessage(message.message_id, message.arguments);
 //						System.err.println("sending resolve to continuation from token message!");
-						StageService.sendMessage(message.continuationDirector, 0 /*setValue*/, new Object[]{result});
+						StageService.sendMessage(message.continuationDirector, 1 /*setValue*/, new Object[]{result});
 						break;
 
 					default:
