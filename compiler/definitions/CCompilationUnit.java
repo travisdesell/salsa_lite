@@ -668,16 +668,37 @@ public class CCompilationUnit {
             int act_constructor = behavior_declaration.getActConstructor();
             if (act_constructor >= 0) {
                 code += CIndent.getIndent() + "public static void main(String[] arguments) {\n";
-                if (isRemote()) {
-                    code += CIndent.getIndent() + "    TransportService.initialize();\n";
+                code += CIndent.getIndent() + "    TransportService.initialize();\n";
+                code += CIndent.getIndent() + "    String name = System.getProperty(\"called\");\n";
+                code += CIndent.getIndent() + "    String nameserver_info = System.getProperty(\"using\");\n";
+                code += CIndent.getIndent() + "    if (name == null || nameserver_info == null) {\n";
+                code += CIndent.getIndent() + "        System.err.println(\"Error starting " + tmp_name + ": to run a mobile actor you must specify a name with the '-Dcalled=<name>' system property and a namesever with the '-Dusing=\\\"<nameserver_host>:<nameserver_port>/<nameserver_name>\\\"' system property.\");\n";
+                code += CIndent.getIndent() + "        System.err.println(\"usage: (port is optional and 4040 by default)\");\n";
+                if (getModule() == null) {
+                    code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dcalled=\\\"<name>\\\" -Dusing=[-Dport=4040] " + tmp_name + "\");\n";
+                } else {
+                    code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dcalled=\\\"<name>\\\" [-Dport=4040] " + getModule() + "." + tmp_name + "\");\n";
                 }
-                code += CIndent.getIndent() + "    " + tmp_name + ".construct(" + act_constructor + ", new Object[]{arguments});\n";
+                code += CIndent.getIndent() + "        System.exit(0);\n";
+                code += CIndent.getIndent() + "    }\n";
+                code += CIndent.getIndent() + "    try {\n";
+                code += CIndent.getIndent() + "        int colon_index = nameserver_info.indexOf(':');\n";
+                code += CIndent.getIndent() + "        int slash_index = nameserver_info.indexOf('/');\n";
+                code += CIndent.getIndent() + "        String nameserver_host = nameserver_info.substring(0,colon_index);\n";
+                code += CIndent.getIndent() + "        int nameserver_port = Integer.parseInt(nameserver_info.substring(colon_index + 1, slash_index));\n";
+                code += CIndent.getIndent() + "        String nameserver_name = nameserver_info.substring(slash_index + 1, nameserver_info.length());\n";
+                code += CIndent.getIndent() + "        " + tmp_name + ".construct(" + act_constructor + ", new Object[]{arguments}, name, NameServer.getRemoteReference(nameserver_name, nameserver_host, nameserver_port));\n";
+                code += CIndent.getIndent() + "    } catch (Exception e) {\n";
+                code += CIndent.getIndent() + "        System.err.println(\"Error in format of -Dusing system property, needs to be 'nameserver_host:nameserver_port/nameserver_name'.\");\n";
+                code += CIndent.getIndent() + "        e.printStackTrace();\n";
+                code += CIndent.getIndent() + "        System.exit(0);\n";
+                code += CIndent.getIndent() + "    }\n";
                 code += CIndent.getIndent() + "}\n\n";
             }
 
-            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions) {\n";
-            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "();\n";
-            code += CIndent.getIndent() + "    State state = new State(actor.stage);\n";
+            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, NameServer nameserver) {\n";
+            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver);\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserver, actor.stage);\n";
             code += CIndent.getIndent() + "    synchronized (MobileActorRegistry.getLock(actor.hashCode())) {\n";
             code += CIndent.getIndent() + "        MobileActorRegistry.addEntry(actor.hashCode(), state);\n";
             code += CIndent.getIndent() + "    }\n";
@@ -687,9 +708,9 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "    return output_continuation;\n";
             code += CIndent.getIndent() + "}\n\n";
 
-            code += CIndent.getIndent() + "public static " + tmp_name + " construct(int constructor_id, Object[] arguments) {\n";
-            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "();\n";
-            code += CIndent.getIndent() + "    State state = new State(actor.stage);\n";
+            code += CIndent.getIndent() + "public static " + tmp_name + " construct(int constructor_id, Object[] arguments, String name, NameServer nameserver) {\n";
+            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver);\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserver, actor.stage);\n";
             code += CIndent.getIndent() + "    synchronized (MobileActorRegistry.getLock(actor.hashCode())) {\n";
             code += CIndent.getIndent() + "        MobileActorRegistry.addEntry(actor.hashCode(), state);\n";
             code += CIndent.getIndent() + "    }\n";
@@ -697,9 +718,9 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "    return actor;\n";
             code += CIndent.getIndent() + "}\n";
 
-            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, SynchronousMailboxStage target_stage) {\n";
-            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(target_stage);\n";
-            code += CIndent.getIndent() + "    State state = new State(target_stage);\n";
+            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, NameServer nameserver, SynchronousMailboxStage target_stage) {\n";
+            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, target_stage);\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserver, target_stage);\n";
             code += CIndent.getIndent() + "    synchronized (MobileActorRegistry.getLock(actor.hashCode())) {\n";
             code += CIndent.getIndent() + "        MobileActorRegistry.addEntry(actor.hashCode(), state);\n";
             code += CIndent.getIndent() + "    }\n";
@@ -709,9 +730,9 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "    return output_continuation;\n";
             code += CIndent.getIndent() + "}\n\n";
 
-            code += CIndent.getIndent() + "public static " + tmp_name + " construct(int constructor_id, Object[] arguments, SynchronousMailboxStage target_stage) {\n";
-            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(target_stage);\n";
-            code += CIndent.getIndent() + "    State state = new State(target_stage);\n";
+            code += CIndent.getIndent() + "public static " + tmp_name + " construct(int constructor_id, Object[] arguments, String name, NameServer nameserver, SynchronousMailboxStage target_stage) {\n";
+            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, target_stage);\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserver, target_stage);\n";
             code += CIndent.getIndent() + "    synchronized (MobileActorRegistry.getLock(actor.hashCode())) {\n";
             code += CIndent.getIndent() + "        MobileActorRegistry.addEntry(actor.hashCode(), state);\n";
             code += CIndent.getIndent() + "    }\n";
@@ -781,9 +802,13 @@ public class CCompilationUnit {
                         code += CIndent.getIndent() + "    TransportService.initialize();\n";
                         code += CIndent.getIndent() + "    String name = System.getProperty(\"called\");\n";
                         code += CIndent.getIndent() + "    if (name == null) {\n";
-                        code += CIndent.getIndent() + "        System.err.println(\"Error starting NameServer: must specify a name with the '-Dcalled=<name>' system property.\");\n";
+                        code += CIndent.getIndent() + "        System.err.println(\"Error starting " + actor_name + ": to run a remote actor you must specify a name with the '-Dcalled=<name>' system property.\");\n";
                         code += CIndent.getIndent() + "        System.err.println(\"usage: (port is optional and 4040 by default)\");\n";
-                        code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dcalled=mynameserver [-Dport=4040] salsa_lite.runtime.wwc.NameServer\");\n";
+                        if (getModule() != null) {
+                            code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dcalled=\\\"<name>\\\" [-Dport=4040] " + getModule() + "." + actor_name + "\");\n";
+                        } else {
+                            code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dcalled=\\\"<name>\\\" [-Dport=4040] " + actor_name + "\");\n";
+                        }
                         code += CIndent.getIndent() + "        System.exit(0);\n";
                         code += CIndent.getIndent() + "    }\n";
                         code += CIndent.getIndent() + "    " + actor_name + ".construct(" + act_constructor + ", new Object[]{arguments}, name);\n";
