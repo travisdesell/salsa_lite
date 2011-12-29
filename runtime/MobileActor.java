@@ -24,22 +24,29 @@ public abstract class MobileActor extends Actor {
 
 
     public MobileActor(String name, NameServer nameserver) {
+        super( MobileActorRegistry.getHashCodeFor(name, nameserver.getName(), nameserver.getHost(), nameserver.getPort()) );
         this.lastKnownHost = TransportService.getHost();
         this.lastKnownPort = TransportService.getPort();
-        this.hashCode = MobileActorRegistry.getHashCodeFor(name, nameserver.getName(), nameserver.getHost(), nameserver.getPort());
-        this.stage = StageService.stages[Math.abs(this.hashCode() % StageService.number_stages)];
     }
 
     public MobileActor(String name, NameServer nameserver, SynchronousMailboxStage stage) {
+        super( MobileActorRegistry.getHashCodeFor(name, nameserver.getName(), nameserver.getHost(), nameserver.getPort()), stage );
         this.lastKnownHost = TransportService.getHost();
         this.lastKnownPort = TransportService.getPort();
-        this.hashCode = MobileActorRegistry.getHashCodeFor(name, nameserver.getName(), nameserver.getHost(), nameserver.getPort());
-        this.stage = stage;
     }
 
     public abstract static class State extends Actor implements java.io.Serializable {
-        public State() { super(); }
-        public State(SynchronousMailboxStage stage) { super(stage); }
+        public State(String name, NameServer nameserver) {
+            super( MobileActorRegistry.getHashCodeFor(name, nameserver.getName(), nameserver.getHost(), nameserver.getPort()) );
+            this.host = TransportService.getHost();
+            this.port = TransportService.getPort();
+        }
+
+        public State(String name, NameServer nameserver, SynchronousMailboxStage stage) {
+            super( MobileActorRegistry.getHashCodeFor(name, nameserver.getName(), nameserver.getHost(), nameserver.getPort()), stage );
+            this.host = TransportService.getHost();
+            this.port = TransportService.getPort();
+        }
 
         private String name = null;
         private String host;
