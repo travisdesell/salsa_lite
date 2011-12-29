@@ -117,6 +117,7 @@ TOKEN : {
     | < BOOLEAN: "boolean" >
     | < BREAK: "break" >
     | < BYTE: "byte" >
+    | < CALLED: "called" >
     | < CASE: "case" >
     | < CATCH: "catch" >
     | < CHAR: "char" >
@@ -144,6 +145,7 @@ TOKEN : {
     | < NEW: "new" >
     | < NULL: "null" >
     | < OBJECT: "object" >
+    | < ON: "on" >
     | < PASS: "pass" >
     | < PARENT: "parent" >
     | < PUBLIC: "public" >
@@ -155,6 +157,7 @@ TOKEN : {
     | < _TOKEN: "token" >
     | < TRUE: "true" >
     | < TRY: "try" >
+    | < USING: "using" >
     | < WAITFOR: "waitfor" >
     | < WHILE: "while" >
 }
@@ -1163,12 +1166,29 @@ CAllocation Allocation() : {
 void BindDeclaration(CAllocation allocation) : {
     CExpression expression;
 } {
-    "at" "("
-        expression = Expression()        { allocation.first_expression = expression; }
-    [
-        "," expression = Expression()        { allocation.second_expression = expression; }
-        "," expression = Expression()        { allocation.third_expression = expression; }
-    ] ")"
+    (
+        "called" "("
+            expression = Expression()                   { allocation.called_expression = expression; }
+        ")"
+
+        [
+            "using" "("
+                expression = Expression()               { allocation.nameserver_expression = expression; }
+            ")"
+        ]
+
+        [
+            "at" "("
+                expression = Expression()               { allocation.host_expression = expression; }
+                ","
+                expression = Expression()               { allocation.port_expression = expression; }
+            ")"
+        ]
+    ) | (
+        "on" "("
+            expression = Expression()               { allocation.stage_expression = expression; }
+        ")"
+    )
 }
 
 void ArrayDimsAndInits(CAllocation allocation) : {

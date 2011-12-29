@@ -35,21 +35,31 @@ public class SymbolTable {
     public static boolean is_mobile_actor = false;
 
     public static boolean isActor(String name) throws SalsaNotFoundException {
-        TypeSymbol knownType = getTypeSymbol(name);
+        try {
+            TypeSymbol knownType = getTypeSymbol(name);
 
-        if (knownType == null) {
-            System.err.println("COMPILER ERROR: Could not determine if [" + name + "] is an actor, because it's type is unknown.");
-            return false;
-        } else return knownType instanceof ActorType;
+            if (knownType == null) {
+                System.err.println("COMPILER ERROR: Could not determine if [" + name + "] is an actor, because it's type is unknown.");
+                return false;
+            } else return knownType instanceof ActorType;
+        } catch (VariableDeclarationException vde) {
+            CompilerErrors.printErrorMessage("Error declaring varible, should not happen in SymbolTable.isActor: " + vde.toString());
+            throw new RuntimeException(vde);
+        }
     }
 
     public static boolean isObject(String name) throws SalsaNotFoundException {
-        TypeSymbol knownType = getTypeSymbol(name);
-       
-        if (knownType == null) {
-            System.err.println("COMPILER ERROR: Could not determine if [" + name + "] is an object, because it's type is unknown.");
-            return false;
-        } else return (knownType instanceof ObjectType) || (knownType instanceof ArrayType);
+        try {
+            TypeSymbol knownType = getTypeSymbol(name);
+           
+            if (knownType == null) {
+                System.err.println("COMPILER ERROR: Could not determine if [" + name + "] is an object, because it's type is unknown.");
+                return false;
+            } else return (knownType instanceof ObjectType) || (knownType instanceof ArrayType);
+        } catch (VariableDeclarationException vde) {
+            CompilerErrors.printErrorMessage("Error declaring varible, should not happen in SymbolTable.isObject: " + vde.toString());
+            throw new RuntimeException(vde);
+        }
     }
 
     public static boolean isMutableObject(TypeSymbol knownType) {
@@ -63,33 +73,43 @@ public class SymbolTable {
     }
 
     public static boolean isPrimitive(String name) throws SalsaNotFoundException {
-        TypeSymbol knownType = getTypeSymbol(name);
+        try {
+            TypeSymbol knownType = getTypeSymbol(name);
 
-        if (knownType == null) {
-            System.err.println("COMPILER ERROR: Could not determine if [" + name + "] is primitive, because it's type is unknown.");
-            return false;
-        } else return (knownType instanceof PrimitiveType);
+            if (knownType == null) {
+                System.err.println("COMPILER ERROR: Could not determine if [" + name + "] is primitive, because it's type is unknown.");
+                return false;
+            } else return (knownType instanceof PrimitiveType);
+        } catch (VariableDeclarationException vde) {
+            CompilerErrors.printErrorMessage("Error declaring varible, should not happen in SymbolTable.isPrimitive: " + vde.toString());
+            throw new RuntimeException(vde);
+        }
     }
 
     public static boolean isArray(String name) throws SalsaNotFoundException {
-        TypeSymbol knownType = getTypeSymbol(name);
+        try {
+            TypeSymbol knownType = getTypeSymbol(name);
 
-        if (knownType == null) {
-            System.err.println("COMPILER ERROR: Could not determine if [" + name + "] is primitive, because it's type is unknown.");
-            return false;
-        } else return (knownType instanceof ArrayType);
+            if (knownType == null) {
+                System.err.println("COMPILER ERROR: Could not determine if [" + name + "] is primitive, because it's type is unknown.");
+                return false;
+            } else return (knownType instanceof ArrayType);
+        } catch (VariableDeclarationException vde) {
+            CompilerErrors.printErrorMessage("Error declaring varible, should not happen in SymbolTable.isArray: " + vde.toString());
+            throw new RuntimeException(vde);
+        }
     }
 
     public static boolean isReferenceMethod(CMethodInvocation methodInvocation) {
         String method_name = methodInvocation.method_name;
-        return (method_name.equals("getHost") || method_name.equals("getPort") || method_name.equals("getName"));
+        return (method_name.equals("getHost") || method_name.equals("getPort") || method_name.equals("getName") || method_name.equals("getLastKnownPort") || method_name.equals("getLastKnownHost"));
     }
 
-    public static TypeSymbol getTypeSymbol(String name) throws SalsaNotFoundException {
+    public static TypeSymbol getTypeSymbol(String name) throws SalsaNotFoundException, VariableDeclarationException {
         return getTypeSymbol(name, null);
     }
 
-    public static TypeSymbol getTypeSymbol(String name, String superType) throws SalsaNotFoundException {
+    public static TypeSymbol getTypeSymbol(String name, String superType) throws SalsaNotFoundException, VariableDeclarationException {
         TypeSymbol knownType = null;
         String baseType = name;
         String arrayDims = "";
@@ -143,17 +163,22 @@ public class SymbolTable {
     }
 
     public static TypeSymbol importEither(String name) throws SalsaNotFoundException {
-        TypeSymbol st;
-       
-        if (ActorType.findSalsaFile(name) != null) {
-            if (!name.contains(".")) st = importActor( getCurrentModule() + name);
-            else st = importActor(name);
-        } else {
-            if (!name.contains(".")) st = importObject( getCurrentModule() + name);
-            else st = importObject(name);
-        }
+        try {
+            TypeSymbol st;
+           
+            if (ActorType.findSalsaFile(name) != null) {
+                if (!name.contains(".")) st = importActor( getCurrentModule() + name);
+                else st = importActor(name);
+            } else {
+                if (!name.contains(".")) st = importObject( getCurrentModule() + name);
+                else st = importObject(name);
+            }
 
-        return st;
+            return st;
+        } catch (VariableDeclarationException vde) {
+            CompilerErrors.printErrorMessage("Error declaring varible, should not happen in SymbolTable.importEither: " + vde.toString());
+            throw new RuntimeException(vde);
+        }
     }
 
     public static void loadPrimitive(String name) {
@@ -168,7 +193,7 @@ public class SymbolTable {
         ((ObjectType)knownTypes.get(name)).isMutable = false;
     }
 
-    public static ObjectType importObject(String name) throws SalsaNotFoundException {
+    public static ObjectType importObject(String name) throws SalsaNotFoundException, VariableDeclarationException {
         if (knownTypes.get(name) != null) return (ObjectType)knownTypes.get(name);
 
         ObjectType objectType = new ObjectType(name);
@@ -179,7 +204,7 @@ public class SymbolTable {
         return objectType;
     }
 
-    public static ActorType importActor(String name) throws SalsaNotFoundException {
+    public static ActorType importActor(String name) throws SalsaNotFoundException, VariableDeclarationException {
         TypeSymbol ts = knownTypes.get(name);
         if (ts != null) {
             if (!(ts instanceof ActorType)) {
@@ -215,49 +240,54 @@ public class SymbolTable {
 		scope = scope.parent;
 	}
 
-    public static void addGenericVariableType(String name, TypeSymbol typeSymbol) {
+    public static void addGenericVariableType(String name, TypeSymbol typeSymbol) throws VariableDeclarationException {
         addVariableType(name, new VariableTypeSymbol(name, typeSymbol, false, false, true));
     }
 
-    public static void addVariableType(String name, String type, boolean isToken, boolean isStatic) throws SalsaNotFoundException {
+    public static void addVariableType(String name, String type, boolean isToken, boolean isStatic) throws SalsaNotFoundException, VariableDeclarationException {
         TypeSymbol typeSymbol = getTypeSymbol(type);
         VariableTypeSymbol variableTypeSymbol = new VariableTypeSymbol(name, typeSymbol, isToken, isStatic, false);
 
         addVariableType(name, variableTypeSymbol);
     }
 
-	public static void addVariableType(String name, VariableTypeSymbol type) {
+	public static void addVariableType(String name, VariableTypeSymbol type) throws VariableDeclarationException {
 		VariableTypeSymbol symbolInScope = scope.getVariableType(name, false);
 
         if (symbolInScope != null) {
-//            System.err.println("COMPILER WARNING [SymbolTable.addVariableType]: Conflict of declarations. '" + name + "' already declared in current scope as '" + symbolInScope.getType().getLongSignature() + "', trying to redefine as '" + type.getType().getLongSignature() + "'");
+//            if (!symbolInScope.getType().equals( type.getType() )) 
+            throw new VariableDeclarationException(name, type.getType().getLongSignature(), "Conflict of declarations. '" + name + "' already declared in current scope as '" + symbolInScope.getType().getLongSignature() + "', trying to redefine as '" + type.getType().getLongSignature() + "'");
 
-            if (!symbolInScope.getType().equals( type.getType() )) throw new RuntimeException();
         } else {
 			scope.addVariableType(name, type);
         }
 	}
 
     public static VariableTypeSymbol getVariableTypeSymbol(String name) throws SalsaNotFoundException {
-		VariableTypeSymbol variableTypeSymbol = scope.getVariableType(name);
-
-        if (variableTypeSymbol == null) {
-//            System.err.println("COMPILER WARNING [SymbolTable.getVariableType]: Lookup of type for variable '" + name + "' failed. Attempting to load it as a Class for static invocations.");
-            //It might be a type for a static method
-            TypeSymbol typeSymbol = getTypeSymbol(name);
-
-            addVariableType(name, name, false, true);
-            variableTypeSymbol = scope.getVariableType(name);
+        try {
+            VariableTypeSymbol variableTypeSymbol = scope.getVariableType(name);
 
             if (variableTypeSymbol == null) {
-                System.err.println("COMPILER ERROR [SymbolTable.getVariableType]: Lookup of type for variable '" + name + "' failed.");
-                throw new RuntimeException();
-//            scope.printScope(true);
-//                return null;
-            }
-        }
+    //            System.err.println("COMPILER WARNING [SymbolTable.getVariableType]: Lookup of type for variable '" + name + "' failed. Attempting to load it as a Class for static invocations.");
+                //It might be a type for a static method
+                TypeSymbol typeSymbol = getTypeSymbol(name);
 
-        return variableTypeSymbol;
+                addVariableType(name, name, false, true);
+                variableTypeSymbol = scope.getVariableType(name);
+
+                if (variableTypeSymbol == null) {
+                    System.err.println("COMPILER ERROR [SymbolTable.getVariableType]: Lookup of type for variable '" + name + "' failed.");
+                    throw new RuntimeException();
+    //            scope.printScope(true);
+    //                return null;
+                }
+            }
+
+            return variableTypeSymbol;
+        } catch (VariableDeclarationException vde) {
+            CompilerErrors.printErrorMessage("Error declaring varible, should not happen in SymbolTable.getVariableTypeSymbol: " + vde.toString());
+            throw new RuntimeException(vde);
+        }
     }
 
 	public static TypeSymbol getVariableType(String name) throws SalsaNotFoundException {
@@ -343,29 +373,50 @@ public class SymbolTable {
 //        System.err.println("getting dominating type2: " + type2.getLongSignature());
 //        System.err.println("getting dominating type1: " + type1.getLongSignature());
 
-        if (type1.getName().equals("String") || type2.getName().equals("String")) return SymbolTable.getTypeSymbol("String");
-		else if (type1.getName().equals("double") || type2.getName().equals("double")) return SymbolTable.getTypeSymbol("double");
-		else if (type1.getName().equals("float") || type2.getName().equals("float")) return SymbolTable.getTypeSymbol("float");
-		else if (type1.getName().equals("short") || type2.getName().equals("short")) return SymbolTable.getTypeSymbol("short");
-		else if (type1.getName().equals("long") || type2.getName().equals("long")) return SymbolTable.getTypeSymbol("long");
-		else if (type1.getName().equals("int") || type2.getName().equals("int")) return SymbolTable.getTypeSymbol("int");
-		else return type1;
+        try {
+            if (type1.getName().equals("String") || type2.getName().equals("String")) return SymbolTable.getTypeSymbol("String");
+            else if (type1.getName().equals("double") || type2.getName().equals("double")) return SymbolTable.getTypeSymbol("double");
+            else if (type1.getName().equals("float") || type2.getName().equals("float")) return SymbolTable.getTypeSymbol("float");
+            else if (type1.getName().equals("short") || type2.getName().equals("short")) return SymbolTable.getTypeSymbol("short");
+            else if (type1.getName().equals("long") || type2.getName().equals("long")) return SymbolTable.getTypeSymbol("long");
+            else if (type1.getName().equals("int") || type2.getName().equals("int")) return SymbolTable.getTypeSymbol("int");
+            else return type1;
+        } catch (VariableDeclarationException vde) {
+            CompilerErrors.printErrorMessage("Error declaring varible, should not happen in SymbolTable.getDominatingType: " + vde.toString());
+            throw new RuntimeException(vde);
+        }
 	}
 
     public static void importDefaultPrimitive(String name, boolean isToken) throws SalsaNotFoundException {
         loadPrimitive(name);
-        addVariableType(name, name, isToken, true);
+        try {
+            addVariableType(name, name, isToken, true);
+        } catch (VariableDeclarationException vde) {
+            CompilerErrors.printErrorMessage("Error declaring varible, should not happen in SymbolTable.importDefaultPrimitive: " + vde.toString());
+            throw new RuntimeException(vde);
+        }
     }
 
     public static void importDefaultPrimitive(String name) throws SalsaNotFoundException {
         loadPrimitive(name);
-        addVariableType(name, name, false, true);
+        try {
+            addVariableType(name, name, false, true);
+        } catch (VariableDeclarationException vde) {
+            CompilerErrors.printErrorMessage("Error declaring varible, should not happen in SymbolTable.importDefaultPrimitive: " + vde.toString());
+            throw new RuntimeException(vde);
+        }
     }
 
     public static void importDefaultObject(String name, boolean isImmutable) throws SalsaNotFoundException {
-        importObject(name);
-        if (isImmutable) setImmutableObject(name);
-        addVariableType(getTypeSymbol(name).getName(), name, false, true);
+        try {
+            importObject(name);
+            if (isImmutable) setImmutableObject(name);
+
+            addVariableType(getTypeSymbol(name).getName(), name, false, true);
+        } catch (VariableDeclarationException vde) {
+            CompilerErrors.printErrorMessage("Error declaring varible, should not happen in SymbolTable.importDefaultObject: " + vde.toString());
+            throw new RuntimeException(vde);
+        }
     }
 
     public static void resetSymbolTable(CCompilationUnit cu) {
@@ -603,18 +654,18 @@ public class SymbolTable {
 
             ActorType mobileActorType = null;
             mobileActorType = new ActorType(runtimeModule + ".MobileActor", SymbolTable.getTypeSymbol("Actor"));
-            MessageSymbol getOriginPortMessage = new MessageSymbol(0, "getOriginPort", mobileActorType, SymbolTable.getTypeSymbol("int"), new TypeSymbol[]{});
-            MessageSymbol getOriginHostMessage = new MessageSymbol(1, "getOriginHost", mobileActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
             MessageSymbol getMobilePortMessage = new MessageSymbol(0, "getPort", mobileActorType, SymbolTable.getTypeSymbol("int"), new TypeSymbol[]{});
             MessageSymbol getMobileHostMessage = new MessageSymbol(1, "getHost", mobileActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
             MessageSymbol getMobileNameMessage = new MessageSymbol(2, "getName", mobileActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
-            MessageSymbol migrateMessage = new MessageSymbol(3, "migrate", mobileActorType, SymbolTable.getTypeSymbol("ack"), new TypeSymbol[]{ SymbolTable.getTypeSymbol("String"), SymbolTable.getTypeSymbol("int") });
-            mobileActorType.message_handlers.add(migrateMessage);
+            MessageSymbol getLastKnownPortMessage = new MessageSymbol(3, "getLastKnownPort", mobileActorType, SymbolTable.getTypeSymbol("int"), new TypeSymbol[]{});
+            MessageSymbol getLastKnownHostMessage = new MessageSymbol(4, "getLastKnownHost", mobileActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
+            MessageSymbol migrateMessage = new MessageSymbol(5, "migrate", mobileActorType, SymbolTable.getTypeSymbol("ack"), new TypeSymbol[]{ SymbolTable.getTypeSymbol("String"), SymbolTable.getTypeSymbol("int") });
             mobileActorType.message_handlers.add(getMobilePortMessage);
             mobileActorType.message_handlers.add(getMobileHostMessage);
-            mobileActorType.message_handlers.add(getOriginPortMessage);
-            mobileActorType.message_handlers.add(getOriginHostMessage);
             mobileActorType.message_handlers.add(getMobileNameMessage);
+            mobileActorType.message_handlers.add(getLastKnownPortMessage);
+            mobileActorType.message_handlers.add(getLastKnownHostMessage);
+            mobileActorType.message_handlers.add(migrateMessage);
             knownTypes.put(mobileActorType.getLongSignature(), mobileActorType);
             namespace.put(mobileActorType.getName(), mobileActorType.getLongSignature());
 
@@ -646,6 +697,10 @@ public class SymbolTable {
             }
             closeScope();
 
+        } catch (VariableDeclarationException vde) {
+            System.err.println("COMPILER ERROR [SymbolTable.resetSymbolTable]: " + vde.toString());
+            vde.printStackTrace();
+            System.exit(0);
         } catch (SalsaNotFoundException snfe) {
             System.err.println("COMPILER ERROR [SymbolTable.resetSymbolTable]: " + snfe.toString());
             snfe.printStackTrace();

@@ -28,8 +28,11 @@ behavior NameServerTest extends MobileActor {
 
         token NameServerTest alsoSelf = (NameServerTest)(ns1<-get(System.getProperty("called")));
 
-        NameServerTest alsoSelf2 = reference NameServerTest called (System.getProperty("called")) using (ns1);
-        NameServerTest alsoSelf3 = reference NameServerTest called (System.getProperty("called")) using (ns2);
+        token NameServerTest alsoSelf2 = reference NameServerTest called (System.getProperty("called")) using (ns1);
+        token NameServerTest alsoSelf3 = reference NameServerTest called (System.getProperty("called")) using (ns2);
+
+//        token NameServerTest alsoSelf2 = (NameServerTest) ns1<-get( System.getProperty("called") );
+//        token NameServerTest alsoSelf3 = (NameServerTest) ns2<-get( System.getProperty("called") );
 
         System.err.println("Should print out:");
         System.err.println(5);

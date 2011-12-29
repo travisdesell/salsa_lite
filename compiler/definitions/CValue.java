@@ -12,6 +12,7 @@ import salsa_lite.compiler.symbol_table.MethodSymbol;
 import salsa_lite.compiler.symbol_table.MessageSymbol;
 import salsa_lite.compiler.symbol_table.TypeSymbol;
 import salsa_lite.compiler.symbol_table.SalsaNotFoundException;
+import salsa_lite.compiler.symbol_table.VariableDeclarationException;
 
 public class CValue extends CErrorInformation {
 
@@ -57,6 +58,9 @@ public class CValue extends CErrorInformation {
                 System.err.println("This should never happen.");
                 throw new RuntimeException();
             }
+        } catch (VariableDeclarationException vde) {
+            CompilerErrors.printErrorMessage("[CValue.getValueType]: Could not declare variable. " + vde.toString(), this);
+            throw new RuntimeException(vde);
         } catch (SalsaNotFoundException snfe) {
             CompilerErrors.printErrorMessage("[CValue.getValueType]: Could not determine type for variable. " + snfe.toString(), this);
             throw new RuntimeException(snfe);
@@ -68,6 +72,9 @@ public class CValue extends CErrorInformation {
 	public TypeSymbol getType() {
         try {
     		if (cast_type != null)  return SymbolTable.getTypeSymbol(cast_type.name);
+        } catch (VariableDeclarationException vde) {
+            CompilerErrors.printErrorMessage("[CValue.getType]: Could not declare variable. " + vde.toString(), this);
+            throw new RuntimeException(vde);
         } catch (SalsaNotFoundException snfe) {
             CompilerErrors.printErrorMessage("[CValue.getType]: Could not determine type for cast. " + snfe.toString(), this);
             throw new RuntimeException(snfe);
@@ -142,6 +149,9 @@ public class CValue extends CErrorInformation {
                         CompilerErrors.printErrorMessage("Cannot invoke a message on an an unknown type.", method_invocation);
                         throw new RuntimeException();
                     }
+                } catch (VariableDeclarationException vde) {
+                    CompilerErrors.printErrorMessage("[CValue.getType]: Could not declare variable for method invocation. " + vde.toString(), this);
+                    throw new RuntimeException(vde);
                 } catch (SalsaNotFoundException snfe) {
                     CompilerErrors.printErrorMessage("[CValue.getType]: Could not determine type for method invocation. " + snfe.toString(), this);
                     throw new RuntimeException(snfe);
@@ -167,6 +177,9 @@ public class CValue extends CErrorInformation {
                         throw new RuntimeException();
                     }
                     value_type = ((ActorType)value_type).getMessage(message_send.message_name, message_send.arguments, isParentMessageSend).getPassType();
+                } catch (VariableDeclarationException vde) {
+                    CompilerErrors.printErrorMessage("[CValue.getType]: Could not declare variable for message send. " + vde.toString(), this);
+                    throw new RuntimeException(vde);
                 } catch (SalsaNotFoundException snfe) {
                     CompilerErrors.printErrorMessage("[CValue.getType]: Could not determine type for message send. " + snfe.toString(), this);
                     throw new RuntimeException(snfe);
@@ -268,14 +281,18 @@ public class CValue extends CErrorInformation {
 		}
 
         if (cast_type != null) {
-            code = "(" + cast_type.name + ")" + code;
+            if (isToken()) {
+                code = "(TokenDirector)" + code;
+            } else {
+                code = "(" + cast_type.name + ")" + code;
+            }
         }
 
         if (currentType == null) currentType = getValueType();
 
 //        System.err.println("\nNew pass through toJavaCode for CValue():");
         for (CModification modification : modifications) {
-//            System.err.println("\tcurrentType = " + currentType.getLongSignature());
+//            System.err.println("    currentType = " + currentType.getLongSignature());
 
             if (modification instanceof CArrayAccess) {
                 CArrayAccess aa = (CArrayAccess)modification;
@@ -358,6 +375,9 @@ public class CValue extends CErrorInformation {
                         }
                         code += ")";
                     }
+                } catch (VariableDeclarationException vde) {
+                    CompilerErrors.printErrorMessage("[CValue.toJavaCode]: Error declaring variable for method invocation. " + vde.toString(), mi);
+                    throw new RuntimeException(vde);
                 } catch (SalsaNotFoundException snfe) {
                     CompilerErrors.printErrorMessage("[CValue.toJavaCode]: Error looking up type for method invocation. " + snfe.toString(), mi);
                     throw new RuntimeException(snfe);
@@ -408,6 +428,9 @@ public class CValue extends CErrorInformation {
                     MessageSymbol messageSymbol = null;
                     try {
                         messageSymbol = at.getMessage(ms.message_name, ms.arguments, isParentMessageSend);
+                    } catch (VariableDeclarationException vde) {
+                        CompilerErrors.printErrorMessage("Could not find matching message, message name: '" + ms.message_name + "', variable declaration exception: " + vde.toString(), ms);
+                        throw new RuntimeException(vde);
                     } catch (SalsaNotFoundException snfe) {
                         CompilerErrors.printErrorMessage("Could not find matching message, message name: '" + ms.message_name + "'", ms);
                         throw new RuntimeException(snfe);
@@ -472,6 +495,7 @@ public class CValue extends CErrorInformation {
                             code += ", continuation_token";
                         }
                         code += "}";
+
                     } else if (SymbolTable.messageRequiresContinuation) {
                         code += ", continuation_token";
                     }
@@ -488,6 +512,9 @@ public class CValue extends CErrorInformation {
 
                     currentType = ((ActorType)currentType).getMessage(ms.message_name, ms.arguments, isParentMessageSend).getPassType();
                     SymbolTable.setContinuationType(currentType);
+                } catch (VariableDeclarationException vde) {
+                    CompilerErrors.printErrorMessage("[CValue.toJavaCode]: Error declaring variable for message send. " + vde.toString(), ms);
+                    throw new RuntimeException(vde);
                 } catch (SalsaNotFoundException snfe) {
                     CompilerErrors.printErrorMessage("[CValue.toJavaCode]: Error looking up type for message send. " + snfe.toString(), ms);
                     throw new RuntimeException(snfe);

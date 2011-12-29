@@ -68,7 +68,7 @@ public class TransportService {
         return outgoingSockets.get(hcb.toHashCode());
     }
 
-    public static final void sendMessage(String host, int port, Message message) {
+    public static final void sendMessageToRemote(String host, int port, Message message) {
         OutgoingTheaterConnection out = getSocket(host, port);
 
         System.err.println("sending remote message to [" + host + " : " + port + "]: " + message);

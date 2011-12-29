@@ -45,6 +45,14 @@ public class CompilerErrors {
     }
 
 
+    public static void printErrorMessage(String message) {
+        System.out.println("COMPILER ERROR: " + message);
+//        System.out.println("COMPILER ERROR: " + message + " [" + currentFile.getName() + "], line [" + ei.beginLine + "], column [" + ei.beginColumn + "]:");
+//        System.out.println(getLine(ei.beginLine));
+//        System.out.println(getWhitespace(ei.beginColumn) + "^");
+        System.out.println();
+    }
+
     public static void printErrorMessage(String message, CErrorInformation ei) {
         System.out.println("COMPILER ERROR: " + message + " [" + currentFile.getName() + "], line [" + ei.beginLine + "], column [" + ei.beginColumn + "]:");
         System.out.println(getLine(ei.beginLine));

@@ -30,7 +30,7 @@ public class ObjectType extends TypeSymbol {
         return method_handlers.get(i);
     }
 
-    public MethodSymbol getMethod(String name, Vector<CExpression> parameters) throws SalsaNotFoundException {
+    public MethodSymbol getMethod(String name, Vector<CExpression> parameters) throws SalsaNotFoundException, VariableDeclarationException {
         return (MethodSymbol)Invokable.matchInvokable(new Invokable(name, this, parameters), method_handlers);
     }
 
@@ -77,7 +77,7 @@ public class ObjectType extends TypeSymbol {
         return copy;
     } 
 
-    public TypeSymbol replaceGenerics(String genericTypesString) throws SalsaNotFoundException {
+    public TypeSymbol replaceGenerics(String genericTypesString) throws SalsaNotFoundException, VariableDeclarationException {
         ObjectType copy = (ObjectType)this.copy();
 
         if (!copy.isGeneric()) throw new SalsaNotFoundException(module, name, "Tried to replace generics on non generic-class: " + copy.getLongSignature());
@@ -121,7 +121,7 @@ public class ObjectType extends TypeSymbol {
         return copy;
     }
 
-	public void load() throws SalsaNotFoundException {
+	public void load() throws SalsaNotFoundException, VariableDeclarationException {
 		int i;
         Class importClass = null;
 

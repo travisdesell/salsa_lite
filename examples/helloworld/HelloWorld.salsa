@@ -1,15 +1,10 @@
-behavior HelloWorld {
-    void hello(){
-        StandardOutput<-print("Hello ");
-    }
-    void world(){
-        StandardOutput<-println("World!");
-    }
-       
-    void act(String[] arguments){
-        StandardOutput<-println("Hello World!");
+import salsa_lite.io.StandardOutput;
 
-        self<-hello();
-        self<-world();
+behavior HelloWorld {
+    HelloWorld(String[] arguments){
+        StandardOutput standardOutput = new StandardOutput();
+
+        standardOutput<-print("Hello") @
+        standardOutput<-println(" World!");
     }
 }

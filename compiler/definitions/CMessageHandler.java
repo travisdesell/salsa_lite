@@ -3,6 +3,7 @@ package salsa_lite.compiler.definitions;
 import salsa_lite.compiler.symbol_table.SymbolTable;
 import salsa_lite.compiler.symbol_table.TypeSymbol;
 import salsa_lite.compiler.symbol_table.SalsaNotFoundException;
+import salsa_lite.compiler.symbol_table.VariableDeclarationException;
 
 import salsa_lite.compiler.SalsaParser;
 import salsa_lite.compiler.SimpleNode;
@@ -62,6 +63,9 @@ public class CMessageHandler extends CErrorInformation {
 
             try {
     			SymbolTable.addVariableType(p.name, p.type.name, false, false);
+            } catch (VariableDeclarationException vde) {
+                CompilerErrors.printErrorMessage("[CMessageHandler.toJavaCode] Could not declare variable. " + vde.toString(), p);
+                throw new RuntimeException(vde);
             } catch (SalsaNotFoundException snfe) {
                 CompilerErrors.printErrorMessage("[CMessageHandler.toJavaCode] Could not find parameter type. " + snfe.toString(), p);
                 throw new RuntimeException(snfe);

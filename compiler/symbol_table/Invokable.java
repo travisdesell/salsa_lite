@@ -86,7 +86,7 @@ public class Invokable {
         return getLongSignature();
     }
 
-    public static Invokable matchInvokable(Invokable targetArguments, ArrayList<? extends Invokable> invokables) throws SalsaNotFoundException {
+    public static Invokable matchInvokable(Invokable targetArguments, ArrayList<? extends Invokable> invokables) throws SalsaNotFoundException, VariableDeclarationException {
         Invokable match = null;
         int matches = 0;
         int[] match_distance = new int[invokables.size()];
@@ -164,7 +164,7 @@ public class Invokable {
      *  returns -1 if there is no match, otherwise it returns
      *  the distance between types (in terms of how many superclasses away it is)
      */
-    public int matches(Invokable target) throws SalsaNotFoundException {
+    public int matches(Invokable target) throws SalsaNotFoundException, VariableDeclarationException {
         if (!name.equals(target.getName())) return -1;
         if (parameterTypes.length != target.parameterTypes.length) return -1;
 

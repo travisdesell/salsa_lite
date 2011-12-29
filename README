@@ -41,23 +41,45 @@ Notable changes from SALSA 1.x and before:
     *   You can specify what stage an actor runs on: 'NewActor na = new NewActor() at (<stage number>);' or 'NewActor na = newActor() at (StageService.getStage(anotherActor));' or 'NewActor na = new NewActor() at (StageService.getNewStage());'.
     *   Actors can implement 'StagedActor' which will make them run on their own stage. This is useful for actors with blocking behavior or long running message handlers that may starve other actors running on the same stage.
     *   RemoteActors (actors remotely accessible but not mobile) and MobileActors (actors that are mobile and remotely accessible) have been added, instead of UniversalActor
-    *   A reference to a RemoteActor can be created as follows: 'MyActor a = reference MyActor at (<host>, <port>) called (<name>);', or if the RemoteActor is local but the name is known: 'MyActor a = reference MyActor called (<name>);', references to MobileActors can be created similarly, if they are at a known host/port or local.
+    *   A reference to a RemoteActor can be created as follows:
+            MyActor a = reference MyActor called (<name>) at (<host>, <port>);
+        or if the RemoteActor is local:
+            MyActor a = reference MyActor called (<name>);
     *   NameServers are now first class RemoteActors, see salsa_lite.runtime.wwc.NameServer
-    *   A reference to a MobileActor can be created via a nameserver (as the above method is unreliable if it has moved):
-            NameServer myNameServer = reference NameServer at (<host>, <port>) called (<name>);
-            MyMobileActor a = reference MyMobileActor at (myNameServer) called (<name>);
+    *   A reference to a MobileActor can be created via a NameServer instead of by using a host/port (as that would be unreliable):
+            NameServer myNameServer = reference NameServer called (<name>) at (<host>, <port>);
+            token MyMobileActor a = reference MyMobileActor called (<name>) using (myNameServer); //this has to be a token
         or:
-            NameServer myNameServer = reference NameServer at (<host>, <port>) called (<name>);
+            NameServer myNameServer = reference NameServer called (<name>) at (<host>, <port>);
             token MyMobileActor a = (MyMobileActor)myNameServer<-get(<name>);
+        or:
+            MyMobleActor a = reference MyMobileActor called (<name>) using (reference NameServer at (<host>, <port>) called (<name>));
+    *   A Remote or Mobile actor can be created remotely with similar semantics:
+            NameServer myNameServer = reference NameServer called (<name) at (<host>, <port>);
+            MyMobileActor myMobileActor = new MyMobileActor(...) called (<name>) using (myNameServer) at (<host>, <port>);
+            MyRemoteActor myRemoteActor = new MyRemoteActor(...) called (<name>) at (<host>, <port>);
+        or locally:
+            NameServer myNameServer = reference NameServer called (<name) at (<host>, <port>);
+            MyMobileActor myMobileActor = new MyMobileActor(...) called (<name>) using (myNameServer);
+            MyRemoteActor myRemoteActor = new MyRemoteActor(...) called (<name>);
+       called and using are optional, however without a name and NameServer a MobileActor cannot migrate and without a name a RemoteActor cannot be referenced remotely.
+   *    Actors can be created at a specific stage using the 'on' keyword as part of an allocation expression.  This can be combined with 'called', 'using' and 'at' for Remote and Mobile actors as well:
+        MyMobileActor myMobileActor = new MyMobileActor(...) called (<name>) using (myNameServer) on (1); // puts it on stage 1
+        MyRemoteActor myRemoteActor = new MyRemoteActor(...) called (<name>) at (host, port) on (1); // puts it on stage 1
+        MyActor myActor = new MyActor(...) on (3); // puts it on stage 1
+        MyActor myActor = new MyActor(...) on (new SynchronousMailboxStage()); // puts it its own stage
+            
 
 BUGS:
     *   Get the wwc package working again.
     *   Type checking for generics may not completely work not sure about things like <? super Something> and <T, E extends T, F extends E>.
     *   Get interfaces working correctly.  They need special messages that know they were sent using an interface, so they invoke the correct message handler.
+    *   Actor.stage should be private, not public.
 
 
 TODO:
     *   Add garbage collection support for MobileActors.
+    *   Allow RemoteActors and MobileActors to be created remotely and on particular stages.
     *   Report an error if trying to invoke a static method on a non-static object
     *   Allow self(...) and parent(...) as the first line within constructors to call another or the superclasses's constructor.
     *   Add syntax support for try/catch blocks for Java support.

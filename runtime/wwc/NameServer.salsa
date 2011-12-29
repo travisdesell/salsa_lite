@@ -25,8 +25,8 @@ behavior NameServer extends RemoteActor {
         } else {
             MobileActor entry = entries.get(name);
             System.err.println("Error: trying to put an actor on the NameServer when it already exists.");
-            System.err.println("\texisting  entry name[" + name + "], host[" + entry.getHost() + "], port[" + entry.getPort() + "]");
-            System.err.println("\tattempted entry name[" + name + "], host[" + actor.getHost() + "], port[" + actor.getPort() + "]");
+            System.err.println("\texisting  entry name[" + name + "], host[" + entry.getLastKnownHost() + "], port[" + entry.getLastKnownPort() + "]");
+            System.err.println("\tattempted entry name[" + name + "], host[" + actor.getLastKnownHost() + "], port[" + actor.getLastKnownPort() + "]");
         }
     }
 
@@ -38,7 +38,7 @@ behavior NameServer extends RemoteActor {
         } else {
             MobileActor entry = entries.get(name);
             System.err.println("Error: trying to update an actor on the NameServer when it does not exist.");
-            System.err.println("\tattempted entry name[" + name + "], host[" + actor.getHost() + "], port[" + actor.getPort() + "]");
+            System.err.println("\tattempted entry name[" + name + "], host[" + actor.getLastKnownHost() + "], port[" + actor.getLastKnownPort() + "]");
         }
     }
 

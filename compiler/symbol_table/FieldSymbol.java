@@ -35,7 +35,7 @@ public class FieldSymbol extends Symbol {
         }
     }
 
-    public FieldSymbol(TypeSymbol enclosingType, Field f) throws SalsaNotFoundException {
+    public FieldSymbol(TypeSymbol enclosingType, Field f) throws SalsaNotFoundException, VariableDeclarationException {
         this.enclosingType = enclosingType;
 
         this.name = f.getName();
@@ -50,6 +50,9 @@ public class FieldSymbol extends Symbol {
 
         try {
             this.type = SymbolTable.getTypeSymbol( variableDeclaration.type.name );
+        } catch (VariableDeclarationException vde) {
+            CompilerErrors.printErrorMessage("Could not declare field. " + vde.toString(), variableDeclaration);
+            throw new RuntimeException(vde);
         } catch (SalsaNotFoundException snfe) {
             CompilerErrors.printErrorMessage("Could not find type for field. " + snfe.toString(), variableDeclaration);
             throw new RuntimeException(snfe);

@@ -14,6 +14,18 @@ public abstract class TypeSymbol implements Comparable<TypeSymbol> {
     TypeSymbol superType = null;
     public TypeSymbol getSuperType()    { return superType; }
 
+    public boolean isSubclassOf(TypeSymbol other) {
+        if (this.equals(other)) return true;
+        else if (superType != null) {
+            return superType.isSubclassOf(other);
+        } else {
+            for (TypeSymbol interfaceType : implementsTypes) {
+                if (interfaceType.isSubclassOf(other)) return true;
+            }
+        }
+        return false;
+    }
+
     ArrayList<TypeSymbol> implementsTypes = new ArrayList<TypeSymbol>();
 
     String name;
@@ -56,7 +68,7 @@ public abstract class TypeSymbol implements Comparable<TypeSymbol> {
 	public FieldSymbol          getField(int i)             { return fields.get(i); }
 	public ConstructorSymbol    getConstructor(int i)       { return constructors.get(i); }
 
-    public ConstructorSymbol    getConstructor(Vector<CExpression> expressions) throws SalsaNotFoundException {
+    public ConstructorSymbol    getConstructor(Vector<CExpression> expressions) throws SalsaNotFoundException, VariableDeclarationException {
         return (ConstructorSymbol)Invokable.matchInvokable(new Invokable(this, expressions), constructors);
     }
 
@@ -70,7 +82,7 @@ public abstract class TypeSymbol implements Comparable<TypeSymbol> {
     } 
 
     public abstract TypeSymbol copy();
-    public abstract TypeSymbol replaceGenerics(String genericTypesString) throws SalsaNotFoundException;
+    public abstract TypeSymbol replaceGenerics(String genericTypesString) throws SalsaNotFoundException, VariableDeclarationException;
 
     public static String genericStringToName(String gs) {
         if (gs.startsWith("class ") || gs.startsWith("interface ")) {
@@ -119,7 +131,7 @@ public abstract class TypeSymbol implements Comparable<TypeSymbol> {
         return compareType;
     }
 
-    public static void addGenericType(String gt, String superType) throws SalsaNotFoundException {
+    public static void addGenericType(String gt, String superType) throws SalsaNotFoundException, VariableDeclarationException {
         String extendsGeneric = null, superGeneric = null;
         if (gt.contains(" super ")) {
 //            System.err.println("super in declared generic: " + gt);
@@ -153,7 +165,7 @@ public abstract class TypeSymbol implements Comparable<TypeSymbol> {
         }
     }
 
-    public static ArrayList<TypeSymbol> parseGenerics(String genericTypesString, ArrayList<String> declaredGenericTypes, boolean fromObject) throws SalsaNotFoundException {
+    public static ArrayList<TypeSymbol> parseGenerics(String genericTypesString, ArrayList<String> declaredGenericTypes, boolean fromObject) throws SalsaNotFoundException, VariableDeclarationException {
         int i = 0;
         ArrayList<TypeSymbol> instantiatedGenericTypes = new ArrayList<TypeSymbol>();
 
@@ -274,11 +286,11 @@ public abstract class TypeSymbol implements Comparable<TypeSymbol> {
     /**
      *  This type matches the target if the target is the same type, or a superclass of this type
      */
-    public int canMatch(TypeSymbol target) {
+    public int canMatch(TypeSymbol target) throws VariableDeclarationException {
         return canMatch(target, 0);
     }
 
-    public int canMatch(TypeSymbol target, int distance) {
+    public int canMatch(TypeSymbol target, int distance) throws VariableDeclarationException {
 //        System.err.println("distance: " + distance + ", testing '" + getSignature() + "' vs '" + target.getSignature() + "'");
 
         if (this.equals(target)) return distance;

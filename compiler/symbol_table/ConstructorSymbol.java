@@ -35,7 +35,7 @@ public class ConstructorSymbol extends Invokable {
         this.parameterTypes = parameterTypes;
     }
 
-    public ConstructorSymbol(int id, TypeSymbol enclosingType, Constructor constructor) throws SalsaNotFoundException {
+    public ConstructorSymbol(int id, TypeSymbol enclosingType, Constructor constructor) throws SalsaNotFoundException, VariableDeclarationException {
         super(id, enclosingType);
 
         Type[] parameterClasses = constructor.getParameterTypes();
@@ -59,6 +59,9 @@ public class ConstructorSymbol extends Invokable {
         for (String s : argumentTypes) {
             try {
                 parameterTypes[i++] = SymbolTable.getTypeSymbol( s );
+            } catch (VariableDeclarationException vde) {
+                CompilerErrors.printErrorMessage("Could not declare argument for constructor. " + vde.toString(), constructor.getArgument(i - 1));
+                throw new RuntimeException(vde);
             } catch (SalsaNotFoundException snfe) {
                 CompilerErrors.printErrorMessage("Could not find argument type for constructor.", constructor.getArgument(i - 1));
                 throw new RuntimeException(snfe);

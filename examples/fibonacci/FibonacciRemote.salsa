@@ -1,0 +1,24 @@
+behavior FibonacciRemote extends RemoteActor {
+	int n;
+
+	FibonacciRemote(int n) {
+		self.n = n;
+	}
+
+	FibonacciRemote(String[] arguments) {
+		n = Integer.parseInt(arguments[0]);
+
+		self<-finish(self<-compute());
+	}
+
+	int compute() {
+		if (n == 0)         pass 0;
+		else if (n <= 2)    pass 1;
+		else                pass new FibonacciRemote(n-1) called ("fib_" + (n-1))<-compute() + new FibonacciRemote(n-2) called ("fib_" + (n-2))<-compute();
+	}
+
+	ack finish(int value) {
+		System.out.println(value);
+        System.exit(0);
+	}
+}

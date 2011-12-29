@@ -49,7 +49,7 @@ public class MethodSymbol extends Invokable {
         this.parameterTypes = parameterTypes;
     }
 
-    public MethodSymbol(int id, TypeSymbol enclosingType, Method method) throws SalsaNotFoundException {
+    public MethodSymbol(int id, TypeSymbol enclosingType, Method method) throws SalsaNotFoundException, VariableDeclarationException {
         super(id, method.getName(), enclosingType);
 
 //        System.err.println("method non generic returnName: " + method.getReturnType().getName());

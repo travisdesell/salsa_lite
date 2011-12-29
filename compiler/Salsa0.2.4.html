@@ -112,6 +112,7 @@
 | &lt;BOOLEAN: "boolean"&gt;
 | &lt;BREAK: "break"&gt;
 | &lt;BYTE: "byte"&gt;
+| &lt;CALLED: "called"&gt;
 | &lt;CASE: "case"&gt;
 | &lt;CATCH: "catch"&gt;
 | &lt;CHAR: "char"&gt;
@@ -139,6 +140,7 @@
 | &lt;NEW: "new"&gt;
 | &lt;NULL: "null"&gt;
 | &lt;OBJECT: "object"&gt;
+| &lt;ON: "on"&gt;
 | &lt;PASS: "pass"&gt;
 | &lt;PARENT: "parent"&gt;
 | &lt;PUBLIC: "public"&gt;
@@ -150,6 +152,7 @@
 | &lt;_TOKEN: "token"&gt;
 | &lt;TRUE: "true"&gt;
 | &lt;TRY: "try"&gt;
+| &lt;USING: "using"&gt;
 | &lt;WAITFOR: "waitfor"&gt;
 | &lt;WHILE: "while"&gt;
 }
@@ -516,7 +519,7 @@
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod47">BindDeclaration</A></TD>
 <TD ALIGN=CENTER VALIGN=BASELINE>::=</TD>
-<TD ALIGN=LEFT VALIGN=BASELINE>"at" "(" <A HREF="#prod31">Expression</A> ( "," <A HREF="#prod31">Expression</A> "," <A HREF="#prod31">Expression</A> )? ")"</TD>
+<TD ALIGN=LEFT VALIGN=BASELINE>( ( "called" "(" <A HREF="#prod31">Expression</A> ")" ( "using" "(" <A HREF="#prod31">Expression</A> ")" )? ( "at" "(" <A HREF="#prod31">Expression</A> "," <A HREF="#prod31">Expression</A> ")" )? ) | ( "on" "(" <A HREF="#prod31">Expression</A> ")" ) )</TD>
 </TR>
 <TR>
 <TD ALIGN=RIGHT VALIGN=BASELINE><A NAME="prod48">ArrayDimsAndInits</A></TD>

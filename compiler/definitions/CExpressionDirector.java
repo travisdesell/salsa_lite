@@ -73,15 +73,15 @@ public class CExpressionDirector {
         code += "Actor";
 
 		code += " {\n";
-        code += CIndent.getIndent() + "\tpublic " + expression_director_name + "(SynchronousMailboxStage stage) { super(stage); }\n";
-        code += CIndent.getIndent() + "\tpublic void invokeConstructor(int id, Object[] arguments) {}\n";
+        code += CIndent.getIndent() + "    public " + expression_director_name + "(SynchronousMailboxStage stage) { super(stage); }\n";
+        code += CIndent.getIndent() + "    public void invokeConstructor(int id, Object[] arguments) {}\n";
 
-		code += CIndent.getIndent() + "\tpublic Object invokeMessage(int messageId, Object[] arguments) {\n";
+		code += CIndent.getIndent() + "    public Object invokeMessage(int messageId, Object[] arguments) {\n";
 		for (int i = 0; i < input_parameter_types.size(); i++) {
-			code += CIndent.getIndent() + "\t\t" + input_parameter_types.get(i) + " " + input_parameter_names.get(i) + " = (" + input_parameter_types.get(i) + ")arguments[" + i + "];\n";
+			code += CIndent.getIndent() + "        " + input_parameter_types.get(i) + " " + input_parameter_names.get(i) + " = (" + input_parameter_types.get(i) + ")arguments[" + i + "];\n";
 		}
-		code += CIndent.getIndent() + "\t\treturn " + getExpressionCode() + ";\n";
-		code += CIndent.getIndent() + "\t}\n";
+		code += CIndent.getIndent() + "        return " + getExpressionCode() + ";\n";
+		code += CIndent.getIndent() + "    }\n";
 		code += CIndent.getIndent() + "}\n";
 
 		code += required_messages_code;

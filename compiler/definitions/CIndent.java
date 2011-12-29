@@ -9,7 +9,7 @@ public class CIndent {
 
 	public static String getIndent() {
 		String code = "";
-		for (int i = 0; i < indent; i++) code += "\t";
+		for (int i = 0; i < indent; i++) code += "    ";
 		return code;
 	}
 }

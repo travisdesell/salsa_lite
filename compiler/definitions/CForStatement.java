@@ -4,6 +4,7 @@ import java.util.Vector;
 
 import salsa_lite.compiler.symbol_table.SymbolTable;
 import salsa_lite.compiler.symbol_table.SalsaNotFoundException;
+import salsa_lite.compiler.symbol_table.VariableDeclarationException;
 
 
 public class CForStatement extends CStatement {
@@ -28,6 +29,8 @@ public class CForStatement extends CStatement {
 
             try {
                 SymbolTable.addVariableType(extended_for.name, extended_for.type.name, false, false);
+            } catch (VariableDeclarationException vde) {
+                CompilerErrors.printErrorMessage("[CForStatement.toJavaCode] Could not declare variable. " + vde.toString() , extended_for);
             } catch (SalsaNotFoundException snfe) {
                 CompilerErrors.printErrorMessage("[CForStatement.toJavaCode] Could not fine parameter type. " + snfe.toString() , extended_for);
             }

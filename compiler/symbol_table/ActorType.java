@@ -60,7 +60,7 @@ public class ActorType extends TypeSymbol {
         return copy;
     } 
 
-    public TypeSymbol replaceGenerics(String genericTypesString) throws SalsaNotFoundException {
+    public TypeSymbol replaceGenerics(String genericTypesString) throws SalsaNotFoundException, VariableDeclarationException {
         ActorType copy = (ActorType)this.copy();
 
         if (!isGeneric()) throw new SalsaNotFoundException(module, name, "Tried to replace generics on non generic-class: " + this.getLongSignature());
@@ -101,7 +101,7 @@ public class ActorType extends TypeSymbol {
 	public MessageSymbol        getMessageHandler(int i)                { return message_handlers.get(i); }
 	public MessageSymbol        getOverloadedMessageHandler(int i)      { return overloaded_message_handlers.get(i); }
 
-    public MessageSymbol        getMessage(String name, Vector<CExpression> parameters, boolean isParentMessage) throws SalsaNotFoundException {
+    public MessageSymbol        getMessage(String name, Vector<CExpression> parameters, boolean isParentMessage) throws SalsaNotFoundException, VariableDeclarationException {
 //        System.err.println("getting message for: " + name + ", isParentMessage: " + isParentMessage);
 //        System.err.println("overloaded: " + overloaded_message_handlers.toString());
 //        System.err.println("message handlers: " + message_handlers.toString());
@@ -137,7 +137,7 @@ public class ActorType extends TypeSymbol {
         return null;
     }
 
-	public void load() throws SalsaNotFoundException {
+	public void load() throws SalsaNotFoundException, VariableDeclarationException {
 		String file = new String(module + name).replace('.', File.separatorChar);
 
         SymbolTable.openScope();
@@ -180,7 +180,7 @@ public class ActorType extends TypeSymbol {
         SymbolTable.closeScope();
     }
 
-    public void load(CCompilationUnit cu, String oldModule) throws SalsaNotFoundException {
+    public void load(CCompilationUnit cu, String oldModule) throws SalsaNotFoundException, VariableDeclarationException {
         int i;
         if (cu.getExtendsName() != null) {
             this.superType = SymbolTable.getTypeSymbol(cu.getExtendsName().name);

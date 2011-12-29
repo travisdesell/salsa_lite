@@ -48,6 +48,9 @@ public class MessageSymbol extends Invokable {
 
         try {
             this.passType = SymbolTable.getTypeSymbol( messageHandler.pass_type.name );
+        } catch (VariableDeclarationException vde) {
+            CompilerErrors.printErrorMessage("Could not declare varible for message handler. " + vde.toString(), messageHandler.pass_type);
+            throw new RuntimeException(vde);
         } catch (SalsaNotFoundException snfe) {
             CompilerErrors.printErrorMessage("Could not find pass type for message handler.", messageHandler.pass_type);
             throw new RuntimeException(snfe);
@@ -60,6 +63,9 @@ public class MessageSymbol extends Invokable {
         for (String s : argumentTypes) {
             try {
                 parameterTypes[i++] = SymbolTable.getTypeSymbol( s );
+            } catch (VariableDeclarationException vde ) {
+                CompilerErrors.printErrorMessage("Could not declare variable for message handler. " + vde.toString(), messageHandler.getArgument(i - 1));
+                throw new RuntimeException(vde);
             } catch (SalsaNotFoundException snfe) {
                 CompilerErrors.printErrorMessage("Could not find argument type for message handler.", messageHandler.getArgument(i - 1));
                 throw new RuntimeException(snfe);

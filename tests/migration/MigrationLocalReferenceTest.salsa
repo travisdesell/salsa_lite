@@ -1,5 +1,7 @@
 import salsa_lite.io.StandardOutput;
 
+import salsa_lite.runtime.wwc.NameServer;
+
 import object java.util.ArrayList;
 
 behavior MigrationLocalReferenceTest extends MobileActor {

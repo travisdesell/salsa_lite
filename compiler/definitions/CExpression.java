@@ -4,6 +4,7 @@ import salsa_lite.compiler.symbol_table.SymbolTable;
 import salsa_lite.compiler.symbol_table.ArrayType;
 import salsa_lite.compiler.symbol_table.TypeSymbol;
 import salsa_lite.compiler.symbol_table.SalsaNotFoundException;
+import salsa_lite.compiler.symbol_table.VariableDeclarationException;
 
 import java.util.Vector;
 
@@ -38,12 +39,17 @@ public class CExpression extends CVariableInit {
 		if (operator == null) {
 			return value_type;
 		} else if (operator.equals("=")) {
-			if (operator_expression.getType().canMatch(value_type) < 0) {
-                CompilerErrors.printErrorMessage("Conflicting types.  Cannot assign '" + operator_expression.getType().getLongSignature() + "' to '" + value_type.getLongSignature() + "'", operator_expression);
-			}
+            try {
+                if (operator_expression.getType().canMatch(value_type) < 0) {
+                    CompilerErrors.printErrorMessage("Conflicting types.  Cannot assign '" + operator_expression.getType().getLongSignature() + "' to '" + value_type.getLongSignature() + "'", operator_expression);
+                }
 
-            if (!value.isToken() && operator_expression.isToken()) {
-                CompilerErrors.printErrorMessage("Cannot assign a token to a non-token: '" + expression.getType().getLongSignature() + "'.", operator_expression);
+                if (!value.isToken() && operator_expression.isToken()) {
+                    CompilerErrors.printErrorMessage("Cannot assign a token to a non-token: '" + expression.getType().getLongSignature() + "'.", operator_expression);
+                }
+            } catch (VariableDeclarationException vde) {
+                CompilerErrors.printErrorMessage("[CExpression.getType]: " + vde.toString(), this);
+                throw new RuntimeException(vde);
             }
 
 			return value_type;
@@ -59,14 +65,15 @@ public class CExpression extends CVariableInit {
                 return dominatingType;
             } catch (SalsaNotFoundException snfe) {
                 CompilerErrors.printErrorMessage("[CExpression.getType]: " + snfe.toString(), this);
-                throw new RuntimeException();
+                throw new RuntimeException(snfe);
             }
 		}
 	}
 
 	public boolean isToken() {
-		if (operator_expression != null) return value.isToken() || operator_expression.isToken();
-		else return value.isToken();
+		if (operator_expression != null) {
+            return value.isToken() || operator_expression.isToken();
+        } else return value.isToken();
 	}
 
 	String implicit_token_code = null;

@@ -23,7 +23,7 @@ public class ArrayType extends TypeSymbol {
         return copy;
     }
 
-    public TypeSymbol replaceGenerics(String genericTypesString) throws SalsaNotFoundException {
+    public TypeSymbol replaceGenerics(String genericTypesString) throws SalsaNotFoundException, VariableDeclarationException {
         ArrayType copy = (ArrayType)this.copy();
         copy.subtype = copy.subtype.replaceGenerics(genericTypesString);
         return copy;
@@ -76,13 +76,16 @@ public class ArrayType extends TypeSymbol {
         try {
             FieldSymbol fs = new FieldSymbol(this, "length", SymbolTable.getTypeSymbol("int"));
             fields.add( fs );
+        } catch (VariableDeclarationException vde) {
+            System.err.println("Very bad compiler error, could declare variable for 'int'. " + vde.toString());
+            throw new RuntimeException(vde);
         } catch (SalsaNotFoundException snfe) {
             System.err.println("Very bad compiler error, could not find the type for 'int'.");
             throw new RuntimeException(snfe);
         }
     }
 
-    public ArrayType(TypeSymbol subtype, String dimensions) throws SalsaNotFoundException {
+    public ArrayType(TypeSymbol subtype, String dimensions) throws SalsaNotFoundException, VariableDeclarationException {
         if (dimensions.length() > 2) this.subtype = new ArrayType(subtype, dimensions.substring(2, dimensions.length()));
         else this.subtype = subtype;
 
