@@ -21,6 +21,16 @@ Running SALSA programs:
     Please let us know at salsadev [at] cs.rpi.edu if the SALSA compiler does not display errors or warnings that the Java compiler does.
 
 
+Syntax Highlighting:
+    *   Syntax highlighting files for vim have been added in salsa_lite/syntax/
+    *   On OS X, copy these to $HOME/.vim/syntax/
+    *   Add the following to your $HOME/.vimrc file: 'au BufRead,BufNewFile *.salsa set filetype=salsa'
+    *   TODO:
+                Not sure if this was the best way to do it (using an edited version of Java's vim syntax file)
+                Should add syntax highlighting files for emacs/others
+                Need instructions for use on other operating systems
+
+
 Notable changes from SALSA 1.x and before:
     *   The compiler now does static typechecking. Error reporting for the compiler has also been greatly improved.
     *   Extended For loop syntax added.
