@@ -17,7 +17,7 @@ behavior Theater extends RemoteActor implements StagedActor {
     }
 
     ack listen() {
-        System.err.println("Theater listening for incoming connection.");
+//        System.err.println("Theater listening for incoming connections.");
 
         try {
             new IncomingTheaterConnection(TransportService.serverSocket.accept());

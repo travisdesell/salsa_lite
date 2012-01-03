@@ -20,11 +20,7 @@ behavior OutgoingTheaterConnection {
         System.out.println("made new outgoing theater connection to: " + host + ":" + port);
         try {
             socket = new Socket(host, port);
-
-            System.out.println("made socket");
             out = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-
-            System.out.println("got objectoutputstream");
 
         } catch (IOException ioe) {
             StringBuffer sb = new StringBuffer();
@@ -63,7 +59,7 @@ behavior OutgoingTheaterConnection {
             System.err.println(sb.toString());
         }
 
-        System.err.println("sent message with outgoing theater connection: " + message);
+//        System.err.println("sent message with outgoing theater connection: " + message);
     }
 
     ack migrate(Actor actor) {

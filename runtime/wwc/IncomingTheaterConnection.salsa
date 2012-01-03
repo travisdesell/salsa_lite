@@ -12,10 +12,10 @@ behavior IncomingTheaterConnection implements StagedActor {
 
     IncomingTheaterConnection(Socket socket) {
         self.socket = socket;
-        System.err.println("stated new incoming theater connection.");
-
         try {
             in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+
+            System.err.println("made new incoming theater connection from: " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
         } catch (IOException ioe) {
             StringBuffer sb = new StringBuffer();
             sb.append("Error in IncomingTheaterConnection, IOException: " + ioe + "\n");
@@ -67,7 +67,7 @@ behavior IncomingTheaterConnection implements StagedActor {
         } else if (o instanceof Message) {
             //check to see if the target actor is here
 
-            System.err.println("IncomingTheaterConnection received a message: " + o);
+//            System.err.println("IncomingTheaterConnection received a message: " + o);
 
             StageService.sendMessage((Message)o);
 

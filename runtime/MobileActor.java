@@ -37,7 +37,7 @@ public abstract class MobileActor extends Actor {
             MobileActorRegistry.addReferenceEntry(hashCode, this);
         }
 
-        System.err.println("Created a mobile actor at local theater with lastKnownHost: " + lastKnownHost + " and lastKnownPort: " + lastKnownPort);
+//        System.err.println("Created a mobile actor at local theater with lastKnownHost: " + lastKnownHost + " and lastKnownPort: " + lastKnownPort);
     }
 
     public MobileActor(String name, NameServer nameserver, SynchronousMailboxStage stage) {
@@ -54,7 +54,7 @@ public abstract class MobileActor extends Actor {
             MobileActorRegistry.addReferenceEntry(hashCode, this);
         }
 
-        System.err.println("Created a mobile actor at local theater with lastKnownHost: " + lastKnownHost + " and lastKnownPort: " + lastKnownPort);
+//        System.err.println("Created a mobile actor at local theater with lastKnownHost: " + lastKnownHost + " and lastKnownPort: " + lastKnownPort);
     }
 
     public MobileActor(String name, NameServer nameserver, String lastKnownHost, int lastKnownPort) { 
@@ -66,7 +66,7 @@ public abstract class MobileActor extends Actor {
         this.hashCode = Hashing.getHashCodeFor(name, nameserver.getName(), nameserver.getHost(), nameserver.getPort());
         this.stage = StageService.stages[Math.abs(hashCode % StageService.number_stages)];
 
-        System.err.println("Created a mobile actor with pre-specified lastKnownHost: " + lastKnownHost + " and lastKnownPort: " + lastKnownPort);
+//        System.err.println("Created a mobile actor with pre-specified lastKnownHost: " + lastKnownHost + " and lastKnownPort: " + lastKnownPort);
     }
 
 

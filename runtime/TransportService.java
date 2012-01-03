@@ -83,7 +83,7 @@ public class TransportService {
         OutgoingTheaterConnection out = getSocket(host, port);
         StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, out, 2 /*send*/, new Object[]{message}));
 
-        System.err.println("sending remote message to [" + host + " : " + port + "]: " + message);
+//        System.err.println("sending remote message to [" + host + " : " + port + "]: " + message);
     }
 
     public static final void migrateActor(String host, int port, Actor actor) {

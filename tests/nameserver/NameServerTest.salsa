@@ -42,6 +42,8 @@ behavior NameServerTest extends MobileActor {
         System.err.println(10);
         System.err.println(10);
 
+        System.err.println("\nNameServerTest:");
+
         self<-printValue() @
         alsoSelf<-printValue() @
         alsoSelf<-setValue(10) @
