@@ -16,7 +16,7 @@ behavior ImplicitTokenDirector extends ValueDirector {
 		if (director != null) {
             //need to do this explicitly so the runtime doesn't add a deep copy (which is unnecessary)
             //director<-setValue(position, value);
-            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 1 /*setValue*/, new Object[]{position, value}));
+            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 2 /*setValue*/, new Object[]{position, value}));
 		}
 	}
 
@@ -27,7 +27,7 @@ behavior ImplicitTokenDirector extends ValueDirector {
 		} else {
             //need to do this explicitly so the runtime doesn't add a deep copy (which is unnecessary)
             //director<-setValue(position, value);
-            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 1 /*setValue*/, new Object[]{position, value}));
+            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 2 /*setValue*/, new Object[]{position, value}));
 		}       
 	}       
 }

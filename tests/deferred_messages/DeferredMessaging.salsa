@@ -1,0 +1,51 @@
+
+behavior DeferredMessaging {
+
+    String name;
+    DeferredMessaging friend;
+
+    DeferredMessaging(String name) {
+        self.name = name;
+    }
+
+    ack setFriend(DeferredMessaging other) {
+        friend = other;
+    }
+
+    DeferredMessaging getFriend() {
+        pass friend;
+    }
+
+    ack printName() {
+        System.out.println("\t" + name);
+    }
+
+    DeferredMessaging(String[] arguments) {
+        DeferredMessaging a = new DeferredMessaging("a");
+        DeferredMessaging b = new DeferredMessaging("b");
+        DeferredMessaging c = new DeferredMessaging("c");
+        DeferredMessaging d = new DeferredMessaging("d");
+
+        a<-setFriend(b);
+        b<-setFriend(d);
+        c<-setFriend(a);
+        d<-setFriend(b);
+
+        System.out.println("Should print:");
+        System.out.println("\tb");
+        System.out.println("\tb");
+        System.out.println("\td");
+        System.out.println("\ta");
+        System.out.println("\td");
+
+        System.out.println("\nDeferredMessaging:");
+        token DeferredMessaging b_copy = a<-getFriend();
+        b_copy<-printName() @
+        
+        a<-getFriend()<-printName() @
+        b<-getFriend()<-printName() @
+        c<-getFriend()<-printName() @
+        d<-getFriend()<-getFriend()<-printName();
+    }
+}
+

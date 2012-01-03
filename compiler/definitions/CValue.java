@@ -276,8 +276,12 @@ public class CValue extends CErrorInformation {
             try {
                 currentValueIsToken = SymbolTable.isToken(variable_name.name);
             } catch (SalsaNotFoundException snfe) {
-                CompilerErrors.printErrorMessage("Error determining if variable was a token.  Could not determine variable type.", variable_name);
-                throw new RuntimeException(snfe);
+                CompilerErrors.printErrorMessage("Warning: Error determining if variable was a token.  Could not determine variable type.", variable_name);
+//                throw new RuntimeException(snfe);
+ 
+                //HUGE HACK!
+                //I think this only breaks with ENUMs and I'm not sure why
+                currentValueIsToken = false;
             }
 
 		} else if (expression != null) {
@@ -311,6 +315,7 @@ public class CValue extends CErrorInformation {
 
         if (currentType == null) currentType = getValueType();
 
+        int position = 0;
 //        System.err.println("\nNew pass through toJavaCode for CValue():");
         for (CModification modification : modifications) {
 //            System.err.println("    currentType = " + currentType.getLongSignature());
@@ -416,6 +421,15 @@ public class CValue extends CErrorInformation {
                         CompilerErrors.printErrorMessage("COMPILER PROBLEM: Unknown message property '" + ms.message_property.name + "'.", ms);
                     }
 
+                    boolean moreMessages = false;
+
+                    for (int new_pos = position + 1; new_pos < modifications.size(); new_pos++) {
+                        if (modifications.get(new_pos) instanceof CMessageSend) {
+                            moreMessages = true;
+                            break;
+                        }
+                    }
+
                     String pre_code = "";
                     if (SymbolTable.continuesToPass && !SymbolTable.withinArguments) {
                         pre_code += "StageService.sendPass";
@@ -426,11 +440,17 @@ public class CValue extends CErrorInformation {
                     } else if (SymbolTable.isExpressionContinuation) {
                         pre_code += "StageService.sendToken";
                     } else if (SymbolTable.messageContinues || joinDirector != null) {
-                        if (SymbolTable.firstContinuation()) {
-                            pre_code += "ContinuationDirector ";
-                            SymbolTable.initializedFirstContinuation();
-                        }
-                        pre_code += "continuation_token = StageService.sendContinuation";
+                        if (moreMessages) {
+                            pre_code += "StageService.sendToken";   //this message returns a token for an actor which has a message being sent to it
+                        } else {
+                            if (SymbolTable.firstContinuation()) {
+                                pre_code += "ContinuationDirector ";
+                                SymbolTable.initializedFirstContinuation();
+                            }
+                            pre_code += "continuation_token = StageService.sendContinuation";
+                        } 
+                    } else if (moreMessages) {
+                            pre_code += "StageService.sendToken";   //this message returns a token for an actor which has a message being sent to it
                     } else {
                         pre_code += "StageService.send";
                     }
@@ -521,11 +541,13 @@ public class CValue extends CErrorInformation {
 
                         if (SymbolTable.messageRequiresContinuation) {
                             code += ", continuation_token";
+                            SymbolTable.messageRequiresContinuation = false;    //so we only use the continuation once
                         }
                         code += "}";
 
                     } else if (SymbolTable.messageRequiresContinuation) {
                         code += ", continuation_token";
+                        SymbolTable.messageRequiresContinuation = false;    //so we only use the continuation once
                     }
 
                     if (SymbolTable.continuesToPass && !SymbolTable.withinArguments) {
@@ -533,7 +555,7 @@ public class CValue extends CErrorInformation {
                     }
 
                     if (currentValueIsToken) {
-//                        System.err.println("CURRENT VALUE IS TOKEN FOR CODE: " + code);
+                        System.err.println("CURRENT VALUE IS TOKEN FOR CODE: " + code);
                         code += ", " + target_code;
                     }
 
@@ -557,6 +579,7 @@ public class CValue extends CErrorInformation {
                 currentValueIsToken = true;
             }
             isParentMessageSend = false;
+            position++;
         }
 
 		return code;

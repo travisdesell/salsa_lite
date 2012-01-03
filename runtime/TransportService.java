@@ -88,7 +88,7 @@ public class TransportService {
 
     public static final void migrateActor(String host, int port, Actor actor) {
         OutgoingTheaterConnection out = getSocket(host, port);
-        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, out, 3 /*migratmigratee*/, new Object[]{actor}));
+        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, out, 3 /*migrate*/, new Object[]{actor}));
 
         System.err.println("migrating actor to [" + host + " : " + port + "]: " + actor.hashCode());
     }

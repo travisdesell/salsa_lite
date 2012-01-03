@@ -62,7 +62,7 @@ public class StageService {
 
 	public final static void sendMessage(Actor target, int message_id, Object[] arguments, ContinuationDirector input_continuation) {
 		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
-		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 2 /*setMessage()*/, new Object[]{input_message}));
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 3 /*setMessage()*/, new Object[]{input_message}));
 	}
 
 	public final static void sendMessage(Actor target, int message_id, Object[] arguments, Director[] input_continuations) {
@@ -87,32 +87,32 @@ public class StageService {
 
 	public final static void sendMessage(Actor target, int message_id, Object[] arguments, ValueDirector message_target) {
 		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
-		MessageDirector md = MessageDirector.construct(5, new Object[]{input_message, message_target}, target.stage);
+		MessageDirector md = MessageDirector.construct(5, new Object[]{input_message, message_target}, message_target.stage);
 	}
 
 	public final static void sendMessage(Actor target, int message_id, Object[] arguments, ContinuationDirector input_continuation, ValueDirector message_target) {
 		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
-		MessageDirector md = MessageDirector.construct(6, new Object[]{input_message, input_continuation, message_target}, target.stage);
+		MessageDirector md = MessageDirector.construct(6, new Object[]{input_message, input_continuation, message_target}, message_target.stage);
 	}
 
 	public final static void sendMessage(Actor target, int message_id, Object[] arguments, Director[] input_continuations, ValueDirector message_target) {
 		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
-		MessageDirector md = MessageDirector.construct(7, new Object[]{input_message, input_continuations, message_target}, target.stage);
+		MessageDirector md = MessageDirector.construct(7, new Object[]{input_message, input_continuations, message_target}, message_target.stage);
 	}
 
 	public final static void sendMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation, ValueDirector message_target) {
 		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
-		MessageDirector md = MessageDirector.construct(8, new Object[]{input_message, arguments, token_positions, input_continuation, message_target}, target.stage);
+		MessageDirector md = MessageDirector.construct(8, new Object[]{input_message, arguments, token_positions, input_continuation, message_target}, message_target.stage);
 	}
 
 	public final static void sendMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, ValueDirector message_target) {
 		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
-		MessageDirector md = MessageDirector.construct(9, new Object[]{input_message, arguments, token_positions, message_target}, target.stage);
+		MessageDirector md = MessageDirector.construct(9, new Object[]{input_message, arguments, token_positions, message_target}, message_target.stage);
 	}
 
 	public final static void sendMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, Director[] input_continuations, ValueDirector message_target) {
 		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
-		MessageDirector md = MessageDirector.construct(10, new Object[]{input_message, arguments, token_positions, input_continuations, message_target}, target.stage);
+		MessageDirector md = MessageDirector.construct(10, new Object[]{input_message, arguments, token_positions, input_continuations, message_target}, message_target.stage);
 	}
 
 
@@ -151,7 +151,7 @@ public class StageService {
 	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, ContinuationDirector input_continuation, Director currentContinuation) {
         int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
         Message input_message = new Message(messageType, target, message_id, arguments, currentContinuation);
-		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 2 /*setMessage()*/, new Object[]{input_message}));
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 3 /*setMessage()*/, new Object[]{input_message}));
 	}
 
 	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, Director[] input_continuations, Director currentContinuation) {
@@ -233,7 +233,7 @@ public class StageService {
 		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, target.stage);
 
 		Message input_message = new Message(Message.CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
-		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 2 /*setMessage()*/, new Object[]{input_message}));
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 3 /*setMessage()*/, new Object[]{input_message}));
 
 		return output_continuation;
 	}
@@ -348,7 +348,7 @@ public class StageService {
 		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target.stage);
 
 		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
-		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 2 /*setMessage()*/, new Object[]{input_message}));
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 3 /*setMessage()*/, new Object[]{input_message}));
 
 		return output_continuation;
 	}
@@ -464,7 +464,7 @@ public class StageService {
 		ImplicitTokenDirector output_continuation = ImplicitTokenDirector.construct(0 /*construct()*/, null, target.stage);
 
 		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
-		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 2 /*setMessage()*/, new Object[]{input_message}));
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 3 /*setMessage()*/, new Object[]{input_message}));
 
 		return output_continuation;
 	}

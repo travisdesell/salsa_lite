@@ -1,6 +1,7 @@
 /****** SALSA LANGUAGE IMPORTS ******/
 import salsa_lite.common.DeepCopy;
-import salsa_lite.runtime.ActorRegistry;
+import salsa_lite.runtime.LocalActorRegistry;
+import salsa_lite.runtime.Hashing;
 import salsa_lite.runtime.Acknowledgement;
 import salsa_lite.runtime.SynchronousMailboxStage;
 import salsa_lite.runtime.Actor;
@@ -26,10 +27,11 @@ import salsa_lite.runtime.language.JoinDirector;
 
 public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Serializable {
 
+
     public Object writeReplace() throws java.io.ObjectStreamException {
         int hashCode = this.hashCode();
-        synchronized (ActorRegistry.getLock(hashCode)) {
-            ActorRegistry.addEntry(hashCode, this);
+        synchronized (LocalActorRegistry.getLock(hashCode)) {
+            LocalActorRegistry.addEntry(hashCode, this);
         }
         return new SerializedThreadRing( hashCode, TransportService.getHost(), TransportService.getPort() );
     }
@@ -41,12 +43,12 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
         RemoteReference(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }
 
         public Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException {
-            TransportService.sendMessage(host, port, this.stage.message);
+            TransportService.sendMessageToRemote(host, port, this.stage.message);
             throw new RemoteMessageException();
         }
 
         public void invokeConstructor(int messageId, Object[] arguments) throws RemoteMessageException, ConstructorNotFoundException {
-            TransportService.sendMessage(host, port, this.stage.message);
+            TransportService.sendMessageToRemote(host, port, this.stage.message);
             throw new RemoteMessageException();
         }
 
@@ -63,12 +65,12 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
         SerializedThreadRing(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }
 
         public Object readResolve() throws java.io.ObjectStreamException {
-            synchronized (ActorRegistry.getLock(hashCode)) {
-                ThreadRing actor = (ThreadRing)ActorRegistry.getEntry(hashCode);
+            synchronized (LocalActorRegistry.getLock(hashCode)) {
+                ThreadRing actor = (ThreadRing)LocalActorRegistry.getEntry(hashCode);
+                System.err.println("DESERIALIZING A REFERENCE TO A LOCAL ACTOR: " + hashCode + " -- " + host + ":" + port + " -- got: " + actor);
                 if (actor == null) {
-                    System.err.println("DESERIALIZING A REMOTE REFERENCE TO A LOCAL ACTOR");
                     RemoteReference remoteReference = new RemoteReference(hashCode, host, port);
-                    ActorRegistry.addEntry(hashCode, remoteReference);
+                    LocalActorRegistry.addEntry(hashCode, remoteReference);
                     return remoteReference;
                 } else {
                     return actor;
@@ -87,8 +89,9 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
     public Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException {
         switch(messageId) {
             case 0: return toString();
-            case 1: setNextThread( (ThreadRing)arguments[0] ); return null;
-            case 2: forwardMessage( (Integer)arguments[0] ); return null;
+            case 1: return hashCode();
+            case 2: setNextThread( (ThreadRing)arguments[0] ); return null;
+            case 3: forwardMessage( (Integer)arguments[0] ); return null;
             default: throw new MessageHandlerNotFoundException(messageId, arguments);
         }
     }
@@ -119,15 +122,15 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
         ThreadRing previous = first;
         for (int i = 1; i < threadCount; i++) {
             next = ThreadRing.construct(0, new Object[]{i + 1});
-            ContinuationDirector continuation_token = StageService.sendContinuationMessage(previous, 1 /*setNextThread*/, new Object[]{next});
-            StageService.sendMessage(jd, 1 /*join*/, null, continuation_token);
+            ContinuationDirector continuation_token = StageService.sendContinuationMessage(previous, 2 /*setNextThread*/, new Object[]{next});
+            StageService.sendMessage(jd, 2 /*join*/, null, continuation_token);
             previous = next;
         }
 
-        ContinuationDirector continuation_token = StageService.sendContinuationMessage(next, 1 /*setNextThread*/, new Object[]{first});
-        StageService.sendMessage(jd, 1 /*join*/, null, continuation_token);
-        continuation_token = StageService.sendContinuationMessage(jd, 2 /*resolveAfter*/, new Object[]{threadCount});
-        StageService.sendMessage(first, 2 /*forwardMessage*/, new Object[]{hopCount}, continuation_token);
+        ContinuationDirector continuation_token = StageService.sendContinuationMessage(next, 2 /*setNextThread*/, new Object[]{first});
+        StageService.sendMessage(jd, 2 /*join*/, null, continuation_token);
+        continuation_token = StageService.sendContinuationMessage(jd, 3 /*resolveAfter*/, new Object[]{threadCount});
+        StageService.sendMessage(first, 3 /*forwardMessage*/, new Object[]{hopCount}, continuation_token);
     }
 
 
@@ -143,7 +146,7 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
         }
         else {
             value--;
-            StageService.sendMessage(next, 2 /*forwardMessage*/, new Object[]{value});
+            StageService.sendMessage(next, 3 /*forwardMessage*/, new Object[]{value});
         }
 
     }
