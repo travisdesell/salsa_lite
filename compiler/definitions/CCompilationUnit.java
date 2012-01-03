@@ -543,12 +543,15 @@ public class CCompilationUnit {
 
             } else {        //this is a local actor
                 code += "\n";
+                //theres got to be a better way to do this so we don't need to know the local host and port when serializing a local actor locally
+                //Maybe a way to find out the stream the actor is being written over.  If it is the local fast deepcopy stream
+                //use a different registry.
                 code += CIndent.getIndent() + "public Object writeReplace() throws java.io.ObjectStreamException {\n";
-                code += CIndent.getIndent() + "    int hashCode = this.hashCode();\n";
+                code += CIndent.getIndent() + "    int hashCode = Hashing.getHashCodeFor(this.hashCode(), TransportService.getHost(), TransportService.getPort());\n";
                 code += CIndent.getIndent() + "    synchronized (LocalActorRegistry.getLock(hashCode)) {\n";
                 code += CIndent.getIndent() + "        LocalActorRegistry.addEntry(hashCode, this);\n";
                 code += CIndent.getIndent() + "    }\n";
-                code += CIndent.getIndent() + "    return new Serialized" + tmp_name + "( hashCode, TransportService.getHost(), TransportService.getPort() );\n";
+                code += CIndent.getIndent() + "    return new Serialized" + tmp_name + "( this.hashCode(), TransportService.getHost(), TransportService.getPort() );\n";
                 code += CIndent.getIndent() + "}\n\n";
 
                 code += CIndent.getIndent() + "public static class RemoteReference extends " + tmp_name + " {\n";
@@ -571,7 +574,7 @@ public class CCompilationUnit {
                 code += "\n";
 
                 code += CIndent.getIndent() + "    public Object writeReplace() throws java.io.ObjectStreamException {\n";
-                code += CIndent.getIndent() + "        return new Serialized" + tmp_name + "( hashCode, TransportService.getHost(), TransportService.getPort() );\n";
+                code += CIndent.getIndent() + "        return new Serialized" + tmp_name + "( hashCode, host, port);\n";
                 code += CIndent.getIndent() + "    }\n";
                 code += CIndent.getIndent() + "}\n\n";
 
@@ -585,11 +588,12 @@ public class CCompilationUnit {
                 code += "\n";
 
                 code += CIndent.getIndent() + "    public Object readResolve() throws java.io.ObjectStreamException {\n";
+                code += CIndent.getIndent() + "        int hashCode = Hashing.getHashCodeFor(this.hashCode, this.host, this.port);\n";
                 code += CIndent.getIndent() + "        synchronized (LocalActorRegistry.getLock(hashCode)) {\n";
                 code += CIndent.getIndent() + "            " + tmp_name + " actor = (" + tmp_name +")LocalActorRegistry.getEntry(hashCode);\n";
                 code += CIndent.getIndent() + "            System.err.println(\"DESERIALIZING A REFERENCE TO A LOCAL ACTOR: \" + hashCode + \" -- \" + host + \":\" + port + \" -- got: \" + actor);\n";
                 code += CIndent.getIndent() + "            if (actor == null) {\n";
-                code += CIndent.getIndent() + "                RemoteReference remoteReference = new RemoteReference(hashCode, host, port);\n";
+                code += CIndent.getIndent() + "                RemoteReference remoteReference = new RemoteReference(this.hashCode, this.host, this.port);\n";
                 code += CIndent.getIndent() + "                LocalActorRegistry.addEntry(hashCode, remoteReference);\n";
                 code += CIndent.getIndent() + "                return remoteReference;\n";
                 code += CIndent.getIndent() + "            } else {\n";

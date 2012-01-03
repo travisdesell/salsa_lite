@@ -276,7 +276,7 @@ public class CValue extends CErrorInformation {
             try {
                 currentValueIsToken = SymbolTable.isToken(variable_name.name);
             } catch (SalsaNotFoundException snfe) {
-                CompilerErrors.printErrorMessage("Warning: Error determining if variable was a token.  Could not determine variable type.", variable_name);
+                CompilerErrors.printErrorMessage("Warning: Error determining if variable was a token.  Could not determine variable type. (This needs to be fixed)", variable_name);
 //                throw new RuntimeException(snfe);
  
                 //HUGE HACK!
@@ -555,7 +555,7 @@ public class CValue extends CErrorInformation {
                     }
 
                     if (currentValueIsToken) {
-                        System.err.println("CURRENT VALUE IS TOKEN FOR CODE: " + code);
+//                        System.err.println("CURRENT VALUE IS TOKEN FOR CODE: " + code);
                         code += ", " + target_code;
                     }
 

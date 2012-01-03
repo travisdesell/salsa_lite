@@ -129,14 +129,14 @@ public class StageService {
         if (currentContinuation == null) return;
 
 //      token<-forwardTo(currentContinuation);
-        token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, token, 3 /*forwardTo*/, new Object[]{currentContinuation}, null));
+        token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, token, 4 /*forwardTo*/, new Object[]{currentContinuation}, null));
     }
 
     public final static void passToken(ContinuationDirector token, Director currentContinuation) {
         if (currentContinuation == null) return;
 
 //      token<-forwardTo(currentContinuation);
-        token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, token, 3 /*forwardTo*/, new Object[]{currentContinuation}, null));
+        token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, token, 4 /*forwardTo*/, new Object[]{currentContinuation}, null));
     }
 
 	/**

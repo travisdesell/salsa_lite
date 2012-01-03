@@ -104,4 +104,6 @@ TODO:
     *   Add compiler tests for interfaces
     *   Add tests for nested expression directors, ie: a<-m( b<-m( c<-m() + d<-m(), e<-m() ) * f<-m() )
     *   Add tests for method invocations within expression directors, ie: a<-m( Math.log(o.something() + 10 * b<-m()) )
+    *   Local actors are serailized the same either locally (because of a deepcopy) or remotely (because of message passing).  This could be made more efficient if we could figure out what stream the actor was being sent over, and storing it in a different registries, one for local, one for remote.  The local one would not need to get the local host and local port to calculate the hashcode, and could remove the actor after deserialization (for garbage collection).
+    *   With remote message sending, we need to make sure the host is the same (eg, getting a reference to a remote actor via it's IP address or it's hostname should resolve to the same reference).
 

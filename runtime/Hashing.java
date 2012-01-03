@@ -31,13 +31,25 @@ public class Hashing {
         return value;
     }
 
+    public final static int getHashCodeFor(int hashcode /*a hashcode from a remote reference to a local actor*/, String host, int port) {
+        HashCodeBuilder hcb = new HashCodeBuilder();
+        hcb.append(hashcode);
+        hcb.append(host);
+        hcb.append(port);
+
+//        System.err.println("hashCode for [" + host + ":" + port + " - " + hashcode + "] resolved to: " + hcb.toHashCode());
+
+        return hcb.toHashCode();
+    }
+
+
     public final static int getHashCodeFor(String name, String host, int port) {
         HashCodeBuilder hcb = new HashCodeBuilder();
         hcb.append(name);
         hcb.append(host);
         hcb.append(port);
 
-        System.err.println("hashCode for [" + host + ":" + port + "/" + name + "] resolved to: " + hcb.toHashCode());
+//        System.err.println("hashCode for [" + host + ":" + port + "/" + name + "] resolved to: " + hcb.toHashCode());
 
         return hcb.toHashCode();
     }
@@ -49,7 +61,7 @@ public class Hashing {
         hcb.append(nameserverHost);
         hcb.append(nameserverPort);
 
-        System.err.println("hashCode for [" + name + " at " + nameserverHost + ":" + nameserverPort + "/" + nameserverName + "] resolved to: " + hcb.toHashCode());
+//        System.err.println("hashCode for [" + name + " at " + nameserverHost + ":" + nameserverPort + "/" + nameserverName + "] resolved to: " + hcb.toHashCode());
         return hcb.toHashCode();
     }
 }
