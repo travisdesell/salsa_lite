@@ -675,6 +675,8 @@ public class SymbolTable {
             knownTypes.put(mobileActorType.getLongSignature(), mobileActorType);
             namespace.put(mobileActorType.getName(), mobileActorType.getLongSignature());
 
+            MessageSymbol getMobileNameServerMessage = new MessageSymbol(7, "getNameServer", mobileActorType, SymbolTable.getTypeSymbol("salsa_lite.runtime.wwc.NameServer"), new TypeSymbol[]{});
+            mobileActorType.message_handlers.add(getMobileNameServerMessage);
 
             FieldSymbol targetField = null;
             targetField = new FieldSymbol(messageType, "target", SymbolTable.getTypeSymbol("Actor"));

@@ -37,6 +37,9 @@ public abstract class MobileActor extends Actor {
             MobileActorRegistry.addReferenceEntry(hashCode, this);
         }
 
+        //Register this mobile actor with the nameserver
+        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, nameserver, 4 /*put*/, new Object[]{this}));
+
 //        System.err.println("Created a mobile actor at local theater with lastKnownHost: " + lastKnownHost + " and lastKnownPort: " + lastKnownPort);
     }
 
@@ -53,6 +56,9 @@ public abstract class MobileActor extends Actor {
         synchronized (lock) {
             MobileActorRegistry.addReferenceEntry(hashCode, this);
         }
+
+        //Register this mobile actor with the nameserver
+        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, nameserver, 4 /*put*/, new Object[]{this}));
 
 //        System.err.println("Created a mobile actor at local theater with lastKnownHost: " + lastKnownHost + " and lastKnownPort: " + lastKnownPort);
     }
@@ -75,6 +81,7 @@ public abstract class MobileActor extends Actor {
             super(false);
             this.host = TransportService.getHost();
             this.port = TransportService.getPort();
+            this.nameserver = nameserver;
             this.hashCode = Hashing.getHashCodeFor(name, nameserver.getName(), nameserver.getHost(), nameserver.getPort());
             this.stage = StageService.stages[Math.abs(hashCode % StageService.number_stages)];
         }
@@ -83,14 +90,17 @@ public abstract class MobileActor extends Actor {
             super(false);
             this.host = TransportService.getHost();
             this.port = TransportService.getPort();
+            this.nameserver = nameserver;
             this.hashCode = Hashing.getHashCodeFor(name, nameserver.getName(), nameserver.getHost(), nameserver.getPort());
             this.stage = stage;
         }
 
+        private NameServer nameserver = null;
         private String name = null;
         private String host;
         private int port;
 
+        public NameServer getNameServer() { return nameserver; }
         public String getName() { return name; }
 
         public String getHost() { return host; }

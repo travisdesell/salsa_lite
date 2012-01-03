@@ -1,11 +1,13 @@
 import salsa_lite.io.StandardOutput;
 
+import salsa_lite.runtime.wwc.NameServer;
+
 import object java.util.ArrayList;
 
-behavior DeepCopyTest {
+behavior MobileDeepCopyTest extends MobileActor {
 
     int value;
-    ArrayList<DeepCopyTest> list;
+    ArrayList<MobileDeepCopyTest> list;
 
     int getValue() {
         pass value;
@@ -15,15 +17,15 @@ behavior DeepCopyTest {
         self.value = value;
     }
 
-    ack setList(ArrayList<DeepCopyTest> list) {
+    ack setList(ArrayList<MobileDeepCopyTest> list) {
         self.list = list;
     }
 
     ack printList() {
         StandardOutput standardOutput = new StandardOutput();
 
-        token ack t = standardOutput<-println("DeepCopyTest [value: " + value + "] printing:");
-        for (DeepCopyTest dct : list) {
+        token ack t = standardOutput<-println("MobileDeepCopyTest [value: " + value + "] printing:");
+        for (MobileDeepCopyTest dct : list) {
             t = standardOutput<-println( dct<-getValue() ) : waitfor(t);
         }
         t = standardOutput<-println() : waitfor(t);
@@ -31,18 +33,20 @@ behavior DeepCopyTest {
         pass t;
     }
 
-    DeepCopyTest(int value) {
+    MobileDeepCopyTest(int value) {
         self.value = value;
     }
 
-    DeepCopyTest(String[] arguments) {
-        DeepCopyTest dct1 = new DeepCopyTest(1);
-        DeepCopyTest dct2 = new DeepCopyTest(2);
-        DeepCopyTest dct3 = new DeepCopyTest(3);
-        DeepCopyTest dct4 = new DeepCopyTest(4);
-        DeepCopyTest dct5 = new DeepCopyTest(5);
+    MobileDeepCopyTest(String[] arguments) {
+        NameServer ns = self.getNameServer();
 
-        ArrayList<DeepCopyTest> list = new ArrayList<DeepCopyTest>();
+        MobileDeepCopyTest dct1 = new MobileDeepCopyTest(1) called ("mdct1") using (ns);
+        MobileDeepCopyTest dct2 = new MobileDeepCopyTest(2) called ("mdct2") using (ns);
+        MobileDeepCopyTest dct3 = new MobileDeepCopyTest(3) called ("mdct3") using (ns);
+        MobileDeepCopyTest dct4 = new MobileDeepCopyTest(4) called ("mdct4") using (ns);
+        MobileDeepCopyTest dct5 = new MobileDeepCopyTest(5) called ("mdct5") using (ns);
+
+        ArrayList<MobileDeepCopyTest> list = new ArrayList<MobileDeepCopyTest>();
 
         list.add(dct1);
         list.add(dct2);

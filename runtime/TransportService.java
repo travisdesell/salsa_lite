@@ -10,6 +10,7 @@ import salsa_lite.common.HashCodeBuilder;
 
 import salsa_lite.runtime.wwc.OutgoingTheaterConnection;
 import salsa_lite.runtime.wwc.Theater;
+import salsa_lite.runtime.wwc.NameServer;
 
 public class TransportService {
 
