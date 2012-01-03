@@ -12,15 +12,17 @@ behavior IncomingTheaterConnection implements StagedActor {
 
     IncomingTheaterConnection(Socket socket) {
         self.socket = socket;
+        System.err.println("stated new incoming theater connection.");
+
         try {
             in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
         } catch (IOException ioe) {
             StringBuffer sb = new StringBuffer();
             sb.append("Error in IncomingTheaterConnection, IOException: " + ioe + "\n");
             sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
-            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tremote host address [" + socket.getInetAddress().getHostAddress() + "], remote host name [" + socket.getInetAddress().getHostName() + "], remote port [" + socket.getPort() + "]\n");
             for (StackTraceElement ste : ioe.getStackTrace()) {
-                sb.append("\t" + ste.toString() + "\n");
+                sb.append("\t\t" + ste.toString() + "\n");
             }
             System.err.println(sb.toString());
             pass;
@@ -31,42 +33,51 @@ behavior IncomingTheaterConnection implements StagedActor {
 
     ack listen() {
         Object o = null;
-        
+
         try {
             o = in.readObject();
-            in.reset();
+//            in.reset();
         } catch (IOException ioe) {
             StringBuffer sb = new StringBuffer();
             sb.append("Error in IncomingTheaterConnection, IOException: " + ioe + "\n");
             sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
-            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tremote host address [" + socket.getInetAddress().getHostAddress() + "], remote host name [" + socket.getInetAddress().getHostName() + "], remote port [" + socket.getPort() + "]\n");
             for (StackTraceElement ste : ioe.getStackTrace()) {
-                sb.append("\t" + ste.toString() + "\n");
+                sb.append("\t\t" + ste.toString() + "\n");
             }
             System.err.println(sb.toString());
+            pass;
 
         } catch (ClassNotFoundException cnfe) {
             StringBuffer sb = new StringBuffer();
             sb.append("Error in IncomingTheaterConnection, ClassNotFoundException: " + cnfe + "\n");
             sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
-            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tremote host address [" + socket.getInetAddress().getHostAddress() + "], remote host name [" + socket.getInetAddress().getHostName() + "], remote port [" + socket.getPort() + "]\n");
             for (StackTraceElement ste : cnfe.getStackTrace()) {
-                sb.append("\t" + ste.toString() + "\n");
+                sb.append("\t\t" + ste.toString() + "\n");
             }
             System.err.println(sb.toString());
+            pass;
         }
 
         if (o instanceof Actor) {
 //            MobileActorRegistry.addEntry(...);
+
+            System.err.println("IncomingTheaterConnection received an actor: " + o);
         } else if (o instanceof Message) {
             //check to see if the target actor is here
+
+            System.err.println("IncomingTheaterConnection received a message: " + o);
+
+            StageService.sendMessage((Message)o);
 
         } else {
             StringBuffer sb = new StringBuffer();
             sb.append("Error in IncomingTheaterConnection, received unknown object: " + o + "\n");
             sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
-            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tremote host address [" + socket.getInetAddress().getHostAddress() + "], remote host name [" + socket.getInetAddress().getHostName() + "], remote port [" + socket.getPort() + "]\n");
             System.err.println(sb.toString());
+            pass;
         }
 
         self<-listen();

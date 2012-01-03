@@ -59,23 +59,36 @@ public class TransportService {
         }
 
         System.err.println("TransportService started on host [" + host + "] and port [" + port + "]");
+
+        Theater.construct(0, new Object[]{}, "runtime/theater");
     }
 
-    public static final OutgoingTheaterConnection getSocket(String host, int port) {
+    public synchronized static final OutgoingTheaterConnection getSocket(String host, int port) {
         HashCodeBuilder hcb = new HashCodeBuilder();
         hcb.append(host);
         hcb.append(port);
-        return outgoingSockets.get(hcb.toHashCode());
+
+        int hashCode = hcb.toHashCode();
+        OutgoingTheaterConnection out = outgoingSockets.get(hashCode);
+
+        if (out == null) {
+            out = OutgoingTheaterConnection.construct(0, new Object[]{host, port});
+            outgoingSockets.put(hashCode, out);
+        }
+
+        return out;
     }
 
     public static final void sendMessageToRemote(String host, int port, Message message) {
         OutgoingTheaterConnection out = getSocket(host, port);
+        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, out, 2 /*send*/, new Object[]{message}));
 
         System.err.println("sending remote message to [" + host + " : " + port + "]: " + message);
     }
 
     public static final void migrateActor(String host, int port, Actor actor) {
         OutgoingTheaterConnection out = getSocket(host, port);
+        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, out, 3 /*migratmigratee*/, new Object[]{actor}));
 
         System.err.println("migrating actor to [" + host + " : " + port + "]: " + actor.hashCode());
     }

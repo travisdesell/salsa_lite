@@ -14,7 +14,7 @@ behavior NameServer extends RemoteActor {
             System.exit(0);
         }
 
-        System.err.println("NameServer running at host[" + TransportService.getHost() + "], port[" + TransportService.getPort() + "], name[" + System.getProperty("called") +"]");
+        System.err.println("NameServer running at host[" + TransportService.getHost() + "], port[" + TransportService.getPort() + "], name[" + System.getProperty("called") + "], hashCode: " + self.hashCode());
     }
 
     ack put(MobileActor actor) {

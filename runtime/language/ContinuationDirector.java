@@ -2,7 +2,8 @@ package salsa_lite.runtime.language;
 
 /****** SALSA LANGUAGE IMPORTS ******/
 import salsa_lite.common.DeepCopy;
-import salsa_lite.runtime.ActorRegistry;
+import salsa_lite.runtime.LocalActorRegistry;
+import salsa_lite.runtime.Hashing;
 import salsa_lite.runtime.Acknowledgement;
 import salsa_lite.runtime.SynchronousMailboxStage;
 import salsa_lite.runtime.Actor;
@@ -29,24 +30,11 @@ import salsa_lite.runtime.Acknowledgement;
 
 public class ContinuationDirector extends Director implements java.io.Serializable {
 
-    public static ContinuationDirector getRemoteReference(String name, String host, int port) {
-        int hashCode = ActorRegistry.getHashCodeFor(name, host, port);
-        synchronized (ActorRegistry.getLock(hashCode)) {
-            ContinuationDirector entry = (ContinuationDirector)ActorRegistry.getEntry(hashCode);
-            if (entry == null) {
-                RemoteReference reference = new RemoteReference(hashCode, host, port);
-                ActorRegistry.addEntry(hashCode, reference);
-                return reference;
-            } else {
-                return entry;
-            }
-        }
-    }
 
     public Object writeReplace() throws java.io.ObjectStreamException {
         int hashCode = this.hashCode();
-        synchronized (ActorRegistry.getLock(hashCode)) {
-            ActorRegistry.addEntry(hashCode, this);
+        synchronized (LocalActorRegistry.getLock(hashCode)) {
+            LocalActorRegistry.addEntry(hashCode, this);
         }
         return new SerializedContinuationDirector( hashCode, TransportService.getHost(), TransportService.getPort() );
     }
@@ -80,12 +68,12 @@ public class ContinuationDirector extends Director implements java.io.Serializab
         SerializedContinuationDirector(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }
 
         public Object readResolve() throws java.io.ObjectStreamException {
-            synchronized (ActorRegistry.getLock(hashCode)) {
-                ContinuationDirector actor = (ContinuationDirector)ActorRegistry.getEntry(hashCode);
+            synchronized (LocalActorRegistry.getLock(hashCode)) {
+                ContinuationDirector actor = (ContinuationDirector)LocalActorRegistry.getEntry(hashCode);
+                System.err.println("DESERIALIZING A REFERENCE TO A LOCAL ACTOR: " + hashCode + " -- " + host + ":" + port + " -- got: " + actor);
                 if (actor == null) {
-                    System.err.println("DESERIALIZING A REMOTE REFERENCE TO A LOCAL ACTOR");
                     RemoteReference remoteReference = new RemoteReference(hashCode, host, port);
-                    ActorRegistry.addEntry(hashCode, remoteReference);
+                    LocalActorRegistry.addEntry(hashCode, remoteReference);
                     return remoteReference;
                 } else {
                     return actor;
@@ -105,9 +93,10 @@ public class ContinuationDirector extends Director implements java.io.Serializab
     public Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException {
         switch(messageId) {
             case 0: return toString();
-            case 1: resolve(); return null;
-            case 2: setMessage( (Message)arguments[0] ); return null;
-            case 3: forwardTo( (Director)arguments[0] ); return null;
+            case 1: return hashCode();
+            case 2: resolve(); return null;
+            case 3: setMessage( (Message)arguments[0] ); return null;
+            case 4: forwardTo( (Director)arguments[0] ); return null;
             default: throw new MessageHandlerNotFoundException(messageId, arguments);
         }
     }
@@ -139,7 +128,7 @@ public class ContinuationDirector extends Director implements java.io.Serializab
         }
 
         if (currentContinuation != null) {
-            StageService.sendMessage(currentContinuation, 1 /*resolve*/, null);
+            StageService.sendMessage(currentContinuation, 2 /*resolve*/, null);
         } 
     }
 
@@ -158,7 +147,7 @@ public class ContinuationDirector extends Director implements java.io.Serializab
             currentContinuation = (ContinuationDirector)director;
         }
         else {
-            StageService.sendMessage(((ContinuationDirector)director), 1 /*resolve*/, null);
+            StageService.sendMessage(((ContinuationDirector)director), 2 /*resolve*/, null);
         }
 
     }

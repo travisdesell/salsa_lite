@@ -33,7 +33,6 @@ Syntax Highlighting:
 
 Notable changes from SALSA 1.x and before:
     *   The compiler now does static typechecking. Error reporting for the compiler has also been greatly improved.
-    *   Extended For loop syntax added.
     *   Generics are usable.
     *   All parameters are pass-by-copy.  The compiler will insert a deep copy statement around a mutable object (or array) before it is passed as the argument to a message, or passed as a result from a message.  Previous versions of SALSA had pass-by-reference for local messages, and pass-by-copy for remote messages; this change makes everything pass-by-copy.
     *   When importing Java objects, use (for example) 'import object java.util.LinkedList;'. Objects in java.lang are automatically imported.
@@ -41,13 +40,13 @@ Notable changes from SALSA 1.x and before:
     *   return statements are now pass statements. ie: use 'pass 10;' instead of 'return 10;'
     *   currentContinuation is not used anymore, instead pass statements are used.  ie: 'a<-m1() @ currentContinuation;' is now 'a<-m1() @ pass;'.  This will pass an acknowledgement as the first class continuation.  If you want to pass the actual value, use: 'pass a<-m1();'.  It is also possible to pass a token: 'token ack t = a<-m1(); pass t;' which has the same semantics as 'pass a<-m1();'.
     *   Join blocks are no longer in the language.  Instead, the JoinDirector actor can be used, see salsa_lite/examples/threadring/ThreadRing.salsa for an example.
-    *   StandardOutput and StandardError are first class actors.  To use them you must first create them, ie: 'StandardOutput standardOutput = new StandardOutput(); standardOutput<-println("something");'.
+    *   StandardOutput and StandardError are first class actors.  To use them you must first create them, ie: 'StandardOutput standardOutput = new StandardOutput(); standardOutput<-println("something");'.  They will always print to the theater they were created at, even if the actor later migrates away from it (this allows mobile actors to easily print to multiple theaters). 
     *   There is no longer an act method, instead, for an actor that can be run from the command line, create a constructor that takes an array of strings. When that actor is run, the constructor with an array of Strings as the argument will be invoked. ie: 'behavior MyActor { void act(String[] arguments) { ... } }' is now 'behavior MyActor { MyActor(String[] arguments() { ... } }'. This reflects the fact that an actor is created when it is run, unlike in java where the main method is a static invocation (and does not create an object).
     *   Salsa now allows for tokens within expressions, eg: 'a<-m1( b<-m2() + c<-m3() * d<-m4() );' will work.
     *   This can also be combined with continuations, eg: 'e<-m5() @ a<-m1( b<-m2() + c<-m3() * d<-m4() ) @ f<-m6();'.
     *   And in pass statements, eg: 'pass a<-m1( b<-m2() + c<-m3() * d<-m4() );'.
     *   It is possible to invoke methods on self.  Because of this, to prevent ambiguity, for an actor to send a message or invoke a method on itself, use either 'self<-message();' or 'self.method();'.  Using 'message()' or 'method()' will not work (we might want to change this, maybe make sending a message the default).
-    *   Local actors have automatic garbage collection (using Java's garbage collector), so long as MobileActors with references to them are not migrated to another theater.
+    *   Local actors have automatic garbage collection (using Java's garbage collector), so long as MobileActors with references to them are not migrated to another theater; or as long as references to them are not passed within messages to remote or mobile actors at other theaters.
     *   You can specify what stage an actor runs on: 'NewActor na = new NewActor() at (<stage number>);' or 'NewActor na = newActor() at (StageService.getStage(anotherActor));' or 'NewActor na = new NewActor() at (StageService.getNewStage());'.
     *   Actors can implement 'StagedActor' which will make them run on their own stage. This is useful for actors with blocking behavior or long running message handlers that may starve other actors running on the same stage.
     *   RemoteActors (actors remotely accessible but not mobile) and MobileActors (actors that are mobile and remotely accessible) have been added, instead of UniversalActor

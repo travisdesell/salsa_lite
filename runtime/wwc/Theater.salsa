@@ -6,11 +6,19 @@ import object java.net.Socket;
 
 behavior Theater extends RemoteActor implements StagedActor {
 
+    Theater() {
+        System.err.println("Theater started as: " + TransportService.getHost() + ":" + TransportService.getPort() + "/" + self.getName());
+        self<-listen();
+    }
+
     Theater(String[] arguments) {
+        System.err.println("Theater started as: " + TransportService.getHost() + ":" + TransportService.getPort() + "/" + self.getName());
         self<-listen();
     }
 
     ack listen() {
+        System.err.println("Theater listening for incoming connection.");
+
         try {
             new IncomingTheaterConnection(TransportService.serverSocket.accept());
         } catch (IOException ioe) {

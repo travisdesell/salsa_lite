@@ -20,23 +20,15 @@ public abstract class Actor {
         return hashCode;
     }
 
-    protected Actor(int hashCode) {
-        this.hashCode = hashCode;
-		this.stage = StageService.stages[Math.abs(this.hashCode() % StageService.number_stages)];
-    }
-    
-    protected Actor(int hashCode, SynchronousMailboxStage stage) {
-        this.hashCode = hashCode;
-        this.stage = stage;
-    }
+    protected Actor(boolean dont_use_default_constructor) {}
 
-	public Actor() {
-        hashCode = ActorRegistry.generateUniqueHashCode(super.hashCode());
-		this.stage = StageService.stages[Math.abs(this.hashCode() % StageService.number_stages)];
+    public Actor() {
+        hashCode = Hashing.generateUniqueHashCode(super.hashCode());
+        this.stage = StageService.stages[Math.abs(hashCode % StageService.number_stages)];
 	}
 
 	public Actor(SynchronousMailboxStage stage) {
-        hashCode = ActorRegistry.generateUniqueHashCode(super.hashCode());
+        hashCode = Hashing.generateUniqueHashCode(super.hashCode());
 		this.stage = stage;
 	}
 

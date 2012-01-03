@@ -10,17 +10,28 @@ behavior OutgoingTheaterConnection {
     Socket socket = null;
     ObjectOutputStream out = null;
 
+    String remote_host;
+    int remote_port;
+
     OutgoingTheaterConnection(String host, int port) {
+        self.remote_host = host;
+        self.remote_port = port;
+
+        System.out.println("made new outgoing theater connection to: " + host + ":" + port);
         try {
             socket = new Socket(host, port);
+
+            System.out.println("made socket");
             out = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+
+            System.out.println("got objectoutputstream");
+
         } catch (IOException ioe) {
             StringBuffer sb = new StringBuffer();
             sb.append("Error in OutgoingTheaterConnection, IOException: " + ioe + "\n");
-            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
-            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tremote host [" + remote_host + "], remote port [" + remote_port + "]\n");
             for (StackTraceElement ste : ioe.getStackTrace()) {
-                sb.append("\t" + ste.toString() + "\n");
+                sb.append("\t\t" + ste.toString() + "\n");
             }
             System.err.println(sb.toString());
 
@@ -39,16 +50,39 @@ behavior OutgoingTheaterConnection {
     ack send(Message message) {
         try {
             out.writeObject(message);
-            out.reset();
+            out.flush();
+//            out.reset();
         } catch (IOException ioe) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("Error in OutgoingTheaterConnection, IOException: " + ioe + "\n");
+            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tremote host address [" + socket.getInetAddress().getHostAddress() + "], remote host name [" + socket.getInetAddress().getHostName() + "], remote port     [" + socket.getPort() + "]\n");
+            for (StackTraceElement ste : ioe.getStackTrace()) {
+                sb.append("\t\t" + ste.toString() + "\n");
+            }
+            System.err.println(sb.toString());
         }
+
+        System.err.println("sent message with outgoing theater connection: " + message);
     }
 
     ack migrate(Actor actor) {
         try {
             out.writeObject(actor);
-            out.reset();
+            out.flush();
+//            out.reset();
         } catch (IOException ioe) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("Error in OutgoingTheaterConnection, IOException: " + ioe + "\n");
+            sb.append("\tmigrating actor '" + actor + "'.");
+            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tremote host address [" + socket.getInetAddress().getHostAddress() + "], remote host name [" + socket.getInetAddress().getHostName() + "], remote port     [" + socket.getPort() + "]\n");
+            for (StackTraceElement ste : ioe.getStackTrace()) {
+                sb.append("\t\t" + ste.toString() + "\n");
+            }
+            System.err.println(sb.toString());
         }
+
+        System.err.println("sent actor with outgoing theater connection: " + actor);
     }
 }

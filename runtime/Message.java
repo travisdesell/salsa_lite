@@ -8,7 +8,7 @@ import salsa_lite.runtime.language.Director;
 
 import java.util.Arrays;
 
-public class Message {
+public class Message implements java.io.Serializable {
 	public final static int CONSTRUCT_MESSAGE = 0;
 	public final static int SIMPLE_MESSAGE = 1;
 	public final static int CONTINUATION_MESSAGE = 2;

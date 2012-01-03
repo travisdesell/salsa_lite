@@ -102,7 +102,7 @@ public class SymbolTable {
 
     public static boolean isReferenceMethod(CMethodInvocation methodInvocation) {
         String method_name = methodInvocation.method_name;
-        return (method_name.equals("getHost") || method_name.equals("getPort") || method_name.equals("getName") || method_name.equals("getLastKnownPort") || method_name.equals("getLastKnownHost"));
+        return (method_name.equals("hashCode") || method_name.equals("getHost") || method_name.equals("getPort") || method_name.equals("getName") || method_name.equals("getLastKnownPort") || method_name.equals("getLastKnownHost"));
     }
 
     public static TypeSymbol getTypeSymbol(String name) throws SalsaNotFoundException, VariableDeclarationException {
@@ -628,7 +628,9 @@ public class SymbolTable {
             ActorType localActorType = null;
             localActorType = new ActorType(runtimeModule + ".Actor", SymbolTable.getTypeSymbol("Object"));
             MessageSymbol toStringMessage = new MessageSymbol(0, "toString", localActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
+            MessageSymbol hashCodeMessage = new MessageSymbol(1, "hashCode", localActorType, SymbolTable.getTypeSymbol("int"), new TypeSymbol[]{});
             localActorType.message_handlers.add(toStringMessage);
+            localActorType.message_handlers.add(hashCodeMessage);
 
             FieldSymbol stageField = new FieldSymbol(localActorType, "stage", SymbolTable.getTypeSymbol("Stage"));
             localActorType.fields.add(stageField);
@@ -642,9 +644,11 @@ public class SymbolTable {
             MessageSymbol getHostMessage = new MessageSymbol(0, "getHost", remoteActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
             MessageSymbol getPortMessage = new MessageSymbol(1, "getPort", remoteActorType, SymbolTable.getTypeSymbol("int"), new TypeSymbol[]{});
             MessageSymbol getNameMessage = new MessageSymbol(2, "getName", remoteActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
+            MessageSymbol getHashCodeMessage = new MessageSymbol(3, "hashCode", remoteActorType, SymbolTable.getTypeSymbol("int"), new TypeSymbol[]{});
             remoteActorType.message_handlers.add(getHostMessage);
             remoteActorType.message_handlers.add(getPortMessage);
             remoteActorType.message_handlers.add(getNameMessage);
+            remoteActorType.message_handlers.add(getHashCodeMessage);
             knownTypes.put(remoteActorType.getLongSignature(), remoteActorType);
             namespace.put(remoteActorType.getName(), remoteActorType.getLongSignature());
 
@@ -657,12 +661,14 @@ public class SymbolTable {
             MessageSymbol getMobilePortMessage = new MessageSymbol(0, "getPort", mobileActorType, SymbolTable.getTypeSymbol("int"), new TypeSymbol[]{});
             MessageSymbol getMobileHostMessage = new MessageSymbol(1, "getHost", mobileActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
             MessageSymbol getMobileNameMessage = new MessageSymbol(2, "getName", mobileActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
-            MessageSymbol getLastKnownPortMessage = new MessageSymbol(3, "getLastKnownPort", mobileActorType, SymbolTable.getTypeSymbol("int"), new TypeSymbol[]{});
-            MessageSymbol getLastKnownHostMessage = new MessageSymbol(4, "getLastKnownHost", mobileActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
-            MessageSymbol migrateMessage = new MessageSymbol(5, "migrate", mobileActorType, SymbolTable.getTypeSymbol("ack"), new TypeSymbol[]{ SymbolTable.getTypeSymbol("String"), SymbolTable.getTypeSymbol("int") });
+            MessageSymbol getMobileHashCodeMessage = new MessageSymbol(3, "hashCode", mobileActorType, SymbolTable.getTypeSymbol("int"), new TypeSymbol[]{});
+            MessageSymbol getLastKnownPortMessage = new MessageSymbol(4, "getLastKnownPort", mobileActorType, SymbolTable.getTypeSymbol("int"), new TypeSymbol[]{});
+            MessageSymbol getLastKnownHostMessage = new MessageSymbol(5, "getLastKnownHost", mobileActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
+            MessageSymbol migrateMessage = new MessageSymbol(6, "migrate", mobileActorType, SymbolTable.getTypeSymbol("ack"), new TypeSymbol[]{ SymbolTable.getTypeSymbol("String"), SymbolTable.getTypeSymbol("int") });
             mobileActorType.message_handlers.add(getMobilePortMessage);
             mobileActorType.message_handlers.add(getMobileHostMessage);
             mobileActorType.message_handlers.add(getMobileNameMessage);
+            mobileActorType.message_handlers.add(getMobileHashCodeMessage);
             mobileActorType.message_handlers.add(getLastKnownPortMessage);
             mobileActorType.message_handlers.add(getLastKnownHostMessage);
             mobileActorType.message_handlers.add(migrateMessage);
