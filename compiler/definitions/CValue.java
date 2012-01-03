@@ -244,6 +244,8 @@ public class CValue extends CErrorInformation {
 
         boolean isParentMessageSend = false;
 
+        boolean currentValueIsToken = false;
+
 		if (literal != null) {
             if (literal.value.equals("self")) {
                 code += "this";
@@ -271,20 +273,39 @@ public class CValue extends CErrorInformation {
 
 		} else if (variable_name != null) {
             code += variable_name;
+            try {
+                currentValueIsToken = SymbolTable.isToken(variable_name.name);
+            } catch (SalsaNotFoundException snfe) {
+                CompilerErrors.printErrorMessage("Error determining if variable was a token.  Could not determine variable type.", variable_name);
+                throw new RuntimeException(snfe);
+            }
 
 		} else if (expression != null) {
 			code += "(" + expression.toJavaCode() + ")";
+            currentValueIsToken = expression.isToken();
 
 		} else if (allocation != null) {
 			code += allocation.toJavaCode();
+            currentValueIsToken = allocation.isToken();
 
 		}
 
+        /**
+         *  Need to check if casting a token to non-token, or non-token to token.
+         */
         if (cast_type != null) {
             if (isToken()) {
-                code = "(TokenDirector)" + code;
+                if (cast_type.is_token) {
+                    code = "(TokenDirector)" + code;
+                } else {
+                    CompilerErrors.printErrorMessage("Cannot cast a token to a non-token type.", cast_type);
+                }
             } else {
-                code = "(" + cast_type.name + ")" + code;
+                if (cast_type.is_token) {
+                    CompilerErrors.printErrorMessage("Cannot cast a non-token to a token type.", cast_type);
+                } else {
+                    code = "(" + cast_type.name + ")" + code;
+                }
             }
         }
 
@@ -299,7 +320,7 @@ public class CValue extends CErrorInformation {
 
                 if (aa.expression.isToken()) {
                     System.err.println("COMPILER PROBLEM: -- haven't implemented using a token for an array access.");
-                    CompilerErrors.printErrorMessage("Haven't implemented using a token for array access", aa);
+                    CompilerErrors.printErrorMessage("Haven't implemented using a token for array access.", aa);
                     currentType = null;
 
                 } else {
@@ -311,6 +332,8 @@ public class CValue extends CErrorInformation {
                     }
                     currentType = ((ArrayType)currentType).getSubtype();
                 }
+
+                if (aa.expression.isToken()) currentValueIsToken = true;
 
             } else if (modification instanceof CFieldAccess) {
                 CFieldAccess fa = (CFieldAccess)modification;
@@ -415,9 +438,14 @@ public class CValue extends CErrorInformation {
                     String expression_director_code = "";
                     pre_code += "Message(";
 
-                    if (currentType.isInterface) code = "(Actor)" + code;
-                    code = pre_code + code + ", ";
+                    String target_code = code;
+                    if (currentType.isInterface) target_code = "(Actor)" + target_code;
 
+                    if (currentValueIsToken) {
+                        code = pre_code + "null, ";
+                    } else {
+                        code = pre_code + target_code + ", ";
+                    }
 
                     if (!(currentType instanceof ActorType)) {
                         CompilerErrors.printErrorMessage("Cannot send a message to an object '" + currentType.getLongSignature() + "'.", ms);
@@ -503,6 +531,12 @@ public class CValue extends CErrorInformation {
                     if (SymbolTable.continuesToPass && !SymbolTable.withinArguments) {
                         code += ", this.stage.message.continuationDirector";
                     }
+
+                    if (currentValueIsToken) {
+//                        System.err.println("CURRENT VALUE IS TOKEN FOR CODE: " + code);
+                        code += ", " + target_code;
+                    }
+
                     code += ")";
 
                     if (joinDirector != null && !SymbolTable.messageContinues) {
@@ -519,6 +553,8 @@ public class CValue extends CErrorInformation {
                     CompilerErrors.printErrorMessage("[CValue.toJavaCode]: Error looking up type for message send. " + snfe.toString(), ms);
                     throw new RuntimeException(snfe);
                 }
+
+                currentValueIsToken = true;
             }
             isParentMessageSend = false;
         }

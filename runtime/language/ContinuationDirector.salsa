@@ -2,6 +2,8 @@ module salsa_lite.runtime.language;
 
 import object java.util.LinkedList;
 
+import object salsa_lite.runtime.Acknowledgement;
+
 behavior ContinuationDirector extends Director {
 
 	boolean unresolved = true;
@@ -9,6 +11,14 @@ behavior ContinuationDirector extends Director {
     ContinuationDirector currentContinuation = null; 
 
 	ContinuationDirector() {}
+
+    /**
+     *  This is used for statements like:  'token ack ta = ack;'
+     *  i.e., an already resolved continution.
+     */
+    ContinuationDirector(Acknowledgement acknowledgement) {
+        self.unresolved = false;
+    }
 
     //This should only ever get called once.
 	ack resolve() {

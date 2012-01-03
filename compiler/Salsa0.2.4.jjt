@@ -996,17 +996,18 @@ CValue Value() : {
     CAllocation allocation;
     CExpression expression;
     CMessageSend message_send;
-   CMethodInvocation method_invocation;
-   CFieldAccess field_access;
+    CMethodInvocation method_invocation;
+    CFieldAccess field_access;
     CType type;
-   CVariableName variableName;
+    CVariableName variableName;
     Token t, t2;
-   Token beginToken, endToken;
-   boolean hasBegin = false;
+    Token beginToken, endToken;
+    Token tokenToken = null;
+    boolean hasBegin = false;
 } {
     [
-        LOOKAHEAD( "(" type = Type() ")" )
-        beginToken = "(" type = Type() ")"                             { value.cast_type = type; value.initLineAndColumnBegin(beginToken); hasBegin = true;}
+        LOOKAHEAD( "(" [ "token" ] type = Type() ")" )
+        beginToken = "(" [ tokenToken = "token" ] type = Type() ")"                             { value.cast_type = type; value.initLineAndColumnBegin(beginToken); hasBegin = true; value.cast_type.is_token = (tokenToken != null); }
     ]
     (
           value.literal = Literal()                               { value.initLineAndColumnEnd( value.literal );                          if (!hasBegin) value.initLineAndColumnBegin( value.literal ); }

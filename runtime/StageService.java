@@ -8,6 +8,7 @@ import salsa_lite.runtime.language.Director;
 import salsa_lite.runtime.language.MessageDirector;
 import salsa_lite.runtime.language.ImplicitTokenDirector;
 import salsa_lite.runtime.language.TokenDirector;
+import salsa_lite.runtime.language.ValueDirector;
 
 public class StageService {
 	public final static int number_stages;
@@ -49,6 +50,72 @@ public class StageService {
 		message.target.stage.putMessageInMailbox(message);
 	}
 
+	/**
+	 *	Send messages which are not followed by a continuation and do not output a named token
+	 *	If token_positions are an argument, there are named (or implicit) tokens in the arguments
+	 *	If input_continuation is an argument, it is waiting for a continuation
+	 */
+	public final static void sendMessage(Actor target, int message_id, Object[] arguments) {
+		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
+		target.stage.putMessageInMailbox(input_message);
+	}
+
+	public final static void sendMessage(Actor target, int message_id, Object[] arguments, ContinuationDirector input_continuation) {
+		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 2 /*setMessage()*/, new Object[]{input_message}));
+	}
+
+	public final static void sendMessage(Actor target, int message_id, Object[] arguments, Director[] input_continuations) {
+		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
+		MessageDirector md = MessageDirector.construct(1, new Object[]{input_message, input_continuations}, target.stage);
+	}
+
+	public final static void sendMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation) {
+		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
+		MessageDirector md = MessageDirector.construct(2, new Object[]{input_message, arguments, token_positions, input_continuation}, target.stage);
+	}
+
+	public final static void sendMessage(Actor target, int message_id, Object[] arguments, int[] token_positions) {
+		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
+		MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target.stage);
+	}
+
+	public final static void sendMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, Director[] input_continuations) {
+		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
+		MessageDirector md = MessageDirector.construct(4, new Object[]{input_message, arguments, token_positions, input_continuations}, target.stage);
+	}
+
+	public final static void sendMessage(Actor target, int message_id, Object[] arguments, ValueDirector message_target) {
+		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
+		MessageDirector md = MessageDirector.construct(5, new Object[]{input_message, message_target}, target.stage);
+	}
+
+	public final static void sendMessage(Actor target, int message_id, Object[] arguments, ContinuationDirector input_continuation, ValueDirector message_target) {
+		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
+		MessageDirector md = MessageDirector.construct(6, new Object[]{input_message, input_continuation, message_target}, target.stage);
+	}
+
+	public final static void sendMessage(Actor target, int message_id, Object[] arguments, Director[] input_continuations, ValueDirector message_target) {
+		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
+		MessageDirector md = MessageDirector.construct(7, new Object[]{input_message, input_continuations, message_target}, target.stage);
+	}
+
+	public final static void sendMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation, ValueDirector message_target) {
+		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
+		MessageDirector md = MessageDirector.construct(8, new Object[]{input_message, arguments, token_positions, input_continuation, message_target}, target.stage);
+	}
+
+	public final static void sendMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, ValueDirector message_target) {
+		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
+		MessageDirector md = MessageDirector.construct(9, new Object[]{input_message, arguments, token_positions, message_target}, target.stage);
+	}
+
+	public final static void sendMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, Director[] input_continuations, ValueDirector message_target) {
+		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
+		MessageDirector md = MessageDirector.construct(10, new Object[]{input_message, arguments, token_positions, input_continuations, message_target}, target.stage);
+	}
+
+
     /**
      *  Create a message to forward a token to the current continuation.
      *
@@ -77,75 +144,76 @@ public class StageService {
 	 */
 	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, Director currentContinuation) {
         int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
-        Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
+        Message input_message = new Message(messageType, target, message_id, arguments, currentContinuation);
         target.stage.putMessageInMailbox(input_message);
 	}
 
 	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, ContinuationDirector input_continuation, Director currentContinuation) {
         int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
-        Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
+        Message input_message = new Message(messageType, target, message_id, arguments, currentContinuation);
 		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 2 /*setMessage()*/, new Object[]{input_message}));
 	}
 
 	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, Director[] input_continuations, Director currentContinuation) {
         int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
-        Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
+        Message input_message = new Message(messageType, target, message_id, arguments, currentContinuation);
 		MessageDirector md = MessageDirector.construct(1, new Object[]{input_message, input_continuations}, target.stage);
-	}
-
-	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, Director currentContinuation) {
-        int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
-        Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
-		MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target.stage);
 	}
 
 	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation, Director currentContinuation) {
         int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
-        Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
+        Message input_message = new Message(messageType, target, message_id, arguments, currentContinuation);
 		MessageDirector md = MessageDirector.construct(2, new Object[]{input_message, arguments, token_positions, input_continuation}, target.stage);
+	}
+
+	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, Director currentContinuation) {
+        int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
+        Message input_message = new Message(messageType, target, message_id, arguments, currentContinuation);
+		MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target.stage);
 	}
 
 	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, Director[] input_continuations, Director currentContinuation) {
         int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
-        Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, currentContinuation);
+        Message input_message = new Message(messageType, target, message_id, arguments, currentContinuation);
 		MessageDirector md = MessageDirector.construct(4, new Object[]{input_message, arguments, token_positions, input_continuations}, target.stage);
 	}
 
-
-	/**
-	 *	Send messages which are not followed by a continuation and do not output a named token
-	 *	If token_positions are an argument, there are named (or implicit) tokens in the arguments
-	 *	If input_continuation is an argument, it is waiting for a continuation
-	 */
-	public final static void sendMessage(Actor target, int message_id, Object[] arguments) {
-		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
-		target.stage.putMessageInMailbox(input_message);
+	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, Director currentContinuation, ValueDirector message_target) {
+        int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
+        Message input_message = new Message(messageType, target, message_id, arguments, currentContinuation);
+		MessageDirector md = MessageDirector.construct(5, new Object[]{input_message, message_target}, target.stage);
 	}
 
-	public final static void sendMessage(Actor target, int message_id, Object[] arguments, ContinuationDirector input_continuation) {
-		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
-		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 2 /*setMessage()*/, new Object[]{input_message}));
+	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, ContinuationDirector input_continuation, Director currentContinuation, ValueDirector message_target) {
+        int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
+        Message input_message = new Message(messageType, target, message_id, arguments, currentContinuation);
+		MessageDirector md = MessageDirector.construct(6, new Object[]{input_message, input_continuation, message_target}, target.stage);
 	}
 
-	public final static void sendMessage(Actor target, int message_id, Object[] arguments, int[] token_positions) {
-		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
-		MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target.stage);
+	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, Director[] input_continuations, Director currentContinuation, ValueDirector message_target) {
+        int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
+        Message input_message = new Message(messageType, target, message_id, arguments, currentContinuation);
+		MessageDirector md = MessageDirector.construct(7, new Object[]{input_message, input_continuations, message_target}, target.stage);
 	}
 
-	public final static void sendMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation) {
-		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
-		MessageDirector md = MessageDirector.construct(2, new Object[]{input_message, arguments, token_positions, input_continuation}, target.stage);
+	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation, Director currentContinuation, ValueDirector message_target) {
+        int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
+        Message input_message = new Message(messageType, target, message_id, arguments, currentContinuation);
+		MessageDirector md = MessageDirector.construct(8, new Object[]{input_message, arguments, token_positions, input_continuation, message_target}, target.stage);
 	}
 
-	public final static void sendMessage(Actor target, int message_id, Object[] arguments, Director[] input_continuations) {
-		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
-		MessageDirector md = MessageDirector.construct(1, new Object[]{input_message, input_continuations}, target.stage);
+	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, Director currentContinuation, ValueDirector message_target) {
+        int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
+        Message input_message = new Message(messageType, target, message_id, arguments, currentContinuation);
+		MessageDirector md = MessageDirector.construct(9, new Object[]{input_message, arguments, token_positions, message_target}, target.stage);
 	}
 
-	public final static void sendMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, Director[] input_continuations) {
-		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
-		MessageDirector md = MessageDirector.construct(4, new Object[]{input_message, arguments, token_positions, input_continuations}, target.stage);
+	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, Director[] input_continuations, Director currentContinuation, ValueDirector message_target) {
+        int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
+        Message input_message = new Message(messageType, target, message_id, arguments, currentContinuation);
+		MessageDirector md = MessageDirector.construct(10, new Object[]{input_message, arguments, token_positions, input_continuations, message_target}, target.stage);
 	}
+
 
 
 	/**
@@ -206,9 +274,64 @@ public class StageService {
 		return output_continuation;
 	}
 
+	public final static ContinuationDirector sendContinuationMessage(Actor target, int message_id, Object[] arguments, ValueDirector message_target) {
+		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, message_target.stage);
+
+		Message input_message = new Message(Message.CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(5, new Object[]{input_message, message_target}, message_target.stage);
+
+		return output_continuation;
+	}
+
+	public final static ContinuationDirector sendContinuationMessage(Actor target, int message_id, Object[] arguments, ContinuationDirector input_continuation, ValueDirector message_target) {
+		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, message_target.stage);
+
+		Message input_message = new Message(Message.CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(6, new Object[]{input_message, input_continuation, message_target}, message_target.stage);
+
+		return output_continuation;
+	}
+
+	public final static ContinuationDirector sendContinuationMessage(Actor target, int message_id, Object[] arguments, Director[] input_continuations, ValueDirector message_target) {
+		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, message_target.stage);
+
+		Message input_message = new Message(Message.CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(7, new Object[]{input_message, input_continuations, message_target}, message_target.stage);
+
+		return output_continuation;
+	}
+
+	public final static ContinuationDirector sendContinuationMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation, ValueDirector message_target) {
+		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, message_target.stage);
+
+		Message input_message = new Message(Message.CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(8, new Object[]{input_message, arguments, token_positions, input_continuation, message_target}, message_target.stage);
+
+		return output_continuation;
+	}
+
+	public final static ContinuationDirector sendContinuationMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, ValueDirector message_target) {
+		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, message_target.stage);
+
+		Message input_message = new Message(Message.CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(9, new Object[]{input_message, arguments, token_positions, message_target}, message_target.stage);
+
+		return output_continuation;
+	}
+
+	public final static ContinuationDirector sendContinuationMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, Director[] input_continuations, ValueDirector message_target) {
+		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, message_target.stage);
+
+		Message input_message = new Message(Message.CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(10, new Object[]{input_message, arguments, token_positions, input_continuations, message_target}, message_target.stage);
+
+		return output_continuation;
+	}
+
+
 
 	/**
-	 *	Send messages which output a named (or implicit) token
+	 *	Send messages which output a named token
 	 *	If token_positions are an argument, there are named (or implicit) tokens in the arguments
 	 *	If input_continuation is an argument, it is waiting for a continuation
 	 */
@@ -239,21 +362,20 @@ public class StageService {
 		return output_continuation;
 	}
 
+	public final static TokenDirector sendTokenMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation) {
+		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target.stage);
+
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(2, new Object[]{input_message, arguments, token_positions, input_continuation}, target.stage);
+
+		return output_continuation;
+	}
 
 	public final static TokenDirector sendTokenMessage(Actor target, int message_id, Object[] arguments, int[] token_positions) {
 		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target.stage);
 
 		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
 		MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target.stage);
-
-		return output_continuation;
-	}
-
-	public final static TokenDirector sendTokenMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation) {
-		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target.stage);
-
-		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
-		MessageDirector md = MessageDirector.construct(2, new Object[]{input_message, arguments, token_positions, input_continuation}, target.stage);
 
 		return output_continuation;
 	}
@@ -267,7 +389,68 @@ public class StageService {
 		return output_continuation;
 	}
 
+	public final static TokenDirector sendTokenMessage(Actor target, int message_id, Object[] arguments, ValueDirector message_target) {
+		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, message_target.stage);
 
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(5, new Object[]{input_message, message_target}, message_target.stage);
+
+		return output_continuation;
+	}
+
+	public final static TokenDirector sendTokenMessage(Actor target, int message_id, Object[] arguments, ContinuationDirector input_continuation, ValueDirector message_target) {
+		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, message_target.stage);
+
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(6, new Object[]{input_message, input_continuation, message_target}, message_target.stage);
+
+		return output_continuation;
+	}
+
+	public final static TokenDirector sendTokenMessage(Actor target, int message_id, Object[] arguments, Director[] input_continuations, ValueDirector message_target) {
+		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, message_target.stage);
+
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(7, new Object[]{input_message, input_continuations, message_target}, message_target.stage);
+
+		return output_continuation;
+	}
+
+	public final static TokenDirector sendTokenMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, ContinuationDirector input_continuation, ValueDirector message_target) {
+		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, message_target.stage);
+
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(8, new Object[]{input_message, arguments, token_positions, input_continuation, message_target}, message_target.stage);
+
+		return output_continuation;
+	}
+
+
+	public final static TokenDirector sendTokenMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, ValueDirector message_target) {
+		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, message_target.stage);
+
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(9, new Object[]{input_message, arguments, token_positions, message_target}, message_target.stage);
+
+		return output_continuation;
+	}
+
+	public final static TokenDirector sendTokenMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, Director[] input_continuations, ValueDirector message_target) {
+		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, message_target.stage);
+
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(10, new Object[]{input_message, arguments, token_positions, input_continuations, message_target}, message_target.stage);
+
+		return output_continuation;
+	}
+
+
+
+	/**
+	 *	Send messages which output an implicit (unnamed) token
+	 *	If token_positions are an argument, there are named (or implicit) tokens in the arguments
+	 *	If input_continuation is an argument, it is waiting for a continuation
+	 */
 	public final static ImplicitTokenDirector sendImplicitTokenMessage(Actor target, int message_id, Object[] arguments) {
 		ImplicitTokenDirector output_continuation = ImplicitTokenDirector.construct(0 /*construct()*/, null, target.stage);
 
@@ -295,7 +478,6 @@ public class StageService {
 		return output_continuation;
 	}
 
-
 	public final static ImplicitTokenDirector sendImplicitTokenMessage(Actor target, int message_id, Object[] arguments, int[] token_positions) {
 		ImplicitTokenDirector output_continuation = ImplicitTokenDirector.construct(0 /*construct()*/, null, target.stage);
 
@@ -304,5 +486,59 @@ public class StageService {
 
 		return output_continuation;
 	}
-	
+
+	public final static ImplicitTokenDirector sendImplicitTokenMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, Director[] input_continuations) {
+		ImplicitTokenDirector output_continuation = ImplicitTokenDirector.construct(0 /*construct()*/, null, target.stage);
+
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(4, new Object[]{input_message, arguments, token_positions, input_continuations}, target.stage);
+
+		return output_continuation;
+	}
+
+	public final static ImplicitTokenDirector sendImplicitTokenMessage(Actor target, int message_id, Object[] arguments, ValueDirector message_target) {
+		ImplicitTokenDirector output_continuation = ImplicitTokenDirector.construct(0 /*construct()*/, null, message_target.stage);
+
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(5, new Object[]{input_message, message_target}, message_target.stage);
+
+		return output_continuation;
+	}
+
+	public final static ImplicitTokenDirector sendImplicitTokenMessage(Actor target, int message_id, Object[] arguments, ContinuationDirector input_continuation, ValueDirector message_target) {
+		ImplicitTokenDirector output_continuation = ImplicitTokenDirector.construct(0 /*construct()*/, null, message_target.stage);
+
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(6, new Object[]{input_message, input_continuation, message_target}, message_target.stage);
+
+		return output_continuation;
+	}
+
+	public final static ImplicitTokenDirector sendImplicitTokenMessage(Actor target, int message_id, Object[] arguments, Director[] input_continuations, ValueDirector message_target) {
+		ImplicitTokenDirector output_continuation = ImplicitTokenDirector.construct(0 /*construct()*/, null, message_target.stage);
+
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(7, new Object[]{input_message, input_continuations, message_target}, message_target.stage);
+
+		return output_continuation;
+	}
+
+	public final static ImplicitTokenDirector sendImplicitTokenMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, ValueDirector message_target) {
+		ImplicitTokenDirector output_continuation = ImplicitTokenDirector.construct(0 /*construct()*/, null, message_target.stage);
+
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(9, new Object[]{input_message, arguments, token_positions, message_target}, message_target.stage);
+
+		return output_continuation;
+	}
+
+	public final static ImplicitTokenDirector sendImplicitTokenMessage(Actor target, int message_id, Object[] arguments, int[] token_positions, Director[] input_continuations, ValueDirector message_target) {
+		ImplicitTokenDirector output_continuation = ImplicitTokenDirector.construct(0 /*construct()*/, null, message_target.stage);
+
+		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
+		MessageDirector md = MessageDirector.construct(10, new Object[]{input_message, arguments, token_positions, input_continuations, message_target}, message_target.stage);
+
+		return output_continuation;
+	}
+
 }

@@ -26,13 +26,13 @@ behavior NameServerTest extends MobileActor {
         ns1<-put(self);
         ns2<-put(self); // should spit out an error at runtime because the actor has already been added at that NameServer
 
-        token NameServerTest alsoSelf = (NameServerTest)(ns1<-get(System.getProperty("called")));
+        token NameServerTest alsoSelf = (token NameServerTest)(ns1<-get(System.getProperty("called")));
 
         token NameServerTest alsoSelf2 = reference NameServerTest called (System.getProperty("called")) using (ns1);
         token NameServerTest alsoSelf3 = reference NameServerTest called (System.getProperty("called")) using (ns2);
 
-//        token NameServerTest alsoSelf2 = (NameServerTest) ns1<-get( System.getProperty("called") );
-//        token NameServerTest alsoSelf3 = (NameServerTest) ns2<-get( System.getProperty("called") );
+//        token NameServerTest alsoSelf2 = (token NameServerTest) ns1<-get( System.getProperty("called") );
+//        token NameServerTest alsoSelf3 = (token NameServerTest) ns2<-get( System.getProperty("called") );
 
         System.err.println("Should print out:");
         System.err.println(5);

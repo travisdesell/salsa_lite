@@ -104,7 +104,7 @@ public class SynchronousMailboxStage extends Thread {
 
 				errorMessage.append("\tThrew exception: " + exception + "\n");
                 for (StackTraceElement ste : exception.getStackTrace()) {
-                    errorMessage.append("\t" + ste.toString() + "\n");
+                    errorMessage.append("\t\t" + ste.toString() + "\n");
                 }
                 System.err.println(errorMessage.toString());
 				return;

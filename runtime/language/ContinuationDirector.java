@@ -25,6 +25,7 @@ import salsa_lite.runtime.language.exceptions.ConstructorNotFoundException;
 /****** END SALSA LANGUAGE IMPORTS ******/
 
 import java.util.LinkedList;
+import salsa_lite.runtime.Acknowledgement;
 
 public class ContinuationDirector extends Director implements java.io.Serializable {
 
@@ -114,11 +115,16 @@ public class ContinuationDirector extends Director implements java.io.Serializab
     public void invokeConstructor(int messageId, Object[] arguments) throws RemoteMessageException, ConstructorNotFoundException {
         switch(messageId) {
             case 0: construct(); return;
+            case 1: construct( (Acknowledgement)arguments[0] ); return;
             default: throw new ConstructorNotFoundException(messageId, arguments);
         }
     }
 
     public void construct() {
+    }
+
+    public void construct(Acknowledgement acknowledgement) {
+        this.unresolved = false;
     }
 
 

@@ -47,9 +47,12 @@ public class CVariableInit extends CErrorInformation {
                 }
                 if (expression.isToken()) {
                     code += " = " + expression.toJavaCode();
+                } else if (is_continuation_director) {
+                    code += " = ContinuationDirector.construct(1, new Object[]{" + expression.toJavaCode() + "})";
                 } else {
                     code += " = TokenDirector.construct(1, new Object[]{" + expression.toJavaCode() + "})";
                 }
+
                 if (is_continuation_director) {
                     SymbolTable.continuationTokenMessage = previous_continues;
                 } else if (is_token_director) {
