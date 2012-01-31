@@ -465,7 +465,7 @@ public class CCompilationUnit {
 
                 code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getReferenceLock(hashCode)) {\n";
                 code += CIndent.getIndent() + "            " + tmp_name + " actor = (" + tmp_name +")MobileActorRegistry.getReferenceEntry(hashCode);\n";
-                code += CIndent.getIndent() + "            System.err.println(\"DESERIALIZING A REFERENCE TO A MOBILE ACTOR: \" + hashCode + \" -- \" + lastKnownHost + \":\" + lastKnownPort + \"/\" + name + \" -- got: \" + actor + \" -- type: " + tmp_name + "\");\n";
+//                code += CIndent.getIndent() + "            System.err.println(\"DESERIALIZING A REFERENCE TO A MOBILE ACTOR: \" + hashCode + \" -- \" + lastKnownHost + \":\" + lastKnownPort + \"/\" + name + \" -- got: \" + actor + \" -- type: " + tmp_name + "\");\n";
                 code += CIndent.getIndent() + "            if (actor == null) {\n";
                 code += CIndent.getIndent() + "                " + tmp_name + " remoteReference = new " + tmp_name + "(name, nameserver, lastKnownHost, lastKnownPort);\n";
                 code += CIndent.getIndent() + "                MobileActorRegistry.addReferenceEntry(hashCode, remoteReference);\n";
@@ -538,7 +538,7 @@ public class CCompilationUnit {
                 code += CIndent.getIndent() + "        int hashCode = Hashing.getHashCodeFor(name, host, port);\n";
                 code += CIndent.getIndent() + "        synchronized (RemoteActorRegistry.getLock(hashCode)) {\n";
                 code += CIndent.getIndent() + "            " + tmp_name + " actor = (" + tmp_name +")RemoteActorRegistry.getEntry(hashCode);\n";
-                code += CIndent.getIndent() + "            System.err.println(\"DESERIALIZING A REFERENCE TO A REMOTE ACTOR: \" + hashCode + \" -- \" + host + \":\" + port + \"/\" + name + \" -- got: \" + actor + \" -- type: " + tmp_name + "\");\n";
+//                code += CIndent.getIndent() + "            System.err.println(\"DESERIALIZING A REFERENCE TO A REMOTE ACTOR: \" + hashCode + \" -- \" + host + \":\" + port + \"/\" + name + \" -- got: \" + actor + \" -- type: " + tmp_name + "\");\n";
                 code += CIndent.getIndent() + "            if (actor == null) {\n";
                 code += CIndent.getIndent() + "                RemoteReference remoteReference = new RemoteReference(name, host, port);\n";
                 code += CIndent.getIndent() + "                RemoteActorRegistry.addEntry(hashCode, remoteReference);\n";
@@ -601,7 +601,7 @@ public class CCompilationUnit {
                 code += CIndent.getIndent() + "        int hashCode = Hashing.getHashCodeFor(this.hashCode, this.host, this.port);\n";
                 code += CIndent.getIndent() + "        synchronized (LocalActorRegistry.getLock(hashCode)) {\n";
                 code += CIndent.getIndent() + "            " + tmp_name + " actor = (" + tmp_name +")LocalActorRegistry.getEntry(hashCode);\n";
-                code += CIndent.getIndent() + "            System.err.println(\"DESERIALIZING A REFERENCE TO A LOCAL ACTOR: \" + hashCode + \" -- \" + host + \":\" + port + \" -- got: \" + actor + \" -- type: " + tmp_name + "\");\n";
+//                code += CIndent.getIndent() + "            System.err.println(\"DESERIALIZING A REFERENCE TO A LOCAL ACTOR: \" + hashCode + \" -- \" + host + \":\" + port + \" -- got: \" + actor + \" -- type: " + tmp_name + "\");\n";
                 code += CIndent.getIndent() + "            if (actor == null) {\n";
                 code += CIndent.getIndent() + "                RemoteReference remoteReference = new RemoteReference(this.hashCode, this.host, this.port);\n";
                 code += CIndent.getIndent() + "                LocalActorRegistry.addEntry(hashCode, remoteReference);\n";

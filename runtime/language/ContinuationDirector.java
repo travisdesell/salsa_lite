@@ -71,7 +71,6 @@ public class ContinuationDirector extends Director implements java.io.Serializab
             int hashCode = Hashing.getHashCodeFor(this.hashCode, this.host, this.port);
             synchronized (LocalActorRegistry.getLock(hashCode)) {
                 ContinuationDirector actor = (ContinuationDirector)LocalActorRegistry.getEntry(hashCode);
-                System.err.println("DESERIALIZING A REFERENCE TO A LOCAL ACTOR: " + hashCode + " -- " + host + ":" + port + " -- got: " + actor + " -- type: ContinuationDirector");
                 if (actor == null) {
                     RemoteReference remoteReference = new RemoteReference(this.hashCode, this.host, this.port);
                     LocalActorRegistry.addEntry(hashCode, remoteReference);

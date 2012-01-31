@@ -65,18 +65,18 @@ behavior IncomingTheaterConnection implements StagedActor {
         if (o instanceof Actor) {
             Actor actor = (Actor)o;
 
-            System.err.println("RECEIVED AN ACTOR WITH HASHCODE: " + actor.hashCode());
+//            System.err.println("RECEIVED AN ACTOR WITH HASHCODE: " + actor.hashCode());
 
             synchronized (MobileActorRegistry.getStateLock(actor.hashCode())) {
                 MobileActorRegistry.updateStateEntry(actor.hashCode(), actor);
             }
 
-            System.err.println("IncomingTheaterConnection received an actor: " + o);
+//            System.err.println("IncomingTheaterConnection received an actor: " + o);
 
         } else if (o instanceof Message) {
             //check to see if the target actor is here
 
-            System.err.println("IncomingTheaterConnection received a message: " + o);
+//            System.err.println("IncomingTheaterConnection received a message: " + o);
 
             StageService.sendMessage((Message)o);
 

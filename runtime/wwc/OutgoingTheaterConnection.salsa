@@ -60,7 +60,7 @@ behavior OutgoingTheaterConnection {
             System.err.println(sb.toString());
         }
 
-        System.err.println("sent message with outgoing theater connection: " + message);
+//        System.err.println("sent message with outgoing theater connection: " + message);
     }
 
     ack migrate(Actor actor) {
@@ -80,6 +80,6 @@ behavior OutgoingTheaterConnection {
             System.err.println(sb.toString());
         }
 
-        System.err.println("sent actor with outgoing theater connection: " + actor);
+//        System.err.println("sent actor with outgoing theater connection: " + actor);
     }
 }

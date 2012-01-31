@@ -55,8 +55,17 @@ behavior MobileDeepCopyTest extends MobileActor {
 
         self<-migrate( ns.getHost(), ns.getPort() ) @
         self<-go() @
-        self<-migrate ( self.getHost(), self.getPort() )@   //arguments are resolved when the message 
+        self<-migrate ( self.getHost(), self.getPort() ) @  //arguments are resolved when the message 
                                                             //is sent so this will migrate the actor back to where it started.
+
+        dct1<-migrate( ns.getHost(), ns.getPort() ) @
+        dct3<-migrate( ns.getHost(), ns.getPort() ) @
+        dct5<-migrate( ns.getHost(), ns.getPort() ) @
+        self<-go() @
+
+        self<-migrate( ns.getHost(), ns.getPort() ) @
+        dct3<-migrate( self.getHost(), self.getPort() ) @
+        dct1<-migrate( ns.getHost(), ns.getPort() ) @
         self<-go();
     }
 

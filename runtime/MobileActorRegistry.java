@@ -54,12 +54,12 @@ public class MobileActorRegistry {
             System.err.println("mobile actor regsitry state error, overwriting registry entry: " + hashCode);
         }
         serializedStates[hashCode % Hashing.numberRegistries].put(hashCode, actor);
-        System.err.println("added mobile state entry[" + hashCode + "]: " + serializedStates[hashCode % Hashing.numberRegistries].get(hashCode));
+//        System.err.println("added mobile state entry[" + hashCode + "]: " + serializedStates[hashCode % Hashing.numberRegistries].get(hashCode));
     }
 
     public final static void updateStateEntry(int hashCode, Actor actor) {
         serializedStates[hashCode % Hashing.numberRegistries].put(hashCode, actor);
-        System.err.println("updated mobile state entry[" + hashCode + "]: " + serializedStates[hashCode % Hashing.numberRegistries].get(hashCode));
+//        System.err.println("updated mobile state entry[" + hashCode + "]: " + serializedStates[hashCode % Hashing.numberRegistries].get(hashCode));
     }
 
 
