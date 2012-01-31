@@ -8,7 +8,7 @@ behavior Fibonacci {
 	Fibonacci(String[] arguments) {
 		n = Integer.parseInt(arguments[0]);
 
-		self<-finish(self<-compute());
+		self<-finish( self<-compute() );
 	}
 
 	int compute() {

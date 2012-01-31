@@ -1,17 +1,10 @@
-module salsa.tests.migration;
-
-import salsa.io.StandardOutput;
-
-import object salsa.wwc.NamingService;
-
-
-behavior MigrationWorker {
+behavior MigrationWorker extends MobileActor {
 
 	MigrationWorker() {
-		StandardOutput<-println("created migration worker: " + NamingService<-getUAN(self) + " - " + NamingService<-getUAL(self));
+		System.out.println("created migration worker: " + self.getHost() + ":" + self.getPort() + "/" + self.getName());
 	}
 
 	ack completedMigration() {
-		StandardOutput<-println(NamingService<-getUAN(self) + " completed migration!");
+		System.out.println(self.getName() + " completed migration!");
 	}
 }

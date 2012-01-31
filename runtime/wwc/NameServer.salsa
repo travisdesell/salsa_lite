@@ -6,6 +6,10 @@ behavior NameServer extends RemoteActor {
 
     HashMap<String,MobileActor> entries = new HashMap<String,MobileActor>();
 
+    NameServer() {
+        System.err.println("NameServer running at host[" + TransportService.getHost() + "], port[" + TransportService.getPort() + "], name[" + System.getProperty("called") + "], hashCode: " + self.hashCode());
+    }
+
     NameServer(String[] arguments) {
         if (System.getProperty("called") == null) {
             System.err.println("Error starting NameServer: must specify a name with the '-Dcalled=<name>' system property.");

@@ -28,38 +28,39 @@ public interface SalsaParserTreeConstants
   public int JJTFORSTATEMENT = 22;
   public int JJTWHILESTATEMENT = 23;
   public int JJTIFSTATEMENT = 24;
-  public int JJTTRYSTATEMENT = 25;
-  public int JJTSWITCHSTATEMENT = 26;
-  public int JJTCASESTATEMENT = 27;
-  public int JJTDEFAULTSTATEMENT = 28;
-  public int JJTLABELSTATEMENT = 29;
-  public int JJTBREAKSTATEMENT = 30;
-  public int JJTLOCALVARIABLEDECLARATION = 31;
-  public int JJTVARIABLEINITIALIZATION = 32;
-  public int JJTARRAYINITIALIZATION = 33;
-  public int JJTEXPRESSION = 34;
-  public int JJTVALUE = 35;
-  public int JJTVARIABLENAME = 36;
-  public int JJTFIELDACCESS = 37;
-  public int JJTMETHODINVOCATION = 38;
-  public int JJTMESSAGESEND = 39;
-  public int JJTMESSAGEPROPERTY = 40;
-  public int JJTARGUMENTS = 41;
-  public int JJTALLOCATION = 42;
-  public int JJTBINDDECLARATION = 43;
-  public int JJTARRAYDIMSANDINITS = 44;
-  public int JJTLITERAL = 45;
-  public int JJTSELFLITERAL = 46;
-  public int JJTPARENTLITERAL = 47;
-  public int JJTINTEGERLITERAL = 48;
-  public int JJTFLOATINGPOINTLITERAL = 49;
-  public int JJTCHARACTERLITERAL = 50;
-  public int JJTSTRINGLITERAL = 51;
-  public int JJTBOOLEANLITERAL = 52;
-  public int JJTNULLLITERAL = 53;
-  public int JJTACKNOWLEDGEMENTLITERAL = 54;
-  public int JJTASSIGNMENTOPERATOR = 55;
-  public int JJTOPERATOR = 56;
+  public int JJTSYNCHRONIZEDSTATEMENT = 25;
+  public int JJTTRYSTATEMENT = 26;
+  public int JJTSWITCHSTATEMENT = 27;
+  public int JJTCASESTATEMENT = 28;
+  public int JJTDEFAULTSTATEMENT = 29;
+  public int JJTLABELSTATEMENT = 30;
+  public int JJTBREAKSTATEMENT = 31;
+  public int JJTLOCALVARIABLEDECLARATION = 32;
+  public int JJTVARIABLEINITIALIZATION = 33;
+  public int JJTARRAYINITIALIZATION = 34;
+  public int JJTEXPRESSION = 35;
+  public int JJTVALUE = 36;
+  public int JJTVARIABLENAME = 37;
+  public int JJTFIELDACCESS = 38;
+  public int JJTMETHODINVOCATION = 39;
+  public int JJTMESSAGESEND = 40;
+  public int JJTMESSAGEPROPERTY = 41;
+  public int JJTARGUMENTS = 42;
+  public int JJTALLOCATION = 43;
+  public int JJTBINDDECLARATION = 44;
+  public int JJTARRAYDIMSANDINITS = 45;
+  public int JJTLITERAL = 46;
+  public int JJTSELFLITERAL = 47;
+  public int JJTPARENTLITERAL = 48;
+  public int JJTINTEGERLITERAL = 49;
+  public int JJTFLOATINGPOINTLITERAL = 50;
+  public int JJTCHARACTERLITERAL = 51;
+  public int JJTSTRINGLITERAL = 52;
+  public int JJTBOOLEANLITERAL = 53;
+  public int JJTNULLLITERAL = 54;
+  public int JJTACKNOWLEDGEMENTLITERAL = 55;
+  public int JJTASSIGNMENTOPERATOR = 56;
+  public int JJTOPERATOR = 57;
 
 
   public String[] jjtNodeName = {
@@ -88,6 +89,7 @@ public interface SalsaParserTreeConstants
     "ForStatement",
     "WhileStatement",
     "IfStatement",
+    "SynchronizedStatement",
     "TryStatement",
     "SwitchStatement",
     "CaseStatement",
@@ -122,4 +124,4 @@ public interface SalsaParserTreeConstants
     "Operator",
   };
 }
-/* JavaCC - OriginalChecksum=5473c0e325bd9ae76e820ecf834d4a1e (do not edit this line) */
+/* JavaCC - OriginalChecksum=b14742418d2d2fed6ff237a7fe46e9e8 (do not edit this line) */

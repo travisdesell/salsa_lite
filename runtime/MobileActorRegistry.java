@@ -4,15 +4,15 @@ import java.util.HashMap;
 
 public class MobileActorRegistry {
     private static final HashMap<Integer,MobileActor>[] serializedReferences;
-    private static final HashMap<Integer,MobileActor.State>[] serializedStates;
+    private static final HashMap<Integer,Actor>[] serializedStates;
 
     static {
         serializedReferences = (HashMap<Integer,MobileActor>[])new HashMap[Hashing.numberRegistries];
-        serializedStates = (HashMap<Integer,MobileActor.State>[])new HashMap[Hashing.numberRegistries];
+        serializedStates = (HashMap<Integer,Actor>[])new HashMap[Hashing.numberRegistries];
 
         for (int i = 0; i < Hashing.numberRegistries; i++) {
             serializedReferences[i] = new HashMap<Integer,MobileActor>();
-            serializedStates[i] = new HashMap<Integer,MobileActor.State>();
+            serializedStates[i] = new HashMap<Integer,Actor>();
         }
     }
 
@@ -40,20 +40,27 @@ public class MobileActorRegistry {
         return serializedStates[hashCode % Hashing.numberRegistries];
     }
 
-    public final static MobileActor.State getStateEntry(int hashCode) {
+    public final static Actor getStateEntry(int hashCode) {
         return serializedStates[hashCode % Hashing.numberRegistries].get(hashCode);
     }
 
-    public final static MobileActor.State removeStateEntry(int hashCode) {
+    public final static Actor removeStateEntry(int hashCode) {
         System.err.println("removing mobile state entry[" + hashCode + "]: " + serializedStates[hashCode % Hashing.numberRegistries].get(hashCode));
         return serializedStates[hashCode % Hashing.numberRegistries].remove(hashCode);
     }
 
-    public final static void addStateEntry(int hashCode, MobileActor.State actor) {
+    public final static void addStateEntry(int hashCode, Actor actor) {
         if (serializedStates[hashCode % Hashing.numberRegistries].get(hashCode) != null) {
             System.err.println("mobile actor regsitry state error, overwriting registry entry: " + hashCode);
         }
         serializedStates[hashCode % Hashing.numberRegistries].put(hashCode, actor);
+        System.err.println("added mobile state entry[" + hashCode + "]: " + serializedStates[hashCode % Hashing.numberRegistries].get(hashCode));
     }
+
+    public final static void updateStateEntry(int hashCode, Actor actor) {
+        serializedStates[hashCode % Hashing.numberRegistries].put(hashCode, actor);
+        System.err.println("updated mobile state entry[" + hashCode + "]: " + serializedStates[hashCode % Hashing.numberRegistries].get(hashCode));
+    }
+
 
 }

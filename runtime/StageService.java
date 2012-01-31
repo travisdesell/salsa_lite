@@ -47,6 +47,9 @@ public class StageService {
 	 *	Send a previously generated message.
 	 */
 	public final static void sendMessage(Message message) {
+        if (message == null) System.err.println("MESSAGE == NULL!");
+        if (message.target == null) System.err.println("MESSAGE.target == NULL!");
+        if (message.target.stage == null) System.err.println("MESSAGE.target.stage == NULL!");
 		message.target.stage.putMessageInMailbox(message);
 	}
 

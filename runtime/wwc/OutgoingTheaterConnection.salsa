@@ -21,6 +21,7 @@ behavior OutgoingTheaterConnection {
         try {
             socket = new Socket(host, port);
             out = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+//            out = new ObjectOutputStream(socket.getOutputStream());
 
         } catch (IOException ioe) {
             StringBuffer sb = new StringBuffer();
@@ -47,7 +48,7 @@ behavior OutgoingTheaterConnection {
         try {
             out.writeObject(message);
             out.flush();
-//            out.reset();
+            out.reset();
         } catch (IOException ioe) {
             StringBuffer sb = new StringBuffer();
             sb.append("Error in OutgoingTheaterConnection, IOException: " + ioe + "\n");
@@ -59,14 +60,14 @@ behavior OutgoingTheaterConnection {
             System.err.println(sb.toString());
         }
 
-//        System.err.println("sent message with outgoing theater connection: " + message);
+        System.err.println("sent message with outgoing theater connection: " + message);
     }
 
     ack migrate(Actor actor) {
         try {
             out.writeObject(actor);
             out.flush();
-//            out.reset();
+            out.reset();
         } catch (IOException ioe) {
             StringBuffer sb = new StringBuffer();
             sb.append("Error in OutgoingTheaterConnection, IOException: " + ioe + "\n");

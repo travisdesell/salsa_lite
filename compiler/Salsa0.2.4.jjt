@@ -153,6 +153,7 @@ TOKEN : {
     | < SELF: "self" >
     | < SHORT: "short" >
     | < SUPER: "super" >
+    | < SYNCHRONIZED: "synchronized" >
     | < SWITCH: "switch" >
     | < _TOKEN: "token" >
     | < TRUE: "true" >
@@ -686,6 +687,7 @@ CStatement Statement() : {
         | statement = IfStatement()
         | statement = SwitchStatement()
         | statement = TryStatement()
+        | statement = SynchronizedStatement()
         | statement = Block()
         | statement = ForStatement()
         | statement = WhileStatement()
@@ -813,6 +815,18 @@ CIfStatement IfStatement() : {
     "if" "(" if_statement.expression = Expression() ")" if_statement.statement = Statement() [ LOOKAHEAD("else") "else" if_statement.else_statement = Statement() ]
 
     { return if_statement; }
+}
+
+CSynchronizedStatement SynchronizedStatement() : {
+    CSynchronizedStatement synchronized_statement = new CSynchronizedStatement();
+    Token t1;
+} {
+    t1 = "synchronized" "(" synchronized_statement.expression = Expression() ")" synchronized_statement.block = Block()
+
+    { 
+        synchronized_statement.initLineAndColumn(t1, synchronized_statement.block);
+        return synchronized_statement;
+    }
 }
 
 CTryStatement TryStatement() : {

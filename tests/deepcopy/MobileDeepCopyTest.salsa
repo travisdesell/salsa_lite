@@ -6,8 +6,9 @@ import object java.util.ArrayList;
 
 behavior MobileDeepCopyTest extends MobileActor {
 
+    NameServer ns;
     int value;
-    ArrayList<MobileDeepCopyTest> list;
+    ArrayList<MobileDeepCopyTest> list = new ArrayList<MobileDeepCopyTest>();
 
     int getValue() {
         pass value;
@@ -38,7 +39,7 @@ behavior MobileDeepCopyTest extends MobileActor {
     }
 
     MobileDeepCopyTest(String[] arguments) {
-        NameServer ns = self.getNameServer();
+        ns = self.getNameServer();
 
         MobileDeepCopyTest dct1 = new MobileDeepCopyTest(1) called ("mdct1") using (ns);
         MobileDeepCopyTest dct2 = new MobileDeepCopyTest(2) called ("mdct2") using (ns);
@@ -46,52 +47,58 @@ behavior MobileDeepCopyTest extends MobileActor {
         MobileDeepCopyTest dct4 = new MobileDeepCopyTest(4) called ("mdct4") using (ns);
         MobileDeepCopyTest dct5 = new MobileDeepCopyTest(5) called ("mdct5") using (ns);
 
-        ArrayList<MobileDeepCopyTest> list = new ArrayList<MobileDeepCopyTest>();
-
         list.add(dct1);
         list.add(dct2);
         list.add(dct3);
         list.add(dct4);
         list.add(dct5);
 
-        StandardOutput standardOutput = new StandardOutput();
-        standardOutput<-println("dct1 value: " + dct1<-getValue()) @
-        standardOutput<-println("dct2 value: " + dct2<-getValue()) @
-        standardOutput<-println("dct3 value: " + dct3<-getValue()) @
-        standardOutput<-println("dct4 value: " + dct4<-getValue()) @
-        standardOutput<-println("dct5 value: " + dct5<-getValue()) @
+        self<-migrate( ns.getHost(), ns.getPort() ) @
+        self<-go() @
+        self<-migrate ( self.getHost(), self.getPort() )@   //arguments are resolved when the message 
+                                                            //is sent so this will migrate the actor back to where it started.
+        self<-go();
+    }
 
-        dct1<-setList(list) @
-        dct2<-setList(list) @
-        dct3<-setList(list) @
-        dct4<-setList(list) @
-        dct5<-setList(list) @
+    ack go() {
+        StandardOutput standardOutput = new StandardOutput();
+        standardOutput<-println("dct1 value: " + list.get(0)<-getValue()) @
+        standardOutput<-println("dct2 value: " + list.get(1)<-getValue()) @
+        standardOutput<-println("dct3 value: " + list.get(2)<-getValue()) @
+        standardOutput<-println("dct4 value: " + list.get(3)<-getValue()) @
+        standardOutput<-println("dct5 value: " + list.get(4)<-getValue()) @
+
+        list.get(0)<-setList(list) @
+        list.get(1)<-setList(list) @
+        list.get(2)<-setList(list) @
+        list.get(3)<-setList(list) @
+        list.get(4)<-setList(list) @
 
         standardOutput<-println("\nsetLists.") @
-        standardOutput<-println("dct1 value: " + dct1<-getValue()) @
-        standardOutput<-println("dct2 value: " + dct2<-getValue()) @
-        standardOutput<-println("dct3 value: " + dct3<-getValue()) @
-        standardOutput<-println("dct4 value: " + dct4<-getValue()) @
-        standardOutput<-println("dct5 value: " + dct5<-getValue()) @
+        standardOutput<-println("dct1 value: " + list.get(0)<-getValue()) @
+        standardOutput<-println("dct2 value: " + list.get(1)<-getValue()) @
+        standardOutput<-println("dct3 value: " + list.get(2)<-getValue()) @
+        standardOutput<-println("dct4 value: " + list.get(3)<-getValue()) @
+        standardOutput<-println("dct5 value: " + list.get(4)<-getValue()) @
 
-        dct1<-setValue(6) @
-        dct2<-setValue(7) @
-        dct3<-setValue(8) @
-        dct4<-setValue(9) @
-        dct5<-setValue(10) @
+        list.get(0)<-setValue(6) @
+        list.get(1)<-setValue(7) @
+        list.get(2)<-setValue(8) @
+        list.get(3)<-setValue(9) @
+        list.get(4)<-setValue(10) @
 
         standardOutput<-println("\nupdated values.") @
-        standardOutput<-println("dct1 value: " + dct1<-getValue()) @
-        standardOutput<-println("dct2 value: " + dct2<-getValue()) @
-        standardOutput<-println("dct3 value: " + dct3<-getValue()) @
-        standardOutput<-println("dct4 value: " + dct4<-getValue()) @
-        standardOutput<-println("dct5 value: " + dct5<-getValue()) @
+        standardOutput<-println("dct1 value: " + list.get(0)<-getValue()) @
+        standardOutput<-println("dct2 value: " + list.get(1)<-getValue()) @
+        standardOutput<-println("dct3 value: " + list.get(2)<-getValue()) @
+        standardOutput<-println("dct4 value: " + list.get(3)<-getValue()) @
+        standardOutput<-println("dct5 value: " + list.get(4)<-getValue()) @
 
         standardOutput<-println("\nprinting lists.") @
-        dct1<-printList() @
-        dct2<-printList() @
-        dct3<-printList() @
-        dct4<-printList() @
-        dct5<-printList();
+        list.get(0)<-printList() @
+        list.get(1)<-printList() @
+        list.get(2)<-printList() @
+        list.get(3)<-printList() @
+        list.get(4)<-printList() @ pass;
     }
 }

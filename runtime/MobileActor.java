@@ -1,5 +1,9 @@
 package salsa_lite.runtime;
 
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
+
 import salsa_lite.runtime.wwc.NameServer;
 
 public abstract class MobileActor extends Actor {
@@ -79,8 +83,10 @@ public abstract class MobileActor extends Actor {
     public abstract static class State extends Actor implements java.io.Serializable {
         public State(String name, NameServer nameserver) {
             super(false);
-            this.host = TransportService.getHost();
-            this.port = TransportService.getPort();
+            this.originHost = TransportService.getHost();
+            this.originPort = TransportService.getPort();
+            this.host = originHost;
+            this.port = originPort;
             this.nameserver = nameserver;
             this.hashCode = Hashing.getHashCodeFor(name, nameserver.getName(), nameserver.getHost(), nameserver.getPort());
             this.stage = StageService.stages[Math.abs(hashCode % StageService.number_stages)];
@@ -88,8 +94,10 @@ public abstract class MobileActor extends Actor {
 
         public State(String name, NameServer nameserver, SynchronousMailboxStage stage) {
             super(false);
-            this.host = TransportService.getHost();
-            this.port = TransportService.getPort();
+            this.originHost = TransportService.getHost();
+            this.originPort = TransportService.getPort();
+            this.host = originHost;
+            this.port = originPort;
             this.nameserver = nameserver;
             this.hashCode = Hashing.getHashCodeFor(name, nameserver.getName(), nameserver.getHost(), nameserver.getPort());
             this.stage = stage;
@@ -97,16 +105,44 @@ public abstract class MobileActor extends Actor {
 
         private NameServer nameserver = null;
         private String name = null;
-        private String host;
-        private int port;
+        private String originHost;
+        private int originPort;
+        protected String host;
+        protected int port;
 
         public NameServer getNameServer() { return nameserver; }
         public String getName() { return name; }
+
+        public String getOriginHost() { return originHost; }
+        public int getOriginPort() { return originPort; }
 
         public String getHost() { return host; }
         public int getPort() { return port; }
 
         public String getLastKnownHost() { return host; }
         public int getLastKnownPort() { return port; }
+
+        private void writeObject(ObjectOutputStream out) throws IOException {
+            out.writeInt(hashCode);
+            out.writeObject(nameserver);
+            out.writeObject(name);
+            out.writeInt(originPort);
+            out.writeObject(originHost);
+            out.writeInt(port);
+            out.writeObject(host);
+        }
+
+        private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+            this.hashCode = in.readInt();
+            this.nameserver = (NameServer)in.readObject();
+            this.name = (String)in.readObject();
+            this.originPort = in.readInt();
+            this.originHost = (String)in.readObject();
+            this.port = in.readInt();
+            this.host = (String)in.readObject();
+
+            this.stage = StageService.stages[Math.abs(hashCode % StageService.number_stages)];
+        }
+
     }
 }

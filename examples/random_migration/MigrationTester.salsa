@@ -1,56 +1,55 @@
-import salsa.io.StandardOutput;
-import salsa.util.System;
+import salsa_lite.runtime.wwc.NameServer;
+import salsa_lite.runtime.io.StandardOutput;
+import salsa_lite.language.JoinDirector;
 
-begin_java/*
-	import java.io.BufferedReader;
-	import java.io.FileReader;
-	import java.util.StringTokenizer;
-	import java.util.Vector;
-*/end_java
+import object java.io.BufferedReader;
+import object java.io.FileReader;
+import object java.util.StringTokenizer;
+import object java.util.ArrayList;
 
 behavior MigrationTester {
 	String[] hosts;
 	int[] ports;
-	String name_server;
+	NameServer nameserver;
 
 	MigrationWorker[] workers;
 
 	MigrationTester(String[] args) {
-		if (args<-length() != 3) {
-			StandardOutput<-println("Incorrect arguments.") @
-			StandardOutput<-println("Usage:") @
-			StandardOutput<-println("\tjava salsa.tests.distributed_random_fibonacci.DRFibonacci <theaters & nameserver file> <number_workers> <number_migrations>") @
-			System<-exit(0);
+		if (args.length != 3) {
+			System.err.println("Incorrect arguments.") @
+			System.err.println("Usage:") @
+			System.err.println("\tjava MigrationTester <theaters & nameserver file> <number_workers> <number_migrations>") @
+			System.exit(0);
 		}
 
-		int number_workers = Integer<-parseInt(args[1]);
-		int number_migrations = Integer<-parseInt(args[2]);
+		int number_workers = Integer.parseInt(args[1]);
+		int number_migrations = Integer.parseInt(args[2]);
 
-		getTheaters(args[0]) @
-		create_actors(number_workers) @
-		migrate_actors(number_migrations) @
-		StandardOutput<-println("Migration test with " + number_workers + " actors and " + number_migrations + " completed.");
+		self<-getTheaters(args[0]) @
+		self<-create_actors(number_workers) @
+		self<-migrate_actors(number_migrations) @
+		new StandardOutput()<-println("Migration test with " + number_workers + " actors and " + number_migrations + " completed.");
 	}
 
 	ack getTheaters(String theater_file) {
-		begin_java/*
 		try {   
 			BufferedReader in = new BufferedReader(new FileReader(theater_file));
 			String line = in.readLine();
 
-			name_server = "uan://" + line + "/";
+	        StringTokenizer st = new StringTokenizer( line, ":");
+			nameserver = new NameServer() called ("nameserver") at (st.nextToken(), Integer.parseInt(st.nextToken()));
 			line = in.readLine();
 
-			Vector theaters_vector = new Vector();
+			ArrayList<String> theaters = new ArrayList<String>();
 			while (line != null) {
-				theaters_vector.add(line);
+				theaters.add(line);
 				line = in.readLine();
 			}
-			hosts = new String[theaters_vector.size()];
-			ports = new int[theaters_vector.size()];
+			hosts = new String[theaters.size()];
+			ports = new int[theaters.size()];
 
-			for (int j = 0; j < theaters_vector.size(); j++) {
-				StringTokenizer st = new StringTokenizer( (String)theaters_vector.get(j), ":");
+			for (int j = 0; j < theaters.size(); j++) {
+				StringTokenizer st = new StringTokenizer( theaters.get(j), ":");
 				hosts[j] = st.nextToken();
 				ports[j] = Integer.parseInt(st.nextToken());
 
@@ -58,27 +57,28 @@ behavior MigrationTester {
 		} catch (Exception e) {
 			System.err.println("Error reading theaters file: " + e);
 			e.printStackTrace();
+            System.exit(0);
 		}       
-		*/end_java
 	}        
 
 	ack create_actors(int number_workers) {
 		workers = new MigrationWorker[number_workers];
 
 		for (int i = 0; i < number_workers; i++) {
-			int target = (int)(hosts<-length() * Math<-random());
-			workers[i] = new MigrationWorker() at (name_server + "worker_" + i, hosts[target], ports[target]);
+			int target = (int)(hosts.length * Math.random());
+			workers[i] = new MigrationWorker() called ("worker_" + i) using (nameserver) at (hosts[target], ports[target]);
 		}
 	}
 
 	ack migrate_actors(int number_migrations) {
-		{
-			for (int i = 0; i < number_migrations; i++) {
-				int target = (int)(hosts<-length() * Math<-random());
+        JoinDirector jd = new JoinDirector();
+        for (int i = 0; i < number_migrations; i++) {
+            int target = (int)(hosts.length * Math.random());
 
-				(workers[ (int)(workers<-length() * Math<-random()) ])<-migrate(hosts[target], ports[target]);
-			}
-		} @ 
+            (workers[ (int)(workers.length * Math.random()) ])<-migrate(hosts[target], ports[target]) @ jd<-join();
+        }
+
+        jd<-resolveAfter(number_migrations) @
 		pass;
 	}
 }

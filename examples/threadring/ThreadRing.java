@@ -29,11 +29,11 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
 
 
     public Object writeReplace() throws java.io.ObjectStreamException {
-        int hashCode = this.hashCode();
+        int hashCode = Hashing.getHashCodeFor(this.hashCode(), TransportService.getHost(), TransportService.getPort());
         synchronized (LocalActorRegistry.getLock(hashCode)) {
             LocalActorRegistry.addEntry(hashCode, this);
         }
-        return new SerializedThreadRing( hashCode, TransportService.getHost(), TransportService.getPort() );
+        return new SerializedThreadRing( this.hashCode(), TransportService.getHost(), TransportService.getPort() );
     }
 
     public static class RemoteReference extends ThreadRing {
@@ -53,7 +53,7 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
         }
 
         public Object writeReplace() throws java.io.ObjectStreamException {
-            return new SerializedThreadRing( hashCode, TransportService.getHost(), TransportService.getPort() );
+            return new SerializedThreadRing( hashCode, host, port);
         }
     }
 
@@ -65,11 +65,12 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
         SerializedThreadRing(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }
 
         public Object readResolve() throws java.io.ObjectStreamException {
+            int hashCode = Hashing.getHashCodeFor(this.hashCode, this.host, this.port);
             synchronized (LocalActorRegistry.getLock(hashCode)) {
                 ThreadRing actor = (ThreadRing)LocalActorRegistry.getEntry(hashCode);
                 System.err.println("DESERIALIZING A REFERENCE TO A LOCAL ACTOR: " + hashCode + " -- " + host + ":" + port + " -- got: " + actor);
                 if (actor == null) {
-                    RemoteReference remoteReference = new RemoteReference(hashCode, host, port);
+                    RemoteReference remoteReference = new RemoteReference(this.hashCode, this.host, this.port);
                     LocalActorRegistry.addEntry(hashCode, remoteReference);
                     return remoteReference;
                 } else {

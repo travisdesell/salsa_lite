@@ -11,11 +11,11 @@ import salsa_lite.runtime.language.exceptions.RemoteMessageException;
 import salsa_lite.runtime.language.exceptions.MessageHandlerNotFoundException;
 import salsa_lite.runtime.language.exceptions.TokenPassException;
 
-public abstract class Actor {
+public abstract class Actor implements java.io.Serializable {
 
-	public SynchronousMailboxStage stage;
+	public transient SynchronousMailboxStage stage;
 
-    int hashCode;
+    protected int hashCode;
     public int hashCode() {
         return hashCode;
     }

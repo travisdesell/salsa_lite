@@ -4,6 +4,7 @@ import object java.net.Socket;
 import object java.io.IOException;
 import object java.io.BufferedInputStream;
 import object java.io.ObjectInputStream;
+import object salsa_lite.runtime.MobileActorRegistry;
 
 behavior IncomingTheaterConnection implements StagedActor {
 
@@ -14,6 +15,7 @@ behavior IncomingTheaterConnection implements StagedActor {
         self.socket = socket;
         try {
             in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+//            in = new ObjectInputStream(socket.getInputStream());
 
             System.err.println("made new incoming theater connection from: " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
         } catch (IOException ioe) {
@@ -61,13 +63,20 @@ behavior IncomingTheaterConnection implements StagedActor {
         }
 
         if (o instanceof Actor) {
-//            MobileActorRegistry.addEntry(...);
+            Actor actor = (Actor)o;
+
+            System.err.println("RECEIVED AN ACTOR WITH HASHCODE: " + actor.hashCode());
+
+            synchronized (MobileActorRegistry.getStateLock(actor.hashCode())) {
+                MobileActorRegistry.updateStateEntry(actor.hashCode(), actor);
+            }
 
             System.err.println("IncomingTheaterConnection received an actor: " + o);
+
         } else if (o instanceof Message) {
             //check to see if the target actor is here
 
-//            System.err.println("IncomingTheaterConnection received a message: " + o);
+            System.err.println("IncomingTheaterConnection received a message: " + o);
 
             StageService.sendMessage((Message)o);
 
