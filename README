@@ -80,22 +80,23 @@ Notable changes from SALSA 1.x and before:
             
 
 BUGS:
-    *   Get migration working.
     *   Type checking for generics may not completely work not sure about things like <? super Something> and <T, E extends T, F extends E>.
+    *   Syntax for generic methods needs to be added.
     *   Get interfaces working correctly.  They need special messages that know they were sent using an interface, so they invoke the correct message handler.
     *   Actor.stage should be private, not public.
     *   Get access modifiers working.
+    *   Local actors are serailized the same either locally (because of a deepcopy) or remotely (because of message passing).  This could be made more efficient if we could figure out what stream the actor was being sent over, and storing it in a different registries, one for local, one for remote.  The local one would not need to get the local host and local port to calculate the hashcode, and could remove the actor after deserialization (for garbage collection).
+    *   With remote message sending, we need to make sure the host is the same (eg, getting a reference to a remote actor via it's IP address or it's hostname should resolve to the same reference).
 
 TODO:
-    *   Add garbage collection support for MobileActors.
+    *   Add reference redirection for migrated actors -- if there is a remote reference pointing to an actor at another theater which migrates to a different theater, this reference needs to get updated.
     *   Allow RemoteActors and MobileActors to be created remotely and on particular stages.
+    *   Add garbage collection support for MobileActors and Remote Actors (and local actors in a distributed setting) -- maybe restrict collection to unnamed actors.
     *   Report an error if trying to invoke a static method on a non-static object
     *   Allow self(...) and parent(...) as the first line within constructors to call another or the superclasses's constructor.
-    *   Add syntax support for try/catch blocks for Java support.
     *   Add support for access control.  All fields of an actor are private (and can't be shared due to no-shared memory), but methods and constructors should be able to be private, protected, public (or no modifier).
     *   Add a thread pool implementation, to compare the two for a publication.
     *   Need to implement a version of the runtime (SynchronousMailboxStage) that is fair. Right now an actor can enter an infinite loop or execute a blocking method which will starve the other actors on that stage.
-    *   Syntax for generic methods needs to be added.
     *   Implement token arrays in the compiler (have them use the language.ArrayDirector class).
     *   Implement message blocks, ie: { a<-m1(); b<-m2(); } @ { c<-m3(); d<-m4() }
     *   Add more compiler tests for generics 
@@ -105,6 +106,3 @@ TODO:
     *   Add tests for nested expression directors, ie: a<-m( b<-m( c<-m() + d<-m(), e<-m() ) * f<-m() )
     *   Add tests for method invocations within expression directors, ie: a<-m( Math.log(o.something() + 10 * b<-m()) )
             -- Actualy: Cannot pass tokens to methods (this actually probably isn't a bug -- similar to not being able to pass tokens to conditionals).
-    *   Local actors are serailized the same either locally (because of a deepcopy) or remotely (because of message passing).  This could be made more efficient if we could figure out what stream the actor was being sent over, and storing it in a different registries, one for local, one for remote.  The local one would not need to get the local host and local port to calculate the hashcode, and could remove the actor after deserialization (for garbage collection).
-    *   With remote message sending, we need to make sure the host is the same (eg, getting a reference to a remote actor via it's IP address or it's hostname should resolve to the same reference).
-
