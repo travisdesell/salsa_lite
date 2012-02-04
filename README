@@ -89,9 +89,9 @@ BUGS:
     *   With remote message sending, we need to make sure the host is the same (eg, getting a reference to a remote actor via it's IP address or it's hostname should resolve to the same reference).
     *   Need to fix tests/SendAndPassTest -- 'token ack t = someMessage() @ pass;' or 'token ack t = someMessage() @ otherMessage()' isn't working.
     *   Need to fix wwc.Theater.  It creates two theaters.
+    *   Get remote creation of MobileActors working and for particular stages.
 
 TODO:
-    *   Allow RemoteActors and MobileActors to be created remotely and on particular stages.
     *   Add reference redirection for migrated actors -- if there is a remote reference pointing to an actor at another theater which migrates to a different theater, this reference needs to get updated.
     *   Add garbage collection support for MobileActors and Remote Actors (and local actors in a distributed setting) -- maybe restrict collection to unnamed actors.
     *   Report an error if trying to invoke a static method on a non-static object
