@@ -563,7 +563,7 @@ public class CValue extends CErrorInformation {
 
                     if (joinDirector != null && !SymbolTable.messageContinues) {
                         code += ";\n";
-                        code += CIndent.getIndent() + "StageService.sendMessage(" + joinDirector + ", 0 /*setValue*/, new Object[]{++" + joinDirector + "_message_count}, continuation_token)";
+                        code += CIndent.getIndent() + "StageService.sendMessage(" + joinDirector + ", 2 /*join*/, new Object[]{++" + joinDirector + "_message_count}, continuation_token)";
                     }
 
                     currentType = ((ActorType)currentType).getMessage(ms.message_name, ms.arguments, isParentMessageSend).getPassType();

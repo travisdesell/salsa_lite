@@ -87,6 +87,7 @@ BUGS:
     *   Get access modifiers working.
     *   Local actors are serailized the same either locally (because of a deepcopy) or remotely (because of message passing).  This could be made more efficient if we could figure out what stream the actor was being sent over, and storing it in a different registries, one for local, one for remote.  The local one would not need to get the local host and local port to calculate the hashcode, and could remove the actor after deserialization (for garbage collection).
     *   With remote message sending, we need to make sure the host is the same (eg, getting a reference to a remote actor via it's IP address or it's hostname should resolve to the same reference).
+    *   Need to fix tests/SendAndPassTest -- 'token ack t = someMessage() @ pass;' or 'token ack t = someMessage() @ otherMessage()' isn't working.
 
 TODO:
     *   Add reference redirection for migrated actors -- if there is a remote reference pointing to an actor at another theater which migrates to a different theater, this reference needs to get updated.

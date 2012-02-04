@@ -8,22 +8,24 @@ import object java.util.StringTokenizer;
 import object java.util.ArrayList;
 
 behavior MigrationTester {
-	String[] hosts;
-	int[] ports;
+	ArrayList<String> hosts = new ArrayList<String>();
+	ArrayList<Integer> ports = new ArrayList<Integer>();
 	NameServer nameserver;
 
 	MigrationWorker[] workers;
 
 	MigrationTester(String[] args) {
 		if (args.length != 3) {
-			System.err.println("Incorrect arguments.") @
-			System.err.println("Usage:") @
-			System.err.println("\tjava MigrationTester <theaters & nameserver file> <number_workers> <number_migrations>") @
+			System.err.println("Incorrect arguments.");
+			System.err.println("Usage:");
+			System.err.println("\tjava MigrationTester <theaters & nameserver file> <number_workers> <number_migrations>");
 			System.exit(0);
 		}
 
 		int number_workers = Integer.parseInt(args[1]);
 		int number_migrations = Integer.parseInt(args[2]);
+
+        nameserver = new NameServer() called ("nameserver");
 
 		self<-getTheaters(args[0]) @
 		self<-create_actors(number_workers) @
@@ -36,23 +38,12 @@ behavior MigrationTester {
 			BufferedReader in = new BufferedReader(new FileReader(theater_file));
 			String line = in.readLine();
 
-	        StringTokenizer st = new StringTokenizer( line, ":");
-			nameserver = new NameServer() called ("nameserver") at (st.nextToken(), Integer.parseInt(st.nextToken()));
-			line = in.readLine();
-
 			ArrayList<String> theaters = new ArrayList<String>();
-			while (line != null) {
-				theaters.add(line);
-				line = in.readLine();
-			}
-			hosts = new String[theaters.size()];
-			ports = new int[theaters.size()];
+			while ((line = in.readLine()) != null) {
+                StringTokenizer st = new StringTokenizer(line, ":");
 
-			for (int j = 0; j < theaters.size(); j++) {
-				StringTokenizer st = new StringTokenizer( theaters.get(j), ":");
-				hosts[j] = st.nextToken();
-				ports[j] = Integer.parseInt(st.nextToken());
-
+				theaters.add(st.nextToken());
+                ports.add(Integer.parseInt(st.nextToken()));
 			}
 		} catch (Exception e) {
 			System.err.println("Error reading theaters file: " + e);
@@ -65,17 +56,17 @@ behavior MigrationTester {
 		workers = new MigrationWorker[number_workers];
 
 		for (int i = 0; i < number_workers; i++) {
-			int target = (int)(hosts.length * Math.random());
-			workers[i] = new MigrationWorker() called ("worker_" + i) using (nameserver) at (hosts[target], ports[target]);
+			int target = (int)(hosts.size() * Math.random());
+			workers[i] = new MigrationWorker() called ("worker_" + i) using (nameserver) at (hosts.get(target), ports.get(target));
 		}
 	}
 
 	ack migrate_actors(int number_migrations) {
         JoinDirector jd = new JoinDirector();
         for (int i = 0; i < number_migrations; i++) {
-            int target = (int)(hosts.length * Math.random());
+            int target = (int)(hosts.size() * Math.random());
 
-            (workers[ (int)(workers.length * Math.random()) ])<-migrate(hosts[target], ports[target]) @ jd<-join();
+            workers[ (int)(workers.length * Math.random()) ]<-migrate(hosts.get(target), ports.get(target)) @ jd<-join();
         }
 
         jd<-resolveAfter(number_migrations) @

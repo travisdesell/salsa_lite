@@ -62,6 +62,17 @@ public class CConstructor extends CErrorInformation {
 
 		SymbolTable.openScope();
 
+        try {
+            SymbolTable.currentPassType = SymbolTable.getTypeSymbol("ack");
+        } catch (VariableDeclarationException vde) {
+            CompilerErrors.printErrorMessage("[CValue.getValueType]: Could not declare variable. " + vde.toString(), this);
+            throw new RuntimeException(vde);
+        } catch (SalsaNotFoundException snfe) {
+            CompilerErrors.printErrorMessage("[CValue.getValueType]: Could not determine type for variable. " + snfe.toString(), this);
+            throw new RuntimeException(snfe);
+        }
+
+
 		String code = CIndent.getIndent() + "public void construct(";
 		for (int i = 0; i < parameters.size(); i++) {
 			CFormalParameter p = parameters.get(i);

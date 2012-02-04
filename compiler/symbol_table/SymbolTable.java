@@ -312,6 +312,8 @@ public class SymbolTable {
 		return continuationType;
 	}
 
+    public static TypeSymbol currentPassType = null;
+
 	public static String currentMessageName = "";
 
 	public static boolean continuesToPass = false;

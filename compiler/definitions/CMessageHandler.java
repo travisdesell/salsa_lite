@@ -53,6 +53,16 @@ public class CMessageHandler extends CErrorInformation {
 		else definition_code += pass_type.name;
 		definition_code += " " + name + "(";
 
+        try {
+            SymbolTable.currentPassType = SymbolTable.getTypeSymbol(pass_type.name);
+        } catch (VariableDeclarationException vde) {
+            CompilerErrors.printErrorMessage("[CValue.getValueType]: Could not declare variable. " + vde.toString(), this);
+            throw new RuntimeException(vde);
+        } catch (SalsaNotFoundException snfe) {
+            CompilerErrors.printErrorMessage("[CValue.getValueType]: Could not determine type for variable. " + snfe.toString(), this);
+            throw new RuntimeException(snfe);
+        }
+
 		SymbolTable.newMessageHandler();
 
 		SymbolTable.openScope();

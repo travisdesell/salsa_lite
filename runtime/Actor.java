@@ -15,20 +15,21 @@ public abstract class Actor implements java.io.Serializable {
 
 	public transient SynchronousMailboxStage stage;
 
-    protected int hashCode;
-    public int hashCode() {
-        return hashCode;
-    }
+//    protected int hashCode;
+//    public int hashCode() {
+//        return hashCode;
+//    }
 
     protected Actor(boolean dont_use_default_constructor) {}
 
     public Actor() {
-        hashCode = Hashing.generateUniqueHashCode(super.hashCode());
-        this.stage = StageService.stages[Math.abs(hashCode % StageService.number_stages)];
+//        hashCode = Hashing.generateUniqueHashCode(super.hashCode());
+//        this.stage = StageService.stages[Math.abs(hashCode % StageService.number_stages)];
+        this.stage = StageService.stages[Math.abs(hashCode() % StageService.number_stages)];
 	}
 
 	public Actor(SynchronousMailboxStage stage) {
-        hashCode = Hashing.generateUniqueHashCode(super.hashCode());
+//        hashCode = Hashing.generateUniqueHashCode(super.hashCode());
 		this.stage = stage;
 	}
 

@@ -3,6 +3,10 @@ package salsa_lite.runtime;
 
 public abstract class RemoteActor extends Actor {
 
+    public final int hashCode() {
+        return Hashing.getHashCodeFor(name, host, port);
+    }
+
     private String name;
     private String host;
     private int port;
@@ -22,7 +26,8 @@ public abstract class RemoteActor extends Actor {
         }
         this.host = host;
         this.port = port;
-        this.hashCode = Hashing.getHashCodeFor(name, host, port);
+
+        int hashCode = hashCode();
         this.stage = StageService.stages[Math.abs(hashCode % StageService.number_stages)];
 
 //        System.err.println("Created a remote actor at with pre-specified host: " + host + " and port: " + port);
@@ -33,7 +38,8 @@ public abstract class RemoteActor extends Actor {
         this.name = name;
         this.host = TransportService.getHost();
         this.port = TransportService.getPort();
-        this.hashCode = Hashing.getHashCodeFor(name, host, port);
+
+        int hashCode = hashCode();
         this.stage = StageService.stages[Math.abs(hashCode % StageService.number_stages)];
 
         Object lock = RemoteActorRegistry.getLock(hashCode);
@@ -49,7 +55,8 @@ public abstract class RemoteActor extends Actor {
         this.name = name;
         this.host = TransportService.getHost();
         this.port = TransportService.getPort();
-        this.hashCode = Hashing.getHashCodeFor(name, host, port);
+
+        int hashCode = hashCode();
         this.stage = stage;
 
         Object lock = RemoteActorRegistry.getLock(hashCode);

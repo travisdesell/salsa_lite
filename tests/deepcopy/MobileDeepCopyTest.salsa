@@ -4,6 +4,14 @@ import salsa_lite.runtime.wwc.NameServer;
 
 import object java.util.ArrayList;
 
+/**
+ * Example usage:
+ *      first run nameserver:
+ *          java -Dnstages=3 -Dcalled="nameserver" -Dport=3030 salsa_lite.runtime.wwc.NameServer
+ *      then run test:
+ *          java -Dnstages=5 -Dcalled="mdc_test" -Dusing="127.0.0.1:3030/nameserver" MobileDeepCopyTest
+ */
+
 behavior MobileDeepCopyTest extends MobileActor {
 
     NameServer ns;

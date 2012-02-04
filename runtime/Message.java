@@ -13,6 +13,7 @@ public class Message implements java.io.Serializable {
 	public final static int SIMPLE_MESSAGE = 1;
 	public final static int CONTINUATION_MESSAGE = 2;
 	public final static int TOKEN_MESSAGE = 3;
+	public final static int CONSTRUCT_CONTINUATION_MESSAGE = 4;
 
 	public final static int DESTROY_MESSAGE = 7;
 

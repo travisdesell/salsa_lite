@@ -153,25 +153,10 @@ public class ContinuationDirector extends Director implements java.io.Serializab
     }
 
 
-    public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions) {
-        ContinuationDirector actor = new ContinuationDirector();
-        TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);
-        Message input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);
-        MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions});
-        return output_continuation;
-    }
-
     public static ContinuationDirector construct(int constructor_id, Object[] arguments) {
         ContinuationDirector actor = new ContinuationDirector();
         StageService.sendMessage(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));
         return actor;
-    }
-    public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, SynchronousMailboxStage target_stage) {
-        ContinuationDirector actor = new ContinuationDirector(target_stage);
-        TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage);
-        Message input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);
-        MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage);
-        return output_continuation;
     }
 
     public static ContinuationDirector construct(int constructor_id, Object[] arguments, SynchronousMailboxStage target_stage) {
@@ -179,4 +164,21 @@ public class ContinuationDirector extends Director implements java.io.Serializab
         target_stage.putMessageInMailbox(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));
         return actor;
     }
+
+    public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions) {
+        ContinuationDirector actor = new ContinuationDirector();
+        TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);
+        Message input_message = new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation);
+        MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions});
+        return output_continuation;
+    }
+
+    public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, SynchronousMailboxStage target_stage) {
+        ContinuationDirector actor = new ContinuationDirector(target_stage);
+        TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage);
+        Message input_message = new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation);
+        MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage);
+        return output_continuation;
+    }
+
 }

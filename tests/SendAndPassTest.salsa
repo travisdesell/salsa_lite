@@ -1,0 +1,45 @@
+import salsa_lite.runtime.io.StandardOutput;
+
+behavior SendAndPassTest {
+
+    int count = 0;
+
+    ack doSomething() {
+        count++;
+        System.out.println("Doing something: " + count);
+    }
+
+    SendAndPassTest() {
+    }
+
+    SendAndPassTest(String[] arguments) {
+//        self<-go()<-doSomething();
+
+        self<-go2()<-doSomething() @
+        self<-go3();
+    }
+
+    SendAndPassTest getActor() {
+        pass self;
+    }
+
+    SendAndPassTest go() {
+        SendAndPassTest other = new SendAndPassTest();
+
+        other<-doSomething() @
+        pass self<-getActor();
+    }
+
+    SendAndPassTest go2() {
+        SendAndPassTest other = new SendAndPassTest();
+
+        other<-doSomething() @
+        pass other;
+    }
+
+    ack go3() {
+        token ack t = new StandardOutput()<-println("blah") @
+        new StandardOutput()<-println("blah2") @
+        pass;
+    }
+}

@@ -712,14 +712,16 @@ CStatement Statement() : {
 CPassStatement PassStatement() : {
     CPassStatement pass_statement = new CPassStatement();
     Token t = null;
+    Token start, end;
 } {
-    "pass" [t = "later" | pass_statement.expression = Expression()] ";"
+    start = "pass" [t = "later" | pass_statement.expression = Expression()] end = ";"
 
     {
         if (t != null) {
 //            System.err.println("pass statement on line " + t.beginLine + " will pass later");
             pass_statement.will_pass_later = true;
         }
+        pass_statement.initLineAndColumn(start, end);
         return pass_statement;
     }
 }

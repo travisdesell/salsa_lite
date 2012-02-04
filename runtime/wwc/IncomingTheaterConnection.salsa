@@ -76,9 +76,9 @@ behavior IncomingTheaterConnection implements StagedActor {
         } else if (o instanceof Message) {
             //check to see if the target actor is here
 
-//            System.err.println("IncomingTheaterConnection received a message: " + o);
-
             StageService.sendMessage((Message)o);
+
+//            System.err.println("IncomingTheaterConnection received a message: " + o);
 
         } else {
             StringBuffer sb = new StringBuffer();

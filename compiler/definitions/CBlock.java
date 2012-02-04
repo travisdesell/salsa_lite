@@ -107,7 +107,7 @@ public class CBlock extends CStatement {
 		code += CIndent.getIndent() + "}\n";
 
 		if (continues) {
-			code += CIndent.getIndent() + "StageService.sendMessage(" + join_director + ", 1 /*resolveAfter*/, new Object[]{" + join_director + "_message_count});\n";
+			code += CIndent.getIndent() + "StageService.sendMessage(" + join_director + ", 3 /*resolveAfter*/, new Object[]{" + join_director + "_message_count});\n";
 			code += CIndent.getIndent();
 			if (SymbolTable.firstContinuation()) {
 				code += "ContinuationDirector ";
