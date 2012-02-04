@@ -39,6 +39,7 @@ public class CAllocation extends CVariableInit {
 
 		if (nameserver_expression != null && nameserver_expression.isToken()) return true;
         if (remote_reference && nameserver_expression != null) return true;         //getting a remote reference to a MobileActor always returns a token
+        if (!remote_reference && (host_expression != null || port_expression != null)) return true; //creating an actor remotely always returns a token
 		if (host_expression != null && host_expression.isToken()) return true;
 		if (port_expression != null && port_expression.isToken()) return true;
 

@@ -503,6 +503,21 @@ public class CCompilationUnit {
                 code += CIndent.getIndent() + "    return new Serialized" + tmp_name + "( this.getName(), this.getHost(), this.getPort() );\n";
                 code += CIndent.getIndent() + "}\n\n";
 
+                code += CIndent.getIndent() + "public static class RemoteCreationStub implements java.io.Serializable {\n";
+                code += CIndent.getIndent() + "    String name;\n";
+                code += CIndent.getIndent() + "    String host;\n";
+                code += CIndent.getIndent() + "    int port;\n";
+                code += CIndent.getIndent() + "    int target_stage;\n";
+                code += "\n";
+                code += CIndent.getIndent() + "    RemoteCreationStub(String name, String host, int port) { this.name = name; this.host = host; this.port = port; }\n";
+                code += CIndent.getIndent() + "    RemoteCreationStub(String name, String host, int port, SynchronousMailboxStage ts) { this.name = name; this.host = host; this.port = port; this.target_stage = ts.getStageId(); }\n";
+                code += "\n";
+                code += CIndent.getIndent() + "    public Object readResolve() throws java.io.ObjectStreamException {\n";
+                code += CIndent.getIndent() + "        if (target_stage < 0) return new " + tmp_name + "(name, StageService.getNewStage());\n";
+                code += CIndent.getIndent() + "        else return new " + tmp_name + "(name, StageService.getStage(target_stage));\n";
+                code += CIndent.getIndent() + "    }\n";
+                code += CIndent.getIndent() + "}\n\n";
+
                 code += CIndent.getIndent() + "public static class RemoteReference extends " + tmp_name + " {\n";
 
                 code += CIndent.getIndent() + "    RemoteReference(String name, String host, int port) { super(name, host, port); }\n";
@@ -957,6 +972,44 @@ public class CCompilationUnit {
                 code += CIndent.getIndent() + "    MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage);\n";
                 code += CIndent.getIndent() + "    return output_continuation;\n";
                 code += CIndent.getIndent() + "}\n\n";
+
+                if (isRemote()) {
+                    //remote creation construct methods
+                    //need one for host port and no tokens, one for host port stage and no tokens, one for host port and tokens and one for host port stage and tokens
+                    code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, String name, String host, int port) {\n";
+                    code += CIndent.getIndent() + "    " + actor_name + " actor = " + actor_name + ".getRemoteReference(name, host, port);\n";
+                    code += CIndent.getIndent() + "    TransportService.createRemotely(host, port, new " + actor_name + ".RemoteCreationStub(name, host, port));\n";  //may need to have this continue to the next message
+                    code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);\n";
+                    code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation));\n";
+                    code += CIndent.getIndent() + "    return output_continuation;\n";
+                    code += CIndent.getIndent() + "}\n\n";
+
+                    code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, String name, String host, int port, SynchronousMailboxStage target_stage) {\n";
+                    code += CIndent.getIndent() + "    " + actor_name + " actor = " + actor_name + ".getRemoteReference(name, host, port);\n";
+                    code += CIndent.getIndent() + "    TransportService.createRemotely(host, port, new " + actor_name + ".RemoteCreationStub(name, host, port, target_stage));\n";  //may need to have this continue to the next message
+                    code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);\n";
+                    code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation));\n";
+                    code += CIndent.getIndent() + "    return output_continuation;\n";
+                    code += CIndent.getIndent() + "}\n\n";
+
+                    code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, String host, int port) {\n";
+                    code += CIndent.getIndent() + "    " + actor_name + " actor = " + actor_name + ".getRemoteReference(name, host, port);\n";
+                    code += CIndent.getIndent() + "    TransportService.createRemotely(host, port, new " + actor_name + ".RemoteCreationStub(name, host, port));\n";  //may need to have this continue to the next message
+                    code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);\n";
+                    code += CIndent.getIndent() + "    Message input_message = new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
+                    code += CIndent.getIndent() + "    MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions});\n";
+                    code += CIndent.getIndent() + "    return output_continuation;\n";
+                    code += CIndent.getIndent() + "}\n\n";
+
+                    code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, String host, int port, SynchronousMailboxStage target_stage) {\n";
+                    code += CIndent.getIndent() + "    " + actor_name + " actor = " + actor_name + ".getRemoteReference(name, host, port);\n";
+                    code += CIndent.getIndent() + "    TransportService.createRemotely(host, port, new " + actor_name + ".RemoteCreationStub(name, host, port, target_stage));\n";  //may need to have this continue to the next message
+                    code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage);\n";
+                    code += CIndent.getIndent() + "    Message input_message = new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
+                    code += CIndent.getIndent() + "    MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage);\n";
+                    code += CIndent.getIndent() + "    return output_continuation;\n";
+                    code += CIndent.getIndent() + "}\n\n\n";
+                }
             }
        }
 

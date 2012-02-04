@@ -1,0 +1,39 @@
+import salsa_lite.runtime.io.StandardOutput;
+
+import object java.util.ArrayList;
+
+behavior MobileRemoteCreator extends MobileActor {
+
+    StandardOutput origin_output;
+
+    ack go() {
+        new StandardOutput()<-println("Hello from: " + self.getName() + "!") @
+        origin_output<-println("Remote hello from: " + self.getName() + "!");
+    }
+
+    MobileRemoteCreator(StandardOutput origin_output) {
+        self.origin_output = origin_output;
+    }
+
+    MobileRemoteCreator(String[] arguments) {
+        if (arguments.length % 2 != 0 || arguments.length < 2) {
+            System.err.println("Error, usage:");
+            System.err.println("    java MobileRemoteCreator <host1> <port1> <host2> <port2> ... <hostn> <portn>");
+            System.exit(0);
+        }
+        NameServer ns = self.getNameServer();
+
+        ArrayList<String> hosts = new ArrayList<String>();
+        ArrayList<Integer> ports = new ArrayList<Integer>();
+
+        for (int i = 0; i < arguments.length; i += 2) {
+            hosts.add(arguments[i]);
+            ports.add(Integer.parseInt(arguments[i + 1]));
+        }
+
+        for (int i = 0; i < hosts.size(); i++) {
+//            MobileRemoteCreator rc = new MobileRemoteCreator(new StandardOutput()) called ("rc_" + i) at (hosts.get(i), ports.get(i))<-go();
+            new MobileRemoteCreator(new StandardOutput()) called ("rc_" + i) using (ns) at (hosts.get(i), ports.get(i))<-go();
+        }
+    }
+}

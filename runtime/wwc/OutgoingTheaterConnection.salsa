@@ -82,4 +82,24 @@ behavior OutgoingTheaterConnection {
 
 //        System.err.println("sent actor with outgoing theater connection: " + actor);
     }
+
+    ack createRemotely(Object o) {
+        try {
+            out.writeObject(o);
+            out.flush();
+            out.reset();
+        } catch (IOException ioe) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("Error in OutgoingTheaterConnection, IOException: " + ioe + "\n");
+            sb.append("\tmigrating actor '" + o + "'.");
+            sb.append("\tlocal host [" + socket.getLocalSocketAddress() + "], local port [" + socket.getLocalPort() + "]\n");
+            sb.append("\tremote host address [" + socket.getInetAddress().getHostAddress() + "], remote host name [" + socket.getInetAddress().getHostName() + "], remote port     [" + socket.getPort() + "]\n");
+            for (StackTraceElement ste : ioe.getStackTrace()) {
+                sb.append("\t\t" + ste.toString() + "\n");
+            }
+            System.err.println(sb.toString());
+        }
+
+//        System.err.println("sent actor creation stub with outgoing theater connection: " + o);
+     }
 }

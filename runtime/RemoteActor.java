@@ -47,7 +47,7 @@ public abstract class RemoteActor extends Actor {
             RemoteActorRegistry.addEntry(hashCode, this);
         }
 
-//        System.err.println("Created a remote actor at local theater with host: " + host + " and port: " + port);
+//        System.err.println("Created a remote actor at local theater with host: " + host + " and port: " + port + ", and hashcode: " + hashCode);
     }
 
     public RemoteActor(String name, SynchronousMailboxStage stage) {
@@ -64,6 +64,6 @@ public abstract class RemoteActor extends Actor {
             RemoteActorRegistry.addEntry(hashCode, this);
         }
 
-//        System.err.println("Created a remote actor at local theater with host: " + host + " and port: " + port);
+//        System.err.println("Created a remote actor at local theater with host: " + host + " and port: " + port + ", and hashcode: " + hashCode);
     }
 }

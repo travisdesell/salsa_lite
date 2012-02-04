@@ -62,7 +62,10 @@ behavior IncomingTheaterConnection implements StagedActor {
             pass;
         }
 
-        if (o instanceof Actor) {
+        if (o instanceof RemoteActor) {
+//            System.err.println("RECEIVED A REMOTE ACTOR WITH HASHCODE: " + o.hashCode());
+
+        } else if (o instanceof Actor) {
             Actor actor = (Actor)o;
 
 //            System.err.println("RECEIVED AN ACTOR WITH HASHCODE: " + actor.hashCode());

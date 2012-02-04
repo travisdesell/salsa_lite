@@ -87,6 +87,13 @@ public class TransportService {
 //        System.err.println("sending remote message to [" + host + " : " + port + "]: " + message);
     }
 
+    public static final void createRemotely(String host, int port, Object remoteCreator) {
+        OutgoingTheaterConnection out = getSocket(host, port);
+        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, out, 4 /*createRemotely*/, new Object[]{remoteCreator}));
+
+//        System.err.println("sending createRemotely to [" + host + " : " + port + "]: " + remoteCreator);
+    }
+
     public static final void migrateActor(String host, int port, MobileActor.State actor) {
         actor.host = host;
         actor.port = port;
