@@ -507,14 +507,14 @@ public class CCompilationUnit {
                 code += CIndent.getIndent() + "    String name;\n";
                 code += CIndent.getIndent() + "    String host;\n";
                 code += CIndent.getIndent() + "    int port;\n";
-                code += CIndent.getIndent() + "    int target_stage;\n";
+                code += CIndent.getIndent() + "    int target_stage_id;\n";
                 code += "\n";
                 code += CIndent.getIndent() + "    RemoteCreationStub(String name, String host, int port) { this.name = name; this.host = host; this.port = port; }\n";
-                code += CIndent.getIndent() + "    RemoteCreationStub(String name, String host, int port, SynchronousMailboxStage ts) { this.name = name; this.host = host; this.port = port; this.target_stage = ts.getStageId(); }\n";
+                code += CIndent.getIndent() + "    RemoteCreationStub(String name, String host, int port, int target_stage_id) { this.name = name; this.host = host; this.port = port; this.target_stage_id = target_stage_id; }\n";
                 code += "\n";
                 code += CIndent.getIndent() + "    public Object readResolve() throws java.io.ObjectStreamException {\n";
-                code += CIndent.getIndent() + "        if (target_stage < 0) return new " + tmp_name + "(name, StageService.getNewStage());\n";
-                code += CIndent.getIndent() + "        else return new " + tmp_name + "(name, StageService.getStage(target_stage));\n";
+                code += CIndent.getIndent() + "        if (target_stage_id < 0) return new " + tmp_name + "(name, -1 /*-1 means a new stage*/);\n";
+                code += CIndent.getIndent() + "        else return new " + tmp_name + "(name, target_stage_id);\n";
                 code += CIndent.getIndent() + "    }\n";
                 code += CIndent.getIndent() + "}\n\n";
 
@@ -524,13 +524,13 @@ public class CCompilationUnit {
                 code += "\n";
 
                 code += CIndent.getIndent() + "    public Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException {\n";
-                code += CIndent.getIndent() + "        TransportService.sendMessageToRemote(getHost(), getPort(), this.stage.message);\n";
+                code += CIndent.getIndent() + "        TransportService.sendMessageToRemote(getHost(), getPort(), this.getStage().message);\n";
                 code += CIndent.getIndent() + "        throw new RemoteMessageException();\n";
                 code += CIndent.getIndent() + "    }\n";
                 code += "\n";
 
                 code += CIndent.getIndent() + "    public void invokeConstructor(int messageId, Object[] arguments) throws RemoteMessageException, ConstructorNotFoundException {\n";
-                code += CIndent.getIndent() + "        TransportService.sendMessageToRemote(getHost(), getPort(), this.stage.message);\n";
+                code += CIndent.getIndent() + "        TransportService.sendMessageToRemote(getHost(), getPort(), this.getStage().message);\n";
                 code += CIndent.getIndent() + "        throw new RemoteMessageException();\n";
                 code += CIndent.getIndent() + "    }\n";
                 code += "\n";
@@ -587,13 +587,13 @@ public class CCompilationUnit {
                 code += "\n";
 
                 code += CIndent.getIndent() + "    public Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException {\n";
-                code += CIndent.getIndent() + "        TransportService.sendMessageToRemote(host, port, this.stage.message);\n";
+                code += CIndent.getIndent() + "        TransportService.sendMessageToRemote(host, port, this.getStage().message);\n";
                 code += CIndent.getIndent() + "        throw new RemoteMessageException();\n";
                 code += CIndent.getIndent() + "    }\n";
                 code += "\n";
 
                 code += CIndent.getIndent() + "    public void invokeConstructor(int messageId, Object[] arguments) throws RemoteMessageException, ConstructorNotFoundException {\n";
-                code += CIndent.getIndent() + "        TransportService.sendMessageToRemote(host, port, this.stage.message);\n";
+                code += CIndent.getIndent() + "        TransportService.sendMessageToRemote(host, port, this.getStage().message);\n";
                 code += CIndent.getIndent() + "        throw new RemoteMessageException();\n";
                 code += CIndent.getIndent() + "    }\n";
                 code += "\n";
@@ -681,7 +681,7 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "    if (entry instanceof State) {\n";
             code += CIndent.getIndent() + "        return ((State)entry).invokeMessage(messageId, arguments);\n";
             code += CIndent.getIndent() + "    } else {\n";
-            code += CIndent.getIndent() + "        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, ((OutgoingTheaterConnection)entry), 2 /*send*/, new Object[]{this.stage.message}));\n";
+            code += CIndent.getIndent() + "        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, ((OutgoingTheaterConnection)entry), 2 /*send*/, new Object[]{this.getStage().message}));\n";
             code += CIndent.getIndent() + "        throw new RemoteMessageException();\n";
             code += CIndent.getIndent() + "    }\n";
             code += CIndent.getIndent() + "}\n";
@@ -695,7 +695,7 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "    if (entry instanceof State) {\n";
             code += CIndent.getIndent() + "        ((State)entry).invokeConstructor(messageId, arguments);\n";
             code += CIndent.getIndent() + "    } else {\n";
-            code += CIndent.getIndent() + "        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, ((OutgoingTheaterConnection)entry), 2 /*send*/, new Object[]{this.stage.message}));\n";
+            code += CIndent.getIndent() + "        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, ((OutgoingTheaterConnection)entry), 2 /*send*/, new Object[]{this.getStage().message}));\n";
             code += CIndent.getIndent() + "        throw new RemoteMessageException();\n";
             code += CIndent.getIndent() + "    }\n";
             code += CIndent.getIndent() + "}\n\n\n";
@@ -703,10 +703,11 @@ public class CCompilationUnit {
             if (!isStaged()) {
                 code += CIndent.getIndent() + "public " + tmp_name + "(String name, NameServer nameserver) { super(name, nameserver); }\n";
             } else {
-                code += CIndent.getIndent() + "public " + tmp_name + "() { super(StageService.getNewStage()); }\n";
+                code += CIndent.getIndent() + "public " + tmp_name + "() { super(-1 /*-1 means new stage*/); }\n";
             }
-            code += CIndent.getIndent() + "public " + tmp_name + "(String name, NameServer nameserver, SynchronousMailboxStage stage) { super(name, nameserver, stage); }\n";
+            code += CIndent.getIndent() + "public " + tmp_name + "(String name, NameServer nameserver, int stage_id) { super(name, nameserver, stage_id); }\n";
             code += CIndent.getIndent() + "public " + tmp_name + "(String name, NameServer nameserver, String lastKnownHost, int lastKnownPort) { super(name, nameserver, lastKnownHost, lastKnownPort); }\n\n";
+            code += CIndent.getIndent() + "public " + tmp_name + "(String name, NameServer nameserver, String lastKnownHost, int lastKnownPort, int stage_id) { super(name, nameserver, lastKnownHost, lastKnownPort, stage_id); }\n\n";
 
             int act_constructor = behavior_declaration.getActConstructor();
             if (act_constructor >= 0) {
@@ -718,7 +719,7 @@ public class CCompilationUnit {
                 code += CIndent.getIndent() + "        System.err.println(\"Error starting " + tmp_name + ": to run a mobile actor you must specify a name with the '-Dcalled=<name>' system property and a namesever with the '-Dusing=\\\"<nameserver_host>:<nameserver_port>/<nameserver_name>\\\"' system property.\");\n";
                 code += CIndent.getIndent() + "        System.err.println(\"usage: (port is optional and 4040 by default)\");\n";
                 if (getModule() == null) {
-                    code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dcalled=\\\"<name>\\\" -Dusing=[-Dport=4040] " + tmp_name + "\");\n";
+                    code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dcalled=\\\"<name>\\\" -Dusing=\\\"nameserver_host:nameserver_port/nameserver_name\\\" [-Dport=4040] " + tmp_name + "\");\n";
                 } else {
                     code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dcalled=\\\"<name>\\\" [-Dport=4040] " + getModule() + "." + tmp_name + "\");\n";
                 }
@@ -741,23 +742,23 @@ public class CCompilationUnit {
 
             code += CIndent.getIndent() + "public static " + tmp_name + " construct(int constructor_id, Object[] arguments, String name, NameServer nameserver) {\n";
             code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver);\n";
-            code += CIndent.getIndent() + "    State state = new State(name, nameserver, actor.stage);\n\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserver, actor.getStageId());\n\n";
             code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, nameserver, 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
             code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
             code += CIndent.getIndent() + "    return actor;\n";
             code += CIndent.getIndent() + "}\n\n";
 
-            code += CIndent.getIndent() + "public static " + tmp_name + " construct(int constructor_id, Object[] arguments, String name, NameServer nameserver, SynchronousMailboxStage target_stage) {\n";
-            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, target_stage);\n";
-            code += CIndent.getIndent() + "    State state = new State(name, nameserver, target_stage);\n\n";
+            code += CIndent.getIndent() + "public static " + tmp_name + " construct(int constructor_id, Object[] arguments, String name, NameServer nameserver, int target_stage_id) {\n";
+            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, target_stage_id);\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserver, target_stage_id);\n\n";
             code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, nameserver, 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
-            code += CIndent.getIndent() + "    target_stage.putMessageInMailbox(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
+            code += CIndent.getIndent() + "    actor.getStage().putMessageInMailbox(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
             code += CIndent.getIndent() + "    return actor;\n";
             code += CIndent.getIndent() + "}\n\n\n";
 
             code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, NameServer nameserver) {\n";
             code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver);\n";
-            code += CIndent.getIndent() + "    State state = new State(name, nameserver, actor.stage);\n\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserver, actor.getStageId());\n\n";
             code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, nameserver, 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
             code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);\n";
             code += CIndent.getIndent() + "    Message input_message = new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
@@ -765,13 +766,13 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "    return output_continuation;\n";
             code += CIndent.getIndent() + "}\n\n";
 
-            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, NameServer nameserver, SynchronousMailboxStage target_stage) {\n";
-            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, target_stage);\n";
-            code += CIndent.getIndent() + "    State state = new State(name, nameserver, target_stage);\n\n";
+            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, NameServer nameserver, int target_stage_id) {\n";
+            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, target_stage_id);\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserver, target_stage_id);\n\n";
             code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, nameserver, 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
-            code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage);\n";
+            code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage_id);\n";
             code += CIndent.getIndent() + "    Message input_message = new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
-            code += CIndent.getIndent() + "    MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage);\n";
+            code += CIndent.getIndent() + "    MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage_id);\n";
             code += CIndent.getIndent() + "    return output_continuation;\n";
             code += CIndent.getIndent() + "}\n\n";
 
@@ -779,10 +780,10 @@ public class CCompilationUnit {
             //need one for host port and no tokens, one for host port stage and no tokens, one for host port and tokens and one for host port stage and tokens
             code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, String name, NameServer nameserver, String host, int port) {\n";
             code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, host, port);\n";
-            code += CIndent.getIndent() + "    State state = new State(name, nameserver, host, port, actor.stage);\n\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserver, host, port, actor.getStageId());\n\n";
             code += CIndent.getIndent() + "    if (! (host.equals(TransportService.getHost()) && port == TransportService.getPort()) ) {\n";
-            code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getStateLock(this.hashCode())) {\n";
-            code += CIndent.getIndent() + "            MobileActorRegistry.updateStateEntry(this.hashCode(), TransportService.getSocket(host, port));\n";
+            code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getStateLock(actor.hashCode())) {\n";
+            code += CIndent.getIndent() + "            MobileActorRegistry.updateStateEntry(actor.hashCode(), TransportService.getSocket(host, port));\n";
             code += CIndent.getIndent() + "        }\n";
             code += CIndent.getIndent() + "        TransportService.migrateActor(host, port, state);\n";
             code += CIndent.getIndent() + "    }\n\n";
@@ -792,12 +793,12 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "    return output_continuation;\n";
             code += CIndent.getIndent() + "}\n\n";
 
-            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, String name, NameServer nameserver, String host, int port, SynchronousMailboxStage target_stage) {\n";
-            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, host, port, target_stage);\n";
-            code += CIndent.getIndent() + "    State state = new State(name, nameserver, host, port, target_stage);\n\n";
+            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, String name, NameServer nameserver, String host, int port, int target_stage_id) {\n";
+            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, host, port, target_stage_id);\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserver, host, port, target_stage_id);\n\n";
             code += CIndent.getIndent() + "    if (! (host.equals(TransportService.getHost()) && port == TransportService.getPort()) ) {\n";
-            code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getStateLock(this.hashCode())) {\n";
-            code += CIndent.getIndent() + "            MobileActorRegistry.updateStateEntry(this.hashCode(), TransportService.getSocket(host, port));\n";
+            code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getStateLock(actor.hashCode())) {\n";
+            code += CIndent.getIndent() + "            MobileActorRegistry.updateStateEntry(actor.hashCode(), TransportService.getSocket(host, port));\n";
             code += CIndent.getIndent() + "        }\n";
             code += CIndent.getIndent() + "        TransportService.migrateActor(host, port, state);\n";
             code += CIndent.getIndent() + "    }\n\n";
@@ -809,10 +810,10 @@ public class CCompilationUnit {
 
             code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, NameServer nameserver, String host, int port) {\n";
             code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, host, port);\n";
-            code += CIndent.getIndent() + "    State state = new State(name, nameserver, host, port, actor.stage);\n\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserver, host, port, actor.getStageId());\n\n";
             code += CIndent.getIndent() + "    if (! (host.equals(TransportService.getHost()) && port == TransportService.getPort()) ) {\n";
-            code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getStateLock(this.hashCode())) {\n";
-            code += CIndent.getIndent() + "            MobileActorRegistry.updateStateEntry(this.hashCode(), TransportService.getSocket(host, port));\n";
+            code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getStateLock(actor.hashCode())) {\n";
+            code += CIndent.getIndent() + "            MobileActorRegistry.updateStateEntry(actor.hashCode(), TransportService.getSocket(host, port));\n";
             code += CIndent.getIndent() + "        }\n";
             code += CIndent.getIndent() + "        TransportService.migrateActor(host, port, state);\n";
             code += CIndent.getIndent() + "    }\n\n";
@@ -823,19 +824,19 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "    return output_continuation;\n";
             code += CIndent.getIndent() + "}\n\n";
 
-            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, NameServer nameserver, String host, int port, SynchronousMailboxStage target_stage) {\n";
-            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, host, port, target_stage);\n";
-            code += CIndent.getIndent() + "    State state = new State(name, nameserver, host, port, target_stage);\n\n";
+            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, NameServer nameserver, String host, int port, int target_stage_id) {\n";
+            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, host, port, target_stage_id);\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserver, host, port, target_stage_id);\n\n";
             code += CIndent.getIndent() + "    if (! (host.equals(TransportService.getHost()) && port == TransportService.getPort()) ) {\n";
-            code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getStateLock(this.hashCode())) {\n";
-            code += CIndent.getIndent() + "            MobileActorRegistry.updateStateEntry(this.hashCode(), TransportService.getSocket(host, port));\n";
+            code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getStateLock(actor.hashCode())) {\n";
+            code += CIndent.getIndent() + "            MobileActorRegistry.updateStateEntry(actor.hashCode(), TransportService.getSocket(host, port));\n";
             code += CIndent.getIndent() + "        }\n";
             code += CIndent.getIndent() + "        TransportService.migrateActor(host, port, state);\n";
             code += CIndent.getIndent() + "    }\n\n";
             code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, nameserver, 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
-            code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage);\n";
+            code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage_id);\n";
             code += CIndent.getIndent() + "    Message input_message = new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
-            code += CIndent.getIndent() + "    MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage);\n";
+            code += CIndent.getIndent() + "    MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage_id);\n";
             code += CIndent.getIndent() + "    return output_continuation;\n";
             code += CIndent.getIndent() + "}\n\n\n";
 
@@ -853,24 +854,26 @@ public class CCompilationUnit {
             if (!isStaged()) {
                 code += CIndent.getIndent() + "public State(String name, NameServer nameserver) { super(name, nameserver); }\n";
             } else {
-                code += CIndent.getIndent() + "public State(String name, NameServer nameserver) { super(name, nameserver, StageService.getNewStage()); }\n";
+                code += CIndent.getIndent() + "public State(String name, NameServer nameserver) { super(name, nameserver, -1 /*-1 means new stage*/); }\n";
             }
-            code += CIndent.getIndent() + "public State(String name, NameServer nameserver, SynchronousMailboxStage stage) { super(name, nameserver, stage); }\n\n";
+            code += CIndent.getIndent() + "public State(String name, NameServer nameserver, int stage_id) { super(name, nameserver, stage_id); }\n\n";
+            code += CIndent.getIndent() + "public State(String name, NameServer nameserver, String host, int port) { super(name, nameserver, host, port); }\n\n";
+            code += CIndent.getIndent() + "public State(String name, NameServer nameserver, String host, int port, int stage_id) { super(name, nameserver, host, port, stage_id); }\n\n";
         } else if (isRemote()) {
             if (!isStaged()) {
                 code += CIndent.getIndent() + "public " + actor_name + "(String name) { super(name); }\n";
             } else {
-                code += CIndent.getIndent() + "public " + actor_name + "(String name) { super(name, StageService.getNewStage()); }\n";
+                code += CIndent.getIndent() + "public " + actor_name + "(String name) { super(name, -1 /*-1 means new stage*/); }\n";
             }
-            code += CIndent.getIndent() + "public " + actor_name + "(String name, SynchronousMailboxStage stage) { super(name, stage); }\n";
+            code += CIndent.getIndent() + "public " + actor_name + "(String name, int stage_id) { super(name, stage_id); }\n";
             code += CIndent.getIndent() + "private " + actor_name + "(String name, String host, int port) { super(name, host, port); }\n\n";
         } else {
             if (!isStaged()) {
                 code += CIndent.getIndent() + "public " + actor_name + "() { super(); }\n";
             } else {
-                code += CIndent.getIndent() + "public " + actor_name + "() { super(StageService.getNewStage()); }\n";
+                code += CIndent.getIndent() + "public " + actor_name + "() { super(-1 /*-1 means new stage*/); }\n";
             }
-            code += CIndent.getIndent() + "public " + actor_name + "(SynchronousMailboxStage stage) { super(stage); }\n\n";
+            code += CIndent.getIndent() + "public " + actor_name + "(int stage_id) { super(stage_id); }\n\n";
         }
 
         if (isMobile()) {
@@ -937,13 +940,13 @@ public class CCompilationUnit {
                 code += CIndent.getIndent() + "}\n\n";
 
                 if (isRemote()) {
-                    code += CIndent.getIndent() + "public static " + actor_name + " construct(int constructor_id, Object[] arguments, String name, SynchronousMailboxStage target_stage) {\n";
-                    code += CIndent.getIndent() + "    " + actor_name + " actor = new " + actor_name + "(name, target_stage);\n";
+                    code += CIndent.getIndent() + "public static " + actor_name + " construct(int constructor_id, Object[] arguments, String name, int target_stage_id) {\n";
+                    code += CIndent.getIndent() + "    " + actor_name + " actor = new " + actor_name + "(name, target_stage_id);\n";
                 } else {
-                    code += CIndent.getIndent() + "public static " + actor_name + " construct(int constructor_id, Object[] arguments, SynchronousMailboxStage target_stage) {\n";
-                    code += CIndent.getIndent() + "    " + actor_name + " actor = new " + actor_name + "(target_stage);\n";
+                    code += CIndent.getIndent() + "public static " + actor_name + " construct(int constructor_id, Object[] arguments, int target_stage_id) {\n";
+                    code += CIndent.getIndent() + "    " + actor_name + " actor = new " + actor_name + "(target_stage_id);\n";
                 }
-                code += CIndent.getIndent() + "    target_stage.putMessageInMailbox(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
+                code += CIndent.getIndent() + "    actor.getStage().putMessageInMailbox(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
                 code += CIndent.getIndent() + "    return actor;\n";
                 code += CIndent.getIndent() + "}\n\n";
  
@@ -961,15 +964,15 @@ public class CCompilationUnit {
                 code += CIndent.getIndent() + "}\n\n";
 
                 if (isRemote()) {
-                    code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, SynchronousMailboxStage target_stage) {\n";
-                    code += CIndent.getIndent() + "    " + actor_name + " actor = new " + actor_name + "(name, target_stage);\n";
+                    code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, int target_stage_id) {\n";
+                    code += CIndent.getIndent() + "    " + actor_name + " actor = new " + actor_name + "(name, target_stage_id);\n";
                 } else {
-                    code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, SynchronousMailboxStage target_stage) {\n";
-                    code += CIndent.getIndent() + "    " + actor_name + " actor = new " + actor_name + "(target_stage);\n";
+                    code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, int target_stage_id) {\n";
+                    code += CIndent.getIndent() + "    " + actor_name + " actor = new " + actor_name + "(target_stage_id);\n";
                 }
-                code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage);\n";
+                code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage_id);\n";
                 code += CIndent.getIndent() + "    Message input_message = new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
-                code += CIndent.getIndent() + "    MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage);\n";
+                code += CIndent.getIndent() + "    MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage_id);\n";
                 code += CIndent.getIndent() + "    return output_continuation;\n";
                 code += CIndent.getIndent() + "}\n\n";
 
@@ -984,9 +987,9 @@ public class CCompilationUnit {
                     code += CIndent.getIndent() + "    return output_continuation;\n";
                     code += CIndent.getIndent() + "}\n\n";
 
-                    code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, String name, String host, int port, SynchronousMailboxStage target_stage) {\n";
+                    code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, String name, String host, int port, int target_stage_id) {\n";
                     code += CIndent.getIndent() + "    " + actor_name + " actor = " + actor_name + ".getRemoteReference(name, host, port);\n";
-                    code += CIndent.getIndent() + "    TransportService.createRemotely(host, port, new " + actor_name + ".RemoteCreationStub(name, host, port, target_stage));\n";  //may need to have this continue to the next message
+                    code += CIndent.getIndent() + "    TransportService.createRemotely(host, port, new " + actor_name + ".RemoteCreationStub(name, host, port, target_stage_id));\n";  //may need to have this continue to the next message
                     code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);\n";
                     code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation));\n";
                     code += CIndent.getIndent() + "    return output_continuation;\n";
@@ -1001,12 +1004,12 @@ public class CCompilationUnit {
                     code += CIndent.getIndent() + "    return output_continuation;\n";
                     code += CIndent.getIndent() + "}\n\n";
 
-                    code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, String host, int port, SynchronousMailboxStage target_stage) {\n";
+                    code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, String host, int port, int target_stage_id) {\n";
                     code += CIndent.getIndent() + "    " + actor_name + " actor = " + actor_name + ".getRemoteReference(name, host, port);\n";
-                    code += CIndent.getIndent() + "    TransportService.createRemotely(host, port, new " + actor_name + ".RemoteCreationStub(name, host, port, target_stage));\n";  //may need to have this continue to the next message
-                    code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage);\n";
+                    code += CIndent.getIndent() + "    TransportService.createRemotely(host, port, new " + actor_name + ".RemoteCreationStub(name, host, port, target_stage_id));\n";  //may need to have this continue to the next message
+                    code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage_id);\n";
                     code += CIndent.getIndent() + "    Message input_message = new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
-                    code += CIndent.getIndent() + "    MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage);\n";
+                    code += CIndent.getIndent() + "    MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage_id);\n";
                     code += CIndent.getIndent() + "    return output_continuation;\n";
                     code += CIndent.getIndent() + "}\n\n\n";
                 }

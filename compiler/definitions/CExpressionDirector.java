@@ -73,7 +73,7 @@ public class CExpressionDirector {
         code += "Actor";
 
 		code += " {\n";
-        code += CIndent.getIndent() + "    public " + expression_director_name + "(SynchronousMailboxStage stage) { super(stage); }\n";
+        code += CIndent.getIndent() + "    public " + expression_director_name + "(int stage_id) { super(stage_id); }\n";
         code += CIndent.getIndent() + "    public void invokeConstructor(int id, Object[] arguments) {}\n";
 
 		code += CIndent.getIndent() + "    public Object invokeMessage(int messageId, Object[] arguments) {\n";
@@ -97,11 +97,11 @@ public class CExpressionDirector {
 			code += "StageService.sendImplicitTokenMessage(new " + expression_director_name + "(";
 		}
 
-        code += "this.stage";
+        code += "this.getStageId()";
 		code += "), 0, new Object[]{" + arguments_code + "}, new int[]{" + token_position_code + "}";
 
 		if (SymbolTable.continuesToPass && !SymbolTable.withinArguments) {
-            code += ", this.stage.message.continuationDirector";
+            code += ", this.getStage().message.continuationDirector";
 		}
 		
 		code += ")";

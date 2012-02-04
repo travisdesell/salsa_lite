@@ -55,18 +55,18 @@ Notable changes from SALSA 1.x and before:
         or if the RemoteActor is local:
             MyActor a = reference MyActor called (<name>);
     *   NameServers are now first class RemoteActors, see salsa_lite.runtime.wwc.NameServer
-    *   A reference to a MobileActor can be created via a NameServer instead of by using a host/port (as that would be unreliable):
+    *   A reference to a MobileActor can be created via a NameServer instead of by using a host/port (as that would be unreliable).  Note that this returns a token:
             NameServer myNameServer = reference NameServer called (<name>) at (<host>, <port>);
             token MyMobileActor a = reference MyMobileActor called (<name>) using (myNameServer); //this has to be a token
         or:
             NameServer myNameServer = reference NameServer called (<name>) at (<host>, <port>);
             token MyMobileActor a = (token MyMobileActor)(myNameServer<-get(<name>));
         or:
-            MyMobleActor a = reference MyMobileActor called (<name>) using (reference NameServer at (<host>, <port>) called (<name>));
-    *   A Remote or Mobile actor can be created remotely with similar semantics:
+            token MyMobleActor a = reference MyMobileActor called (<name>) using (reference NameServer at (<host>, <port>) called (<name>));
+    *   A Remote or Mobile actor can be created remotely with similar semantics (again note that these return tokens):
             NameServer myNameServer = reference NameServer called (<name) at (<host>, <port>);
-            MyMobileActor myMobileActor = new MyMobileActor(...) called (<name>) using (myNameServer) at (<host>, <port>);
-            MyRemoteActor myRemoteActor = new MyRemoteActor(...) called (<name>) at (<host>, <port>);
+            token MyMobileActor myMobileActor = new MyMobileActor(...) called (<name>) using (myNameServer) at (<host>, <port>);
+            token MyRemoteActor myRemoteActor = new MyRemoteActor(...) called (<name>) at (<host>, <port>);
         or locally:
             NameServer myNameServer = reference NameServer called (<name) at (<host>, <port>);
             MyMobileActor myMobileActor = new MyMobileActor(...) called (<name>) using (myNameServer);
@@ -74,7 +74,7 @@ Notable changes from SALSA 1.x and before:
        called and using are optional, however without a name and NameServer a MobileActor cannot migrate and without a name a RemoteActor cannot be referenced remotely.
    *    Actors can be created at a specific stage using the 'on' keyword as part of an allocation expression.  This can be combined with 'called', 'using' and 'at' for Remote and Mobile actors as well:
         MyMobileActor myMobileActor = new MyMobileActor(...) called (<name>) using (myNameServer) on (1); // puts it on stage 1
-        MyRemoteActor myRemoteActor = new MyRemoteActor(...) called (<name>) at (host, port) on (1); // puts it on stage 1
+        token MyRemoteActor myRemoteActor = new MyRemoteActor(...) called (<name>) at (host, port) on (1); // puts it on stage 1
         MyActor myActor = new MyActor(...) on (3); // puts it on stage 1
         MyActor myActor = new MyActor(...) on (new SynchronousMailboxStage()); // puts it its own stage
             
@@ -83,13 +83,11 @@ BUGS:
     *   Type checking for generics may not completely work not sure about things like <? super Something> and <T, E extends T, F extends E>.
     *   Syntax for generic methods needs to be added.
     *   Get interfaces working correctly.  They need special messages that know they were sent using an interface, so they invoke the correct message handler.
-    *   Actor.stage should be private, not public.
-    *   Get access modifiers working.
     *   Local actors are serailized the same either locally (because of a deepcopy) or remotely (because of message passing).  This could be made more efficient if we could figure out what stream the actor was being sent over, and storing it in a different registries, one for local, one for remote.  The local one would not need to get the local host and local port to calculate the hashcode, and could remove the actor after deserialization (for garbage collection).
     *   With remote message sending, we need to make sure the host is the same (eg, getting a reference to a remote actor via it's IP address or it's hostname should resolve to the same reference).
     *   Need to fix tests/SendAndPassTest -- 'token ack t = someMessage() @ pass;' or 'token ack t = someMessage() @ otherMessage()' isn't working.
     *   Need to fix wwc.Theater.  It creates two theaters.
-    *   Get remote creation of MobileActors working and for particular stages.
+    *   If a mobile actor is created on stage -1, and it migrates away, that stage is not cleaned up.
 
 TODO:
     *   Add reference redirection for migrated actors -- if there is a remote reference pointing to an actor at another theater which migrates to a different theater, this reference needs to get updated.

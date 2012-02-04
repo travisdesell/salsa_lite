@@ -80,19 +80,9 @@ public class CAllocation extends CVariableInit {
                             CompilerErrors.printErrorMessage("Cannot create a MobileActor without using a nameserver.  Use new " + type.name + "(...) called ('your_name') using (<nameserver or host, port>)", this);
                         }
 
-                        //if the actor is mobile or remote (and we are creating it remotely) we can put it on a particular stage -- if its a new stage that new stage needs to be created at the remote theater, not here
-                        if (host_expression != null && stage_expression != null) {
-                            CompilerErrors.printErrorMessage("NOT IMPLEMENTED: Currently cannot create a MobileActor at a remote stage on a specific stage", stage_expression);
-                        }
-
                     } else if (actorType.isSubclassOf(SymbolTable.getTypeSymbol("RemoteActor"))) {
                         if (called_expression == null) {
                             CompilerErrors.printErrorMessage("Cannot create a RemoteActor without a name.  Use new " + type.name + "(...) called (<unique mobile actor name)", this);
-                        }
-
-                        //if the actor is mobile or remote (and we are creating it remotely) we can put it on a particular stage -- if its a new stage that new stage needs to be created at the remote theater, not here
-                        if (host_expression != null && stage_expression != null) {
-                            CompilerErrors.printErrorMessage("NOT IMPLEMENTED: Currently cannot create a RemoteActor at a remote stage on a specific stage", stage_expression);
                         }
 
                     } else {
@@ -193,8 +183,8 @@ public class CAllocation extends CVariableInit {
                         }
 
                         if (stage_expression != null) {
-                            if (stage_expression.getType().equals(SymbolTable.getTypeSymbol("Integer"))) {
-                                code += ", StageService.getStage(" + stage_expression.toJavaCode() + ")";
+                            if (stage_expression.getType().equals(SymbolTable.getTypeSymbol("Integer")) || stage_expression.getType().equals(SymbolTable.getTypeSymbol("int"))) {
+                                code += ", " + stage_expression.toJavaCode();
                             } else if (stage_expression.getType().isSubclassOf(SymbolTable.getTypeSymbol("Stage"))) {
                                 code += ", " + stage_expression.toJavaCode();
                             } else {

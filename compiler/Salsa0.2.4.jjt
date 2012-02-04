@@ -1201,10 +1201,15 @@ void BindDeclaration(CAllocation allocation) : {
                 expression = Expression()               { allocation.port_expression = expression; }
             ")"
         ]
-    ) | (
-        "on" "("
+        [
+            "on" "("
             expression = Expression()               { allocation.stage_expression = expression; }
-        ")"
+            ")"
+        ]
+    ) | (
+    "on" "("
+        expression = Expression()               { allocation.stage_expression = expression; }
+    ")"
     )
 }
 

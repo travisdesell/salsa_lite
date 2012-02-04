@@ -251,7 +251,7 @@ public class CValue extends CErrorInformation {
                 code += "this";
                 if (modifications.size() == 0 || (modifications.size() > 0 && modifications.get(0) instanceof CMessageSend)) {
                     if (SymbolTable.is_mobile_actor) {
-                        code += ".stage.message.target";        //kind of a hack, so that a mobile actor state doesn't need to have a self reference
+                        code += ".getStage().message.target";        //kind of a hack, so that a mobile actor state doesn't need to have a self reference
                     }
                 }
 
@@ -259,7 +259,7 @@ public class CValue extends CErrorInformation {
                 if (modifications.size() > 0 && modifications.get(0) instanceof CMessageSend) {
                     code += "this";
                     if (SymbolTable.is_mobile_actor) {
-                        code += ".stage.message.target";        //kind of a hack, so that a mobile actor state doesn't need to have a self reference
+                        code += ".getStage().message.target";        //kind of a hack, so that a mobile actor state doesn't need to have a self reference
                     }
                     isParentMessageSend = true;
                 } else {
@@ -551,7 +551,7 @@ public class CValue extends CErrorInformation {
                     }
 
                     if (SymbolTable.continuesToPass && !SymbolTable.withinArguments) {
-                        code += ", this.stage.message.continuationDirector";
+                        code += ", this.getStage().message.continuationDirector";
                     }
 
                     if (currentValueIsToken) {

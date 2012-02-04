@@ -31,8 +31,11 @@ behavior RemoteCreator extends RemoteActor {
         }
 
         for (int i = 0; i < hosts.size(); i++) {
-//            RemoteCreator rc = new RemoteCreator(new StandardOutput()) called ("rc_" + i) at (hosts.get(i), ports.get(i))<-go();
-            new RemoteCreator(new StandardOutput()) called ("rc_" + i) at (hosts.get(i), ports.get(i))<-go();
+            token RemoteCreator rc = new RemoteCreator(new StandardOutput()) called ("rc_" + i) at (hosts.get(i), ports.get(i)) on (-1);
+            rc<-go() @
+            new StandardOutput()<-println("Remote go() finished!");
+
+//            new RemoteCreator(new StandardOutput()) called ("rc_" + i) at (hosts.get(i), ports.get(i))<-go();
         }
     }
 }

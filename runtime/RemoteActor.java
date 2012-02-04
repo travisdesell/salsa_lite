@@ -29,6 +29,7 @@ public abstract class RemoteActor extends Actor {
 
         int hashCode = hashCode();
         this.stage = StageService.stages[Math.abs(hashCode % StageService.number_stages)];
+        this.stage_id = stage.getStageId();
 
 //        System.err.println("Created a remote actor at with pre-specified host: " + host + " and port: " + port);
     }
@@ -41,6 +42,7 @@ public abstract class RemoteActor extends Actor {
 
         int hashCode = hashCode();
         this.stage = StageService.stages[Math.abs(hashCode % StageService.number_stages)];
+        this.stage_id = stage.getStageId();
 
         Object lock = RemoteActorRegistry.getLock(hashCode);
         synchronized (lock) {
@@ -50,14 +52,15 @@ public abstract class RemoteActor extends Actor {
 //        System.err.println("Created a remote actor at local theater with host: " + host + " and port: " + port + ", and hashcode: " + hashCode);
     }
 
-    public RemoteActor(String name, SynchronousMailboxStage stage) {
+    public RemoteActor(String name, int stage_id) {
         super(false);
         this.name = name;
         this.host = TransportService.getHost();
         this.port = TransportService.getPort();
 
         int hashCode = hashCode();
-        this.stage = stage;
+        this.stage = StageService.getStage(stage_id);
+        this.stage_id = stage_id;
 
         Object lock = RemoteActorRegistry.getLock(hashCode);
         synchronized (lock) {

@@ -41,6 +41,7 @@ public abstract class MobileActor extends Actor {
 
         this.hashCode = Hashing.getHashCodeFor(name, nameserver.getName(), nameserver.getHost(), nameserver.getPort());
         this.stage = StageService.stages[Math.abs(hashCode % StageService.number_stages)];
+        this.stage_id = stage.getStageId();
 
         Object lock = MobileActorRegistry.getReferenceLock(hashCode);
         synchronized (lock) {
@@ -50,7 +51,7 @@ public abstract class MobileActor extends Actor {
 //        System.err.println("Created a mobile actor at local theater with lastKnownHost: " + lastKnownHost + " and lastKnownPort: " + lastKnownPort);
     }
 
-    public MobileActor(String name, NameServer nameserver, SynchronousMailboxStage stage) {
+    public MobileActor(String name, NameServer nameserver, int stage_id) {
         super(false);
         this.name = name;
         this.nameserver = nameserver;
@@ -58,7 +59,8 @@ public abstract class MobileActor extends Actor {
         this.lastKnownPort = TransportService.getPort();
 
         this.hashCode = Hashing.getHashCodeFor(name, nameserver.getName(), nameserver.getHost(), nameserver.getPort());
-        this.stage = stage;
+        this.stage = StageService.getStage(stage_id);
+        this.stage_id = stage_id;
 
         Object lock = MobileActorRegistry.getReferenceLock(hashCode);
         synchronized (lock) {
@@ -77,9 +79,25 @@ public abstract class MobileActor extends Actor {
 
         this.hashCode = Hashing.getHashCodeFor(name, nameserver.getName(), nameserver.getHost(), nameserver.getPort());
         this.stage = StageService.stages[Math.abs(hashCode % StageService.number_stages)];
+        this.stage_id = stage_id;
 
 //        System.err.println("Created a mobile actor with pre-specified lastKnownHost: " + lastKnownHost + " and lastKnownPort: " + lastKnownPort);
     }
+
+    public MobileActor(String name, NameServer nameserver, String lastKnownHost, int lastKnownPort, int stage_id) { 
+        super(false);
+        this.name = name;
+        this.nameserver = nameserver;
+        this.lastKnownHost = lastKnownHost;
+        this.lastKnownPort = lastKnownPort;
+
+        this.hashCode = Hashing.getHashCodeFor(name, nameserver.getName(), nameserver.getHost(), nameserver.getPort());
+        this.stage = StageService.getStage(stage_id);
+        this.stage_id = stage_id;
+
+//        System.err.println("Created a mobile actor with pre-specified lastKnownHost: " + lastKnownHost + " and lastKnownPort: " + lastKnownPort);
+    }
+
 
 
     public abstract static class State extends Actor implements java.io.Serializable {
@@ -108,6 +126,7 @@ public abstract class MobileActor extends Actor {
 
         public State(String name, NameServer nameserver) {
             super(false);
+            this.name = name;
             this.originHost = TransportService.getHost();
             this.originPort = TransportService.getPort();
             this.host = originHost;
@@ -116,26 +135,66 @@ public abstract class MobileActor extends Actor {
 
             int hashCode = hashCode();
             this.stage = StageService.stages[Math.abs(hashCode % StageService.number_stages)];
+            this.stage_id = stage_id;
 
             synchronized (MobileActorRegistry.getStateLock(hashCode)) {
                 MobileActorRegistry.addStateEntry(hashCode, this);
             }
         }
 
-        public State(String name, NameServer nameserver, SynchronousMailboxStage stage) {
+        public State(String name, NameServer nameserver, int stage_id) {
             super(false);
+            this.name = name;
             this.originHost = TransportService.getHost();
             this.originPort = TransportService.getPort();
             this.host = originHost;
             this.port = originPort;
             this.nameserver = nameserver;
-            this.stage = stage;
+            this.stage = StageService.getStage(stage_id);
+            this.stage_id = stage_id;
 
             int hashCode = hashCode();
             synchronized (MobileActorRegistry.getStateLock(hashCode)) {
                 MobileActorRegistry.addStateEntry(hashCode, this);
             }
         }
+
+        public State(String name, NameServer nameserver, String host, int port) {
+            super(false);
+            this.name = name;
+            this.originHost = TransportService.getHost();
+            this.originPort = TransportService.getPort();
+            this.host = host;
+            this.port = port;
+            this.nameserver = nameserver;
+
+            int hashCode = hashCode();
+            this.stage = StageService.stages[Math.abs(hashCode % StageService.number_stages)];
+            this.stage_id = stage_id;
+
+            synchronized (MobileActorRegistry.getStateLock(hashCode)) {
+                MobileActorRegistry.addStateEntry(hashCode, this);
+            }
+        }
+
+
+        public State(String name, NameServer nameserver, String host, int port, int stage_id) {
+            super(false);
+            this.name = name;
+            this.originHost = TransportService.getHost();
+            this.originPort = TransportService.getPort();
+            this.host = host;
+            this.port = port;
+            this.nameserver = nameserver;
+            this.stage = StageService.getStage(stage_id);
+            this.stage_id = stage_id;
+
+            int hashCode = hashCode();
+            synchronized (MobileActorRegistry.getStateLock(hashCode)) {
+                MobileActorRegistry.addStateEntry(hashCode, this);
+            }
+        }
+
 
         private void writeObject(ObjectOutputStream out) throws IOException {
 //            if (out instanceof salsa_lite.common.LocalObjectOutputStream) {
@@ -150,6 +209,7 @@ public abstract class MobileActor extends Actor {
             out.writeObject(originHost);
             out.writeInt(port);
             out.writeObject(host);
+            out.writeInt(stage_id);
         }
 
         private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -159,8 +219,9 @@ public abstract class MobileActor extends Actor {
             this.originHost = (String)in.readObject();
             this.port = in.readInt();
             this.host = (String)in.readObject();
+            this.stage_id = in.readInt();
 
-            this.stage = StageService.stages[Math.abs(hashCode() % StageService.number_stages)];
+            this.stage = StageService.getStage(stage_id);
         }
     }
 }

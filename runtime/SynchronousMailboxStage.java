@@ -18,7 +18,7 @@ public class SynchronousMailboxStage extends Thread {
 	private LinkedList<Message> mailbox;
 	private int id;
 
-    public int getStageId() {
+    public final int getStageId() {
         return id;
     }
 

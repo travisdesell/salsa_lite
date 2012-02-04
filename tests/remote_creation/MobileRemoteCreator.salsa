@@ -32,8 +32,12 @@ behavior MobileRemoteCreator extends MobileActor {
         }
 
         for (int i = 0; i < hosts.size(); i++) {
-//            MobileRemoteCreator rc = new MobileRemoteCreator(new StandardOutput()) called ("rc_" + i) at (hosts.get(i), ports.get(i))<-go();
-            new MobileRemoteCreator(new StandardOutput()) called ("rc_" + i) using (ns) at (hosts.get(i), ports.get(i))<-go();
+            token MobileRemoteCreator rc = new MobileRemoteCreator(new StandardOutput()) called ("rc_" + i) using (ns) at (hosts.get(i), ports.get(i)) on (3);
+            rc<-go() @
+            rc<-migrate(self.getHost(), self.getPort()) @
+            rc<-go() @
+            new StandardOutput()<-println("finished go() at remote theater then migrate and go back to local theater.");
+//            new MobileRemoteCreator(new StandardOutput()) called ("mrc_" + i) using (ns) at (hosts.get(i), ports.get(i))<-go();
         }
     }
 }

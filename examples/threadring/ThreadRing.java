@@ -68,7 +68,6 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
             int hashCode = Hashing.getHashCodeFor(this.hashCode, this.host, this.port);
             synchronized (LocalActorRegistry.getLock(hashCode)) {
                 ThreadRing actor = (ThreadRing)LocalActorRegistry.getEntry(hashCode);
-                System.err.println("DESERIALIZING A REFERENCE TO A LOCAL ACTOR: " + hashCode + " -- " + host + ":" + port + " -- got: " + actor);
                 if (actor == null) {
                     RemoteReference remoteReference = new RemoteReference(this.hashCode, this.host, this.port);
                     LocalActorRegistry.addEntry(hashCode, remoteReference);
@@ -81,7 +80,7 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
     }
 
     public ThreadRing() { super(); }
-    public ThreadRing(SynchronousMailboxStage stage) { super(stage); }
+    public ThreadRing(int stage_id) { super(stage_id); }
 
     ThreadRing next;
     int id;
@@ -157,30 +156,32 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
         ThreadRing.construct(1, new Object[]{arguments});
     }
 
-    public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions) {
-        ThreadRing actor = new ThreadRing();
-        TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);
-        Message input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);
-        MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions});
-        return output_continuation;
-    }
-
     public static ThreadRing construct(int constructor_id, Object[] arguments) {
         ThreadRing actor = new ThreadRing();
         StageService.sendMessage(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));
         return actor;
     }
-    public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, SynchronousMailboxStage target_stage) {
-        ThreadRing actor = new ThreadRing(target_stage);
-        TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage);
-        Message input_message = new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments, output_continuation);
-        MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage);
+
+    public static ThreadRing construct(int constructor_id, Object[] arguments, int target_stage_id) {
+        ThreadRing actor = new ThreadRing(target_stage_id);
+        actor.stage.putMessageInMailbox(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));
+        return actor;
+    }
+
+    public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions) {
+        ThreadRing actor = new ThreadRing();
+        TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);
+        Message input_message = new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation);
+        MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions});
         return output_continuation;
     }
 
-    public static ThreadRing construct(int constructor_id, Object[] arguments, SynchronousMailboxStage target_stage) {
-        ThreadRing actor = new ThreadRing(target_stage);
-        target_stage.putMessageInMailbox(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));
-        return actor;
+    public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, int target_stage_id) {
+        ThreadRing actor = new ThreadRing(target_stage_id);
+        TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage_id);
+        Message input_message = new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation);
+        MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage_id);
+        return output_continuation;
     }
+
 }
