@@ -1,7 +1,7 @@
 Building:
     Make sure the salsa_lite directory is in your classpath.
 
-    To reparse the grammar (and re-generate the compiler files) and recompile salsa run the parse_and_build.sh script.  You'll need JavaCC (the Java Compiler Compiler -- http://javacc.java.net/) installed to be able to modify the grammar and update syntax.
+    To reparse the grammar (and re-generate the compiler files) and recompile salsa run the parse_and_build.sh script.  You'll need JavaCC (the Java Compiler Compiler -- http://javacc.java.net/) installed to be able to modify the grammar and update syntax.  Make sure that the directory you put javacc in is also in your CLASSPATH, and that javacc-version/bin is in your PATH, so you can run the ./parse_and_compile.sh.
 
     To just compile everything (without regenerating the compiler files), run the build.sh script.
 
