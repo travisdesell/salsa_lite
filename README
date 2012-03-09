@@ -36,6 +36,13 @@ Notable changes from SALSA 1.x and before:
     *   Generics are usable.
     *   All parameters are pass-by-copy.  The compiler will insert a deep copy statement around a mutable object (or array) before it is passed as the argument to a message, or passed as a result from a message.  Previous versions of SALSA had pass-by-reference for local messages, and pass-by-copy for remote messages; this change makes everything pass-by-copy.
     *   When importing Java objects, use (for example) 'import object java.util.LinkedList;'. Objects in java.lang are automatically imported.
+    *   The token keyword (to signify the return/pass value of a previous message) is no longer used.  Instead of:
+            'a<-m1() @ b<-m2(token);'
+        It is possible to use the new nested message passing semantics:
+            'b<-m2( a<-m1() );'
+        or named tokens:
+            'token SomeType value = a<-m1();'
+            'b<-m2( value );'
     *   void is not a valid return type for a message handler any more, use ack (for acknowledgement).  This better represents the fact that message handlers that don't return a value can still be used in continuations, as they send an acknowledgement.
     *   return statements are now pass statements. ie: use 'pass 10;' instead of 'return 10;'
     *   currentContinuation is not used anymore, instead pass statements are used.  ie: 'a<-m1() @ currentContinuation;' is now 'a<-m1() @ pass;'.  This will pass an acknowledgement as the first class continuation.  If you want to pass the actual value, use: 'pass a<-m1();'.  It is also possible to pass a token: 'token ack t = a<-m1(); pass t;' which has the same semantics as 'pass a<-m1();'.

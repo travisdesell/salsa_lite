@@ -6,5 +6,7 @@ behavior HelloWorld {
 
         standardOutput<-print("Hello") @
         standardOutput<-println(" World!");
+
+        standardOutput<-print(" new " );
     }
 }
