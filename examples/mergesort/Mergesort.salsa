@@ -1,25 +1,23 @@
-module examples.mergesort;
+import object java.io.FileReader;
+import object java.io.BufferedReader;
+import object java.io.IOException;
+import object java.util.ArrayList;
 
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.Vector;
-
-behavior Mergesort {
+behavior Mergesort extends RemoteActor {
 	long start_time;
 
-	public void act(String[] arguments) {
+	ack act(String[] arguments) {
 		if (!(arguments.length == 5) && !(arguments.length == 3)) {
 			System.err.println("Usage:");
 			System.err.println("\tjava examples.mergesort.Mergesort <#workers> <#elements> <iterations> [theater file] [nameserver]");
 			System.exit(0);
 		}
 
-		if (arguments.length == 5) distributed_start(arguments);
-		else local_start(arguments);
+		if (arguments.length == 5) self.distributed_start(arguments);
+		else self.local_start(arguments);
 	}
 
-	public void distributed_start(String[] arguments) {
+	ack distributed_start(String[] arguments) {
 		int number_workers = Integer.parseInt(arguments[0]);
 		int number_elements = Integer.parseInt(arguments[1]);
 		int iterations = Integer.parseInt(arguments[2]);
@@ -27,7 +25,7 @@ behavior Mergesort {
 		String nameserver = arguments[4];
 
                 // read available theaters
-		Vector theaters = new Vector();
+		ArrayList<String> theaters = new ArrayList<String>();
 		try {
 			BufferedReader in = new BufferedReader(new FileReader(theaters_file));
 			String theater = in.readLine();
@@ -52,9 +50,7 @@ behavior Mergesort {
 
 		for (int i = 0; i < number_workers; i++) {
 			try {
-				UAN uan = new UAN("uan://"+nameserver+"/worker_"+i);
-				UAL ual = new UAL("rmsp://"+theaters.get(i%theaters.size())+"/worker_"+i);
-				workers[i] = new Mergesort() at (uan, ual.getHost(), ual.getPort() );
+				workers[i] = new Mergesort() called ("worker_" + i) at (ual.getHost(), ual.getPort() );
 			} catch (Exception e) {
 				System.err.println("Error generating UAN and UAL: " + e);
 				e.printStackTrace();
@@ -67,17 +63,17 @@ behavior Mergesort {
 //			}
 		}
 
-		mergesort(0, number_workers, elements_per_worker, workers) @
-		token x = finish();
+		self<-mergesort(0, number_workers, elements_per_worker, workers) @
+		token ack x = self<-finish();
 
 		for (int i = 0; i < iterations-1; i++) {
-			mergesort(0, number_workers, elements_per_worker, workers) : waitfor(x) @
-			x = finish();
+			self<-mergesort(0, number_workers, elements_per_worker, workers) : waitfor(x) @
+			x = self<-finish();
 		}
 		start_time = System.currentTimeMillis();
 	}
 
-	public void local_start(String[] arguments) {
+	ack local_start(String[] arguments) {
 		int number_workers = Integer.parseInt(arguments[0]);
 		int number_elements = Integer.parseInt(arguments[1]);
 		int iterations = Integer.parseInt(arguments[2]);
@@ -89,27 +85,25 @@ behavior Mergesort {
 			workers[i] = new Mergesort();
 		}
 
-		mergesort(0, number_workers, elements_per_worker, workers) @
-		token x = finish();
+		self<-mergesort(0, number_workers, elements_per_worker, workers) @
+		token ack x = self<-finish();
 
 		for (int i = 0; i < iterations-1; i++) {
-			mergesort(0, number_workers, elements_per_worker, workers) : waitfor(x) @
-			x = finish();
+			self<-mergesort(0, number_workers, elements_per_worker, workers) : waitfor(x) @
+			x = self<-finish();
 		}
 		start_time = System.currentTimeMillis();
 	}
 
 	double[] mergesort(int worker_num, int max_workers, int elements_per_worker, Mergesort[] workers) {
 		if ((2*worker_num)+1 < max_workers && (2*worker_num)+2 < max_workers) {
-			token x = workers[ (2*worker_num)+1 ]<-mergesort( (2*worker_num)+1, max_workers, elements_per_worker, workers );
-			token y = workers[ (2*worker_num)+2 ]<-mergesort( (2*worker_num)+2, max_workers, elements_per_worker, workers );
-			merge(x, y) @ currentContinuation;
+			token double[] x = workers[ (2*worker_num)+1 ]<-mergesort( (2*worker_num)+1, max_workers, elements_per_worker, workers );
+			token double[] y = workers[ (2*worker_num)+2 ]<-mergesort( (2*worker_num)+2, max_workers, elements_per_worker, workers );
+			pass self<-merge(x, y);
 		} else if ((2*worker_num)+2 < max_workers) {
-			workers[ (2*worker_num)+1 ]<-sort(elements_per_worker) @
-			currentContinuation;
+			pass workers[ (2*worker_num)+1 ]<-sort(elements_per_worker);
 		} else {
-			sort(elements_per_worker) @
-			currentContinuation;
+			pass self<-sort(elements_per_worker);
 		}
 	}
 
@@ -133,7 +127,8 @@ behavior Mergesort {
 				y_position++;
 			}
 		}
-		return result;
+
+		pass result;
 	}
 
 
@@ -152,16 +147,16 @@ behavior Mergesort {
 				}
 			}
 		}
-		return elements;
+		pass elements;
 	}
 
-	void printResults(double[] results) {
+	ack printResults(double[] results) {
 		for (int i = 0; i < results.length; i++) {
 			System.err.println(results[i]);
 		}
 	}
 
-	void finish() {
+	ack finish() {
 		long finish_time = System.currentTimeMillis();
 //		System.err.println("start time: " + start_time);
 //		System.err.println("finish time: " + finish_time);
