@@ -146,6 +146,12 @@ public abstract class TypeSymbol implements Comparable<TypeSymbol> {
         TypeSymbol genericType = null;
         try {
             genericType = SymbolTable.getTypeSymbol( gt );
+            if (!SymbolTable.isGeneric(gt)) {
+//                System.err.println("Found generic type is not generic, setting it to null?");
+            } else {
+//                System.err.println("Found generic type is generic, setting it to null?");
+            }
+
         } catch (SalsaNotFoundException snfe) {
             //                    System.err.println("Could not get declared generic type for '" + gt + "'");
             //                    System.err.println("Going to try and create it.");

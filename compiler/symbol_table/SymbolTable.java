@@ -13,19 +13,19 @@ import salsa_lite.compiler.definitions.CMethodInvocation;
 
 public class SymbolTable {
 
-	static String currentModule;
-	static String runtimeModule;
-	static String languageModule;
-	static String workingDirectory;
+    static String currentModule;
+    static String runtimeModule;
+    static String languageModule;
+    static String workingDirectory;
 
-	public static String currentImportModule;
+    public static String currentImportModule;
 
-	public static void setCurrentModule(String module) { currentModule = module; }
-	public static void setWorkingDirectory(String directory) { workingDirectory = directory; }
-	public static String getCurrentModule() { return currentModule; }
-	public static String getRuntimeModule() { return runtimeModule; }
-	public static String getLanguageModule() { return languageModule; }
-	public static String getWorkingDirectory() { return workingDirectory; }
+    public static void setCurrentModule(String module) { currentModule = module; }
+    public static void setWorkingDirectory(String directory) { workingDirectory = directory; }
+    public static String getCurrentModule() { return currentModule; }
+    public static String getRuntimeModule() { return runtimeModule; }
+    public static String getLanguageModule() { return languageModule; }
+    public static String getWorkingDirectory() { return workingDirectory; }
 
 
     public static HashMap<String,TypeSymbol> knownTypes = new HashMap<String,TypeSymbol>();
@@ -223,22 +223,22 @@ public class SymbolTable {
         return actorType;
     }
 
-	static SymbolTableScope base_scope;
-	static SymbolTableScope scope;
+    static SymbolTableScope base_scope;
+    static SymbolTableScope scope;
 
-	public static void openScope() {
-		SymbolTableScope newScope = new SymbolTableScope();
-		newScope.parent = scope;
+    public static void openScope() {
+        SymbolTableScope newScope = new SymbolTableScope();
+        newScope.parent = scope;
 
-		if (scope == null) newScope.depth = 0;
-		else newScope.depth = newScope.parent.depth + 1;
+        if (scope == null) newScope.depth = 0;
+        else newScope.depth = newScope.parent.depth + 1;
 
-		scope = newScope;
-	}
+        scope = newScope;
+    }
 
-	public static void closeScope() {
-		scope = scope.parent;
-	}
+    public static void closeScope() {
+        scope = scope.parent;
+    }
 
     public static void addGenericVariableType(String name, TypeSymbol typeSymbol) throws VariableDeclarationException {
         addVariableType(name, new VariableTypeSymbol(name, typeSymbol, false, false, true));
@@ -251,17 +251,17 @@ public class SymbolTable {
         addVariableType(name, variableTypeSymbol);
     }
 
-	public static void addVariableType(String name, VariableTypeSymbol type) throws VariableDeclarationException {
-		VariableTypeSymbol symbolInScope = scope.getVariableType(name, false);
+    public static void addVariableType(String name, VariableTypeSymbol type) throws VariableDeclarationException {
+        VariableTypeSymbol symbolInScope = scope.getVariableType(name, false);
 
         if (symbolInScope != null) {
 //            if (!symbolInScope.getType().equals( type.getType() )) 
             throw new VariableDeclarationException(name, type.getType().getLongSignature(), "Conflict of declarations. '" + name + "' already declared in current scope as '" + symbolInScope.getType().getLongSignature() + "', trying to redefine as '" + type.getType().getLongSignature() + "'");
 
         } else {
-			scope.addVariableType(name, type);
+            scope.addVariableType(name, type);
         }
-	}
+    }
 
     public static VariableTypeSymbol getVariableTypeSymbol(String name) throws SalsaNotFoundException {
         try {
@@ -290,9 +290,9 @@ public class SymbolTable {
         }
     }
 
-	public static TypeSymbol getVariableType(String name) throws SalsaNotFoundException {
+    public static TypeSymbol getVariableType(String name) throws SalsaNotFoundException {
         return getVariableTypeSymbol(name).getType();
-	}
+    }
 
     public static boolean isToken(String name) throws SalsaNotFoundException {
         return getVariableTypeSymbol(name).isToken();
@@ -304,74 +304,74 @@ public class SymbolTable {
 
     static TypeSymbol continuationType;
 
-	public static void setContinuationType(TypeSymbol continuationType) {
-		SymbolTable.continuationType = continuationType;
-	}
+    public static void setContinuationType(TypeSymbol continuationType) {
+        SymbolTable.continuationType = continuationType;
+    }
 
-	public static TypeSymbol getContinuationType() {
-		return continuationType;
-	}
+    public static TypeSymbol getContinuationType() {
+        return continuationType;
+    }
 
     public static TypeSymbol currentPassType = null;
 
-	public static String currentMessageName = "";
+    public static String currentMessageName = "";
 
-	public static boolean continuesToPass = false;
-	public static boolean token_pass_exception = false;
-	public static boolean continuation_pass_exception = false;
+    public static boolean continuesToPass = false;
+    public static boolean token_pass_exception = false;
+    public static boolean continuation_pass_exception = false;
     public static boolean continuationTokenMessage = false;
-	public static boolean messageContinues;
-	public static boolean messageRequiresContinuation;
-	public static boolean withinArguments = false;
-	public static int generated_implicit_tokens = 0;
-	public static int generated_expression_directors = 0;
-	public static boolean implicitMessage = false;
+    public static boolean messageContinues;
+    public static boolean messageRequiresContinuation;
+    public static boolean withinArguments = false;
+    public static int generated_implicit_tokens = 0;
+    public static int generated_expression_directors = 0;
+    public static boolean implicitMessage = false;
 
-	public static void newMessageHandler() {
-		scope.joinDirectors = 0;
-		generated_implicit_tokens = 0;
-		generated_expression_directors = 0;
-	}
+    public static void newMessageHandler() {
+        scope.joinDirectors = 0;
+        generated_implicit_tokens = 0;
+        generated_expression_directors = 0;
+    }
 
-	public static String getImplicitTokenName() {
-		return "implicit_token_" + (++generated_implicit_tokens);
-	}
+    public static String getImplicitTokenName() {
+        return "implicit_token_" + (++generated_implicit_tokens);
+    }
 
-	public static String getExpressionDirectorName() {
-		return "ExpressionDirector" + (++generated_expression_directors);
-	}
+    public static String getExpressionDirectorName() {
+        return "ExpressionDirector" + (++generated_expression_directors);
+    }
 
-	static int generated_message_names = 0;
-	public static String getNewLoopMessageName() {
-		return "unnamed_" + (++generated_message_names) + "_loop";
-	}
+    static int generated_message_names = 0;
+    public static String getNewLoopMessageName() {
+        return "unnamed_" + (++generated_message_names) + "_loop";
+    }
 
-	public static String getNewUnnamedMessageName() {
-		return "unnamed_" + (++generated_message_names);
-	}
+    public static String getNewUnnamedMessageName() {
+        return "unnamed_" + (++generated_message_names);
+    }
 
-	public static void newJoinDirector() {
-		scope.joinDirectors++;
-		scope.inJoinDirector = true;
-	}
+    public static void newJoinDirector() {
+        scope.joinDirectors++;
+        scope.inJoinDirector = true;
+    }
 
-	public static void closeJoinDirector() {
-		scope.inJoinDirector = false;
-	}
+    public static void closeJoinDirector() {
+        scope.inJoinDirector = false;
+    }
 
-	public static String getJoinDirector() {
-		return scope.getJoinDirector();
-	}
+    public static String getJoinDirector() {
+        return scope.getJoinDirector();
+    }
 
-	public static boolean firstContinuation() {
-		return scope.firstContinuation();
-	}
+    public static boolean firstContinuation() {
+        return scope.firstContinuation();
+    }
 
-	public static void initializedFirstContinuation() {
-		scope.firstContinuation = false;
-	}
+    public static void initializedFirstContinuation() {
+        scope.firstContinuation = false;
+    }
 
-	public static TypeSymbol getDominatingType(TypeSymbol type1, TypeSymbol type2) throws SalsaNotFoundException {
+    public static TypeSymbol getDominatingType(TypeSymbol type1, TypeSymbol type2) throws SalsaNotFoundException {
 //        System.err.println("getting dominating type2: " + type2.getLongSignature());
 //        System.err.println("getting dominating type1: " + type1.getLongSignature());
 
@@ -387,7 +387,7 @@ public class SymbolTable {
             CompilerErrors.printErrorMessage("Error declaring varible, should not happen in SymbolTable.getDominatingType: " + vde.toString());
             throw new RuntimeException(vde);
         }
-	}
+    }
 
     public static void importDefaultPrimitive(String name, boolean isToken) throws SalsaNotFoundException {
         loadPrimitive(name);
@@ -434,8 +434,8 @@ public class SymbolTable {
 
         currentModule = "";
 
-		runtimeModule = "salsa_lite.runtime";
-		languageModule = runtimeModule + ".language.";
+        runtimeModule = "salsa_lite.runtime";
+        languageModule = runtimeModule + ".language.";
 
 
         try {

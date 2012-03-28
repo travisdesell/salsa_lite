@@ -239,6 +239,10 @@ public class ActorType extends TypeSymbol {
         }
 
         ArrayList<MessageSymbol> superclassMessageHandlers = null;
+
+//        System.err.println("super type is: " + getSuperType().toString());
+//        System.err.println("super type is ActorType? " + (getSuperType() instanceof ActorType));
+
         if (getSuperType() instanceof ActorType) {
             ActorType superType = (ActorType)getSuperType();
 
@@ -284,6 +288,8 @@ public class ActorType extends TypeSymbol {
         for (i = 0; i < superclassMessageHandlers.size(); i++) {
             MessageSymbol sms = superclassMessageHandlers.get(i);
 
+//            System.err.println("adding overloaded method handler for: " + toString() + ": " + sms.toString());
+
             MessageSymbol overloadedMessageHandler = null;
             for (MessageSymbol cms : childMessageHandlers) {
                 if (sms.matches(cms) == 0) {
@@ -316,6 +322,14 @@ public class ActorType extends TypeSymbol {
         for (MessageSymbol ms : message_handlers) ms.id = current++;
         for (MessageSymbol ms : overloaded_message_handlers) ms.id = current++; 
 
+//        System.err.println(toString() + ":");
+        for (MessageSymbol ms : message_handlers) {
+//            System.err.println("\t\t" + ms.toString());
+        }
+//        System.err.println("\toverloaded:");
+        for (MessageSymbol ms : overloaded_message_handlers) {
+//            System.err.println("\t\t" + ms.toString());
+        }
 //        System.err.println("overloaded: " + overloaded_message_handlers.toString());
 //        System.err.println("message handlers: " + message_handlers.toString());
 

@@ -86,12 +86,15 @@ public class ArrayType extends TypeSymbol {
     }
 
     public ArrayType(TypeSymbol subtype, String dimensions) throws SalsaNotFoundException, VariableDeclarationException {
-        if (dimensions.length() > 2) this.subtype = new ArrayType(subtype, dimensions.substring(2, dimensions.length()));
-        else this.subtype = subtype;
+        if (dimensions.length() > 2) {
+            this.subtype = new ArrayType(subtype, dimensions.substring(2, dimensions.length()));
+        } else {
+            this.subtype = subtype;
+        }
 
         this.superType = SymbolTable.getTypeSymbol("java.lang.Object");
-        this.module = subtype.getModule();
-        this.name = subtype.getName() + "[]";
+        this.module = this.subtype.getModule();
+        this.name = this.subtype.getName() + "[]";
 
         FieldSymbol fs = new FieldSymbol(this, "length", SymbolTable.getTypeSymbol("int"));
         fields.add( fs );
