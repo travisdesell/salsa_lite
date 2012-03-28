@@ -78,6 +78,8 @@ public class CForStatement extends CStatement {
         }
         
         code += statement.toJavaCode();
+        if (!(statement instanceof CBlock)) code += ";";
+
         SymbolTable.closeScope();
 
 		return code;
