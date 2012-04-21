@@ -153,6 +153,13 @@ public class Invokable {
                 if (targetArguments.parameterTypes.length != current.parameterTypes.length) continue;
                 System.err.println("\t" + current.getLongSignature());
             }
+
+            System.err.println("all methods:");
+            i = 0;
+            for (Invokable current : invokables) {
+                System.err.println("\t" + current.getLongSignature());
+            }
+
             throw new SalsaNotFoundException(targetArguments.getEnclosingType().getModule(), targetArguments.getEnclosingType().getName(), "Could not find matching targetArguments for '" + targetArguments.getLongSignature() + "'");
         }
 

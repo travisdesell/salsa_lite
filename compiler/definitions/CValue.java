@@ -510,7 +510,8 @@ public class CValue extends CErrorInformation {
                         argument_code += argument.toJavaCode();
                         SymbolTable.withinArguments = false;
 
-                        if (SymbolTable.isMutableObject( argument.getType() )) argument_code += " )";
+//                        System.err.println("is mutable object (" + argument.getType() + "): " + SymbolTable.isMutableObject( argument.getType() ));
+                        if (!argument.isToken() && SymbolTable.isMutableObject( argument.getType() )) argument_code += " )";
 
                         if (!argument.equals(ms.arguments.lastElement())) argument_code += ", ";
                         j++;
