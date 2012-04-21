@@ -126,12 +126,24 @@ public class ActorType extends TypeSymbol {
 	}
 
     public static String findSalsaFile(String name) {
+//        System.err.println("finding SALSA file: " + name + ", module: " + SymbolTable.currentModule);
+
         for (int i = 0; i < classpaths.length; i++) {
             String filename = classpaths[i] + name.replace('.', File.separatorChar) + ".salsa";
-
 //            System.out.println("looking for actor: " + filename);
 
-            if (new File(filename).exists()) return filename;
+            if (new File(filename).exists()) {
+//                System.err.println("\tFound: " + filename);
+                return filename;
+            }
+
+            String longFilename = classpaths[i] + SymbolTable.currentModule.replace('.', File.separatorChar) + name.replace('.', File.separatorChar) + ".salsa";
+//            System.out.println("looking for actor (long name): " + longFilename);
+
+            if (new File(longFilename).exists()) {
+//                System.err.println("\tFound: " + longFilename);
+                return longFilename;
+            }
         }
 
         return null;
