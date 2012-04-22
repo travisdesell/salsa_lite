@@ -194,7 +194,30 @@ public class SymbolTable {
     }
 
     public static ObjectType importObject(String name) throws SalsaNotFoundException, VariableDeclarationException {
+
+        /**
+         *  Should not have to do this but some weird inner class problem is causing it:
+         */
+        if (name.contains("$")) {
+            String tmp = name.substring(0, name.indexOf('$'));
+//            System.err.println("need to remove possible dupication from '" + name + "'");
+//            System.err.println("before $ is: '" + tmp + "'");
+            int length = tmp.length() + 1;
+            String tmp1 = tmp.substring(0, (length / 2) - 1);
+            String tmp2 = tmp.substring(length / 2);
+
+//            System.err.println("tmp1: " + tmp1);
+//            System.err.println("tmp2: " + tmp2);
+
+            if (tmp1.equals(tmp2)) {
+                name = tmp1 + name.substring(name.indexOf('$'));
+ //               System.err.println("fixed name is: '" + name + "'");
+            }
+        }
+
         if (knownTypes.get(name) != null) return (ObjectType)knownTypes.get(name);
+
+//        System.err.println("importing object: " + name);
 
         ObjectType objectType = new ObjectType(name);
         knownTypes.put(objectType.getLongSignature(), objectType);
