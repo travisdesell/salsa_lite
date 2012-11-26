@@ -178,9 +178,20 @@ public class ObjectType extends TypeSymbol {
 
         Field[] fv = importClass.getFields();
         for (i = 0; i < fv.length; i++) {
-//            System.err.println("Object: " + getName() + ", generic field: " + fv[i].toGenericString());
+//            if (isEnum) {
+//                System.err.println("Object: " + getName() + ", generic field: " + fv[i].toGenericString());
+//            }
+
             FieldSymbol fs = new FieldSymbol(this, fv[i]);
             fields.add( fs );
+
+            if (isEnum) {
+                SymbolTable.addGlobalVariableType(fs.getName(), fs.getType().getLongSignature(), false, true);
+                System.err.println("Added variable: " + fs.getName() + ", type: " + fs.getType().getLongSignature());
+            }
+//            if (isEnum) {
+//                System.err.println("Field type is: " + fs.getType());
+//            }
         }
 	}
 }

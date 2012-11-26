@@ -8,6 +8,7 @@ import java.util.Vector;
 import salsa_lite.compiler.symbol_table.SymbolTable;
 import salsa_lite.compiler.symbol_table.ActorType;
 import salsa_lite.compiler.symbol_table.TypeSymbol;
+import salsa_lite.compiler.symbol_table.FieldSymbol;
 import salsa_lite.compiler.symbol_table.ConstructorSymbol;
 import salsa_lite.compiler.symbol_table.MessageSymbol;
 import salsa_lite.compiler.symbol_table.SalsaNotFoundException;
@@ -107,10 +108,20 @@ public class CCompilationUnit {
                     SymbolTable.addVariableType(import_declaration.import_string, import_declaration.import_string, false, true);
 
                 } else if (import_declaration.is_enum) {
+//                    System.err.println("Importing enum : " + import_string);
                     SymbolTable.importObject(import_string);
                     SymbolTable.addVariableType(import_declaration.import_string, import_declaration.import_string, false, true);
 
-                } else SymbolTable.importActor(import_string);
+                    //Need to do this when object is imported because it may be in the same package and not explicitly declared
+//                    for (FieldSymbol field : SymbolTable.getTypeSymbol( import_declaration.import_string ).fields) {
+//                        System.err.println("adding varible: " + field.getName() + " -- type: " + field.getType().getLongSignature());
+//                        SymbolTable.addVariableType(field.getName(), field.getType().getLongSignature(), false, true);
+//                    }
+
+                } else {
+                    SymbolTable.importActor(import_string);
+                }
+
             } catch (VariableDeclarationException vde) {
                 CompilerErrors.printErrorMessage("[CCompilationUnit.getImportDeclarationCode] Could not declare variable. " + vde.toString(), import_declaration);
                 throw new RuntimeException(vde);

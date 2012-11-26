@@ -46,23 +46,23 @@ behavior MeetingPlace {
 
 	Colour doCompliment(Colour c1, Colour c2) {
 		switch (c1) {
-			case Colour.blue:
+			case blue:
 				switch (c2) {
-					case Colour.blue:      pass Colour.blue;
-					case Colour.red:       pass Colour.yellow;
-					case Colour.yellow:    pass Colour.red;
+					case blue:      pass Colour.blue;
+					case red:       pass Colour.yellow;
+					case yellow:    pass Colour.red;
 				}
-			case Colour.red:
+			case red:
 				switch (c2) {
-					case Colour.blue:      pass Colour.yellow;
-					case Colour.red:       pass Colour.red;
-					case Colour.yellow:    pass Colour.blue;
+					case blue:      pass Colour.yellow;
+					case red:       pass Colour.red;
+					case yellow:    pass Colour.blue;
 				}
-			case Colour.yellow:
+			case yellow:
 				switch (c2) {
-					case Colour.blue:      pass Colour.red;
-					case Colour.red:       pass Colour.blue;
-					case Colour.yellow:    pass Colour.yellow;
+					case blue:      pass Colour.red;
+					case red:       pass Colour.blue;
+					case yellow:    pass Colour.yellow;
 				}
 		}
 		System.out.println("Cannot do compliment for unknown colours: " + c1 + ", " + c2);

@@ -274,6 +274,25 @@ public class SymbolTable {
         addVariableType(name, variableTypeSymbol);
     }
 
+    public static void addGlobalVariableType(String name, String typeName, boolean isToken, boolean isStatic) throws SalsaNotFoundException, VariableDeclarationException {
+        SymbolTableScope globalScope = scope;
+
+        while (globalScope.parent != null) globalScope = globalScope.parent;
+
+        VariableTypeSymbol symbolInScope = globalScope.getVariableType(name, false);
+
+        TypeSymbol typeSymbol = getTypeSymbol(typeName);
+        VariableTypeSymbol type = new VariableTypeSymbol(name, typeSymbol, isToken, isStatic, false);
+
+        if (symbolInScope != null) {
+//            if (!symbolInScope.getType().equals( type.getType() )) 
+            throw new VariableDeclarationException(name, type.getType().getLongSignature(), "Conflict of declarations. '" + name + "' already declared in current scope as '" + symbolInScope.getType().getLongSignature() + "', trying to redefine as '" + type.getType().getLongSignature() + "'");
+
+        } else {
+            globalScope.addVariableType(name, type);
+        }
+    }
+
     public static void addVariableType(String name, VariableTypeSymbol type) throws VariableDeclarationException {
         VariableTypeSymbol symbolInScope = scope.getVariableType(name, false);
 
