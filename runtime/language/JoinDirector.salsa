@@ -19,6 +19,13 @@ behavior JoinDirector {
 
             if (valueCount >= reqTokens) {
                 ContinuationDirector continuationDirector = continuationDirectors.get(i);
+
+                if (continuationDirector == null) {
+                    System.err.println("WARNING: Join Director Error: A continuation was not specifed by the resolveAfter message.");
+                    System.err.println("\tThis error should probably be handled by the compiler and not as a runtime error.");
+                    continue;
+                }
+
                 continuationDirector<-resolve();
 
                 requiredTokens.remove(i);

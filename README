@@ -96,6 +96,7 @@ BUGS:
     *   Need to fix wwc.Theater.  It creates two theaters.
     *   If a mobile actor is created on stage -1, and it migrates away, that stage is not cleaned up.
     *   Inheritance is broken again, need to fix it.  Looks like child actors aren't adding the basic Actor message handlers.
+    *   If a joinDirector's resolveAfter message doesn't have a continuation a warning is printed to the screen at runtime.  This should be handled at compile time by the compiler.
 
 TODO:
     *   Add reference redirection for migrated actors -- if there is a remote reference pointing to an actor at another theater which migrates to a different theater, this reference needs to get updated.

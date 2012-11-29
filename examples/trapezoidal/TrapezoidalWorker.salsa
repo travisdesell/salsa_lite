@@ -1,0 +1,33 @@
+/* TrapezoidalWorker.salsa -- Worker for Parallel Trapezoidal Rule
+ *
+ */
+
+behavior TrapezoidalWorker {
+    double f(double x) {	
+        pass 5 * x * x * x;
+    }
+
+    TrapezoidalWorker() {
+    }
+
+    double calculatePartialIntegral(double leftEndpoint, double rightEndpoint, int numberTrapezoids)  {
+        double trapezoidWidth = (rightEndpoint - leftEndpoint) / numberTrapezoids;
+
+        System.out.println("Calculating integral from: " + leftEndpoint + " to " + rightEndpoint);
+
+        double partialIntegral = 0.0;
+        for (int i = 0; i < numberTrapezoids; i++) {
+            double left = leftEndpoint + (i * trapezoidWidth);
+            double right = leftEndpoint + ((i + 1) * trapezoidWidth);
+
+//            System.out.println("f(" + left + ") = " + self.f(left));
+//            System.out.println("f(" + right + ") = " + self.f(right));
+
+            partialIntegral += trapezoidWidth * (self.f(right) + self.f(left)) / 2.0;
+        }
+
+        System.out.println("Partial integral: " + partialIntegral);
+
+        pass partialIntegral;
+    }
+}

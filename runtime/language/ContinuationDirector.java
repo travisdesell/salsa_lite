@@ -113,7 +113,7 @@ public class ContinuationDirector extends Director implements java.io.Serializab
     }
 
     public void construct(Acknowledgement acknowledgement) {
-        this.unresolved = false;
+        ((salsa_lite.runtime.language.ContinuationDirector)this).unresolved = false;
     }
 
 

@@ -122,6 +122,7 @@ TOKEN : {
     | < CATCH: "catch" >
     | < CHAR: "char" >
     | < CONST: "const" >
+    | < CONTINUE: "continue" >
     | < _DEFAULT: "default" >
     | < DELAY: "delay" >
     | < DOUBLE: "double" >
@@ -693,6 +694,7 @@ CStatement Statement() : {
         | statement = WhileStatement()
         | statement = CaseStatement()
         | statement = BreakStatement()
+        | statement = ContinueStatement()
         | statement = DefaultStatement()
         | LOOKAHEAD(<IDENTIFIER> ":") statement = LabelStatement()
         | LOOKAHEAD(["token"] Type() <IDENTIFIER>) statement = LocalVariableDeclaration()    ( t = "@" | t = ";" )
@@ -899,6 +901,15 @@ CBreakStatement BreakStatement() : {
 
     { return break_statement; }
 }
+
+CContinueStatement ContinueStatement() : {
+    CContinueStatement continue_statement = new CContinueStatement();
+} {
+    "continue" ";"
+
+    { return continue_statement; }
+}
+
 
 CLocalVariableDeclaration LocalVariableDeclaration() : {
     CLocalVariableDeclaration local_variable_declaration = new CLocalVariableDeclaration();

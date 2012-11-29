@@ -187,7 +187,7 @@ public class ObjectType extends TypeSymbol {
 
             if (isEnum) {
                 SymbolTable.addGlobalVariableType(fs.getName(), fs.getType().getLongSignature(), false, true);
-                System.err.println("Added variable: " + fs.getName() + ", type: " + fs.getType().getLongSignature());
+//                System.err.println("Added variable: " + fs.getName() + ", type: " + fs.getType().getLongSignature());
             }
 //            if (isEnum) {
 //                System.err.println("Field type is: " + fs.getType());
