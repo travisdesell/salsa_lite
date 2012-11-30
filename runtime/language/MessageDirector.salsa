@@ -1,5 +1,7 @@
 module salsa_lite.runtime.language;
 
+import object salsa_lite.common.NullObject;
+
 behavior MessageDirector extends SynchronizationDirector {
 	Message message;
 	int required_tokens;
@@ -178,8 +180,12 @@ behavior MessageDirector extends SynchronizationDirector {
     }
 
 	ack setValue(int position, Object value) {
-        if (position >= 0) message.arguments[position] = value;
-        else if (position == -1) message.target = (Actor)value;
+        if (position >= 0) {
+            message.arguments[position] = value;
+        } else if (position == -1) {
+            message.target = (Actor)value;
+        }
+
 		required_tokens--;
 
 		if (required_tokens <= 0) StageService.sendMessage(message);

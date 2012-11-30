@@ -49,13 +49,11 @@ public class SynchronousMailboxStage extends Thread {
 	public final void run() {
 		Object result;
 
-        System.err.println("Starting stage: " + id);
-
 		while (true) {
 			message = getMessage();
 
 			try {
-//                System.err.println("invoking message: " + message);
+                System.err.println("invoking message: " + message);
 				switch (message.type) {
 					case Message.CONSTRUCT_MESSAGE:
 						message.target.invokeConstructor(message.message_id, message.arguments);

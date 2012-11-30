@@ -1,8 +1,8 @@
 module salsa_lite.runtime.language;
 
-
 behavior ImplicitTokenDirector extends ValueDirector {
 
+    boolean resolved = false;
 	Object value;
 	SynchronizationDirector director;
 	int position;
@@ -11,7 +11,9 @@ behavior ImplicitTokenDirector extends ValueDirector {
 	}
 
 	ack setValue(Object value) {
-		self.value = value;
+        self.value = value;
+        self.resolved = true;
+
 
 		if (director != null) {
             //need to do this explicitly so the runtime doesn't add a deep copy (which is unnecessary)
@@ -21,10 +23,10 @@ behavior ImplicitTokenDirector extends ValueDirector {
 	}
 
 	ack addDirector(SynchronizationDirector director, int position) {
-        if (value == null) {
+        if (!resolved) {
 			self.director = director;
 			self.position = position;
-		} else {
+        } else {
             //need to do this explicitly so the runtime doesn't add a deep copy (which is unnecessary)
             //director<-setValue(position, value);
             StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 2 /*setValue*/, new Object[]{position, value}));
