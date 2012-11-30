@@ -1,0 +1,60 @@
+behavior DiningTable {
+    Fork[] forks;
+
+
+    DiningTable(String[] arguments) {
+        /**
+          * There are five forks at the table.
+          * A philosopher needs their left and right fork to be able to eat.
+          * After a philosopher eats, they will set down both their forks.
+          */ 
+        forks = new Fork[5];
+        for (int i = 0; i < forks.length; i++) {
+            forks[i] = new Fork(i);
+        }
+
+        /**
+          * There are five philosophers at the table. Each has a name,
+          * a reference to the dining table, and a number for their
+          * left and right forks. There is a fork between each 
+          * philosopher at the circular dining table.
+          *
+          * Note: using 'on (value)' after creating an actor will specify
+          * what stage the actor is created on. By making them all on their own stage
+          * they will all try to grab forks from the dining table
+          * concurrently.
+          */
+        Philosopher plato = new Philosopher("Plato", self, 0, 1);
+        Philosopher confucious = new Philosopher("Confucious", self, 1, 2);
+        Philosopher descartes = new Philosopher("René Descartes", self, 2, 3);
+        Philosopher nietzche = new Philosopher("Friedrich Nietzche", self, 3, 4);
+        Philosopher kant = new Philosopher("Immanuel Kant", self, 4, 0);
+    }
+
+    /**
+     *  When a philosopher grabs a fork, it will be passed to the
+     *  philosopher, and the fork will be set to null in the array.
+     */
+    Fork grabFork(int forkNumber) {
+        if (forks[forkNumber] == null) {
+            System.out.println("Fork " + forkNumber + " is trying to be grabbed, but not at the table!");
+        } else {
+            System.out.println("Fork " + forkNumber + " is being grabbed!");
+        }
+        Fork fork = forks[forkNumber];
+        forks[forkNumber] = null;
+
+        pass fork;
+    }
+
+    /**
+     * When a philosopher is done eating, it will return both its
+     * forks to the dining table (so other philosophers can use
+     * them to eat).
+     */
+    ack returnFork(Fork fork) {
+        System.out.println("Fork " + fork.number + " was returned.");
+        forks[fork.number] = fork;
+    }
+
+}

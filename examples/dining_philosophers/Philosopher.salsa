@@ -1,0 +1,59 @@
+
+
+behavior Philosopher {
+
+    String name;
+    DiningTable table;
+
+    int leftForkNumber, rightForkNumber;
+    Fork leftFork, rightFork;
+
+    Philosopher(String n, DiningTable t, int lf, int rf) {
+        self.name = n;
+        self.table = t;
+        self.leftForkNumber = lf;
+        self.rightForkNumber = rf;
+
+        self<-go();
+    }
+
+    ack go() {
+        System.out.println(name + " is hungry!");
+        self<-holdLeftFork( table<-grabFork(leftForkNumber) );
+    }
+
+    ack holdLeftFork(Fork fork) {
+        if (fork != null) {
+            System.out.println(name + " is holding a left fork: " + fork.number);
+            leftFork = fork;
+            self<-holdRightFork( table<-grabFork(rightForkNumber) );
+        }
+    }
+
+    ack holdRightFork(Fork fork) {
+        if (fork != null) {
+            System.out.println(name + " is holding a right fork: " + fork.number);
+            rightFork = fork;
+            self<-eat();
+        } else {
+            self<-holdRightFork( table<-grabFork(rightForkNumber) );
+        }
+    }
+
+    ack eat() {
+        System.out.println(name + " is eating!");
+
+        table<-returnFork(leftFork) @
+        table<-returnFork(rightFork) @
+        self<-rest();
+
+        leftFork = null;
+        rightFork = null;
+    }
+
+    ack rest() {
+        System.out.println(name + " is in a food coma.");
+        self<-go();
+    }
+
+}
