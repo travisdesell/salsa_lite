@@ -62,7 +62,9 @@ behavior TrapezoidalMaster {
             double left = leftEndpoint + (i * sliceSize);
             double right = leftEndpoint + ((i + 1) * sliceSize);
 
-            self<-accumulate( new TrapezoidalWorker()<-calculatePartialIntegral(left, right, trapezoidsPerWorker) ) @
+            TrapezoidalWorker worker = new TrapezoidalWorker() on (i);
+
+            self<-accumulate( worker<-calculatePartialIntegral(left, right, trapezoidsPerWorker) ) @
             joinDirector<-join();
         }
 

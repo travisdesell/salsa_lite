@@ -22,6 +22,8 @@ PARSER_BEGIN(SalsaParser)
 
     public class SalsaParser {
 
+        public static String currentFilename;
+
         public static void main(String args[]) {
             SalsaParser parser;
 

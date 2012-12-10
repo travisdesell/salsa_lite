@@ -115,3 +115,4 @@ TODO:
     *   Add tests for nested expression directors, ie: a<-m( b<-m( c<-m() + d<-m(), e<-m() ) * f<-m() )
     *   Add tests for method invocations within expression directors, ie: a<-m( Math.log(o.something() + 10 * b<-m()) )
             -- Actualy: Cannot pass tokens to methods (this actually probably isn't a bug -- similar to not being able to pass tokens to conditionals).
+    *   MyActor a = new MyActor() on stage(5) if there aren't 5 stages should make a new stage for it.
