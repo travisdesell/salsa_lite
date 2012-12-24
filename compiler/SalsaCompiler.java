@@ -100,6 +100,7 @@ public class SalsaCompiler {
 				try {
 					String working_directory = files[x].substring(0, files[x].lastIndexOf(File.separatorChar) + 1);
                     CompilerErrors.initialize(files[x]);
+                    SalsaParser.currentFilename = files[x];
 
 					if (x == 0) {
 						SymbolTable.setWorkingDirectory(working_directory);

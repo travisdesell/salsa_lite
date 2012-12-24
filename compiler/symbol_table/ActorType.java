@@ -169,9 +169,14 @@ public class ActorType extends TypeSymbol {
                 throw new SalsaNotFoundException(module, name, "actor");
             } 
 
+            String oldParserFile = SalsaParser.currentFilename;
+            SalsaParser.currentFilename = filename;
+
             FileInputStream fis = new FileInputStream( filename );
             SalsaParser.ReInit(fis);
             cu = SalsaParser.CompilationUnit();
+
+            SalsaParser.currentFilename = oldParserFile;
 
             oldModule = SymbolTable.getCurrentModule();
 //            System.err.println("setting current module to: " + module);

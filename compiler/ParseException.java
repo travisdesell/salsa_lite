@@ -103,7 +103,9 @@ public class ParseException extends Exception {
       }
       expected.append(eol).append("    ");
     }
-    String retval = "Encountered \"";
+    String retval = "\nIn '" + SalsaParser.currentFilename + "',";
+    retval += " encountered \"";
+
     Token tok = currentToken.next;
     for (int i = 0; i < maxSize; i++) {
       if (i != 0) retval += " ";
