@@ -38,8 +38,11 @@ public class CExpression extends CVariableInit {
 
 		if (operator == null) {
 			return value_type;
-		} else if (operator.equals("=")) {
+		} else if (operator.equals("=") || operator.equals("+=") || operator.equals("-=") || operator.equals("*=") || operator.equals("/=") || 
+                   operator.equals("%=") || operator.equals(">>=") || operator.equals("<<=") || operator.equals(">>>=") || operator.equals("&=") || 
+                   operator.equals("|=") || operator.equals("^=")) {
             try {
+
                 if (operator_expression.getType().canMatch(value_type) < 0) {
                     CompilerErrors.printErrorMessage("Conflicting types.  Cannot assign '" + operator_expression.getType().getLongSignature() + "' to '" + value_type.getLongSignature() + "'", operator_expression);
                 }
@@ -149,20 +152,41 @@ public class CExpression extends CVariableInit {
             boolean isExpressionContinuation = SymbolTable.isExpressionContinuation;
             boolean continuationTokenMessage = SymbolTable.continuationTokenMessage;
 
+//            System.err.println();
 //            System.err.println("java code of expression, value.getType(): " + value.getType());
 
             if (value.getType().getLongSignature().equals("ack")) {
 //                System.err.println("continuation token message is true!");
                 SymbolTable.continuationTokenMessage = true;
             }
-            if (operator.equals("=")) SymbolTable.isExpressionContinuation = true;
+
+		    if (operator.equals("=") || operator.equals("+=") || operator.equals("-=") || operator.equals("*=") || operator.equals("/=") || 
+                   operator.equals("%=") || operator.equals(">>=") || operator.equals("<<=") || operator.equals(">>>=") || operator.equals("&=") || 
+                   operator.equals("|=") || operator.equals("^=")) {
+
+//                System.err.println("Is error continuation!");
+                SymbolTable.isExpressionContinuation = true;
+            }
+
+		    if ((operator.equals("=") || operator.equals("+=") || operator.equals("-=") || operator.equals("*=") || operator.equals("/=") || 
+                   operator.equals("%=") || operator.equals(">>=") || operator.equals("<<=") || operator.equals(">>>=") || operator.equals("&=") || 
+                   operator.equals("|=") || operator.equals("^=")) &&
+                   (operator_expression.isToken() && !value.isToken())) {
+//                System.err.println("Problem! value is not token but operator_expression is!");
+                CompilerErrors.printErrorMessage("Trying to assign a token to a non-token variable.", value);
+            }
 
 			code += operator_expression.toJavaCode();
 
 //            System.err.println("code is: " + code);
+//            System.err.println("operator_expression is token? " + operator_expression.isToken());
 
             SymbolTable.continuationTokenMessage = continuationTokenMessage;
-            if (operator.equals("=")) SymbolTable.isExpressionContinuation = isExpressionContinuation;
+		    if (operator.equals("=") || operator.equals("+=") || operator.equals("-=") || operator.equals("*=") || operator.equals("/=") || 
+                   operator.equals("%=") || operator.equals(">>=") || operator.equals("<<=") || operator.equals(">>>=") || operator.equals("&=") || 
+                   operator.equals("|=") || operator.equals("^=")) {
+                SymbolTable.isExpressionContinuation = isExpressionContinuation;
+            }
 		}
 
 		return code;

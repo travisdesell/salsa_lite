@@ -41,6 +41,9 @@ public class SalsaCompiler {
 	private List<String> fileList = new ArrayList<String>();
 	private ArrayList<String> classPaths = new ArrayList<String>();
 
+    public static boolean compilationSuccess = true;
+
+
 	public static String convertToPath(String objectName) {
 		StringTokenizer stringTokenizer = new StringTokenizer(objectName, ".");
 
@@ -122,7 +125,11 @@ public class SalsaCompiler {
 						SymbolTable.resetSymbolTable(cu);
 
 						if (System.getProperty("silent") == null) {
-							System.out.println("SalsaLite Compiler Version " + VERSION + ":  Salsa program parsed successfully.");
+                            if (compilationSuccess) {
+                                System.out.println("SalsaLite Compiler Version " + VERSION + ":  Salsa program parsed successfully.");
+                            } else {
+                                System.out.println("SalsaLite Compiler Version " + VERSION + ":  Salsa program parsed unsuccessfully.");
+                            }
 						}
 
 						if (referenceFile != null) {
@@ -132,7 +139,11 @@ public class SalsaCompiler {
 						}
 
 						if (System.getProperty("silent") == null) {
-							System.out.println("SalsaLite Compiler Version " + VERSION + ":  Salsa program compiled successfully.");
+                            if (compilationSuccess) {
+                                System.out.println("SalsaLite Compiler Version " + VERSION + ":  Salsa program compiled successfully.");
+                            } else {
+                                System.out.println("SalsaLite Compiler Version " + VERSION + ":  Salsa program compiled unsuccessfully.");
+                            }
 						}
 					} catch (IOException e) {
 						System.out.println(e.getMessage());

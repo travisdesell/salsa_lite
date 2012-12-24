@@ -1,5 +1,7 @@
 package salsa_lite.compiler.definitions;
 
+import salsa_lite.compiler.SalsaCompiler;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -46,6 +48,8 @@ public class CompilerErrors {
 
 
     public static void printErrorMessage(String message) {
+        SalsaCompiler.compilationSuccess = false;
+
         System.out.println("COMPILER ERROR: " + message);
 //        System.out.println("COMPILER ERROR: " + message + " [" + currentFile.getName() + "], line [" + ei.beginLine + "], column [" + ei.beginColumn + "]:");
 //        System.out.println(getLine(ei.beginLine));
@@ -54,6 +58,8 @@ public class CompilerErrors {
     }
 
     public static void printErrorMessage(String message, CErrorInformation ei) {
+        SalsaCompiler.compilationSuccess = false;
+
         System.out.println("COMPILER ERROR: " + message + " [" + currentFile.getName() + "], line [" + ei.beginLine + "], column [" + ei.beginColumn + "]:");
         System.out.println(getLine(ei.beginLine));
         System.out.println(getWhitespace(ei.beginColumn) + "^");

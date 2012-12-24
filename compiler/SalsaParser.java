@@ -8,6 +8,9 @@
 
     public class SalsaParser/*@bgen(jjtree)*/implements SalsaParserTreeConstants, SalsaParserConstants {/*@bgen(jjtree)*/
   protected static JJTSalsaParserState jjtree = new JJTSalsaParserState();
+        public static boolean compilationSuccess = true;
+        public static String currentFilename;
+
         public static void main(String args[]) {
             SalsaParser parser;
 
@@ -36,7 +39,11 @@
                 CCompilationUnit cu = parser.CompilationUnit();
                 System.out.println("\u005cn\u005cnSTATE CODE:\u005cn\u005cn" + cu.getStateCode());
 
-                System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Salsa program parsed successfully.");
+                if (compilationSuccess) {
+                    System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Salsa program parsed successfully.");
+                } else {
+                    System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Salsa program parsed unsuccessfully.");
+                }
             } catch (ParseException e) {
                 System.out.println(e.getMessage());
                 System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Encountered errors during parse.");
@@ -51,13 +58,13 @@
         }
 
         static void jjtreeOpenNodeScope(SimpleNode n) {
-//            System.out.println(getDepth() + "Opening node: " + SalsaParserTreeConstants.jjtNodeName[n.id]);
-//            depth++;
+            //            System.out.println(getDepth() + "Opening node: " + SalsaParserTreeConstants.jjtNodeName[n.id]);
+            //            depth++;
         }
 
         static void jjtreeCloseNodeScope(SimpleNode n) {
-//            depth--;
-//            System.out.println(getDepth() + "Closing node: " + SalsaParserTreeConstants.jjtNodeName[n.id]);
+            //            depth--;
+            //            System.out.println(getDepth() + "Closing node: " + SalsaParserTreeConstants.jjtNodeName[n.id]);
         }
 
 /******************************************
@@ -4161,36 +4168,6 @@
     finally { jj_save(29, xla); }
   }
 
-  static private boolean jj_3R_51() {
-    if (jj_scan_token(ASSIGN)) return true;
-    if (jj_3R_33()) return true;
-    return false;
-  }
-
-  static private boolean jj_3R_132() {
-    if (jj_scan_token(WAITFOR)) return true;
-    return false;
-  }
-
-  static private boolean jj_3R_131() {
-    if (jj_scan_token(DELAY)) return true;
-    return false;
-  }
-
-  static private boolean jj_3R_41() {
-    if (jj_scan_token(COMMA)) return true;
-    if (jj_3R_40()) return true;
-    return false;
-  }
-
-  static private boolean jj_3R_40() {
-    if (jj_scan_token(IDENTIFIER)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3R_51()) jj_scanpos = xsp;
-    return false;
-  }
-
   static private boolean jj_3_3() {
     if (jj_3R_27()) return true;
     Token xsp;
@@ -4207,17 +4184,6 @@
     return false;
   }
 
-  static private boolean jj_3_2() {
-    if (jj_scan_token(122)) return true;
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_scan_token(32)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(56)) return true;
-    }
-    return false;
-  }
-
   static private boolean jj_3_24() {
     if (jj_scan_token(COLON)) return true;
     Token xsp;
@@ -4225,6 +4191,17 @@
     if (jj_scan_token(27)) {
     jj_scanpos = xsp;
     if (jj_scan_token(63)) return true;
+    }
+    return false;
+  }
+
+  static private boolean jj_3_2() {
+    if (jj_scan_token(122)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_scan_token(32)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(56)) return true;
     }
     return false;
   }
@@ -5306,6 +5283,36 @@
     if (jj_scan_token(IDENTIFIER)) return true;
     if (jj_scan_token(COLON)) return true;
     if (jj_3R_33()) return true;
+    return false;
+  }
+
+  static private boolean jj_3R_51() {
+    if (jj_scan_token(ASSIGN)) return true;
+    if (jj_3R_33()) return true;
+    return false;
+  }
+
+  static private boolean jj_3R_132() {
+    if (jj_scan_token(WAITFOR)) return true;
+    return false;
+  }
+
+  static private boolean jj_3R_131() {
+    if (jj_scan_token(DELAY)) return true;
+    return false;
+  }
+
+  static private boolean jj_3R_41() {
+    if (jj_scan_token(COMMA)) return true;
+    if (jj_3R_40()) return true;
+    return false;
+  }
+
+  static private boolean jj_3R_40() {
+    if (jj_scan_token(IDENTIFIER)) return true;
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_51()) jj_scanpos = xsp;
     return false;
   }
 

@@ -22,6 +22,7 @@ PARSER_BEGIN(SalsaParser)
 
     public class SalsaParser {
 
+        public static boolean compilationSuccess = true;
         public static String currentFilename;
 
         public static void main(String args[]) {
@@ -51,8 +52,12 @@ PARSER_BEGIN(SalsaParser)
             try {
                 CCompilationUnit cu = parser.CompilationUnit();
                 System.out.println("\n\nSTATE CODE:\n\n" + cu.getStateCode());
-                
-                System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Salsa program parsed successfully.");
+
+                if (compilationSuccess) {
+                    System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Salsa program parsed successfully.");
+                } else {
+                    System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Salsa program parsed unsuccessfully.");
+                }
             } catch (ParseException e) {
                 System.out.println(e.getMessage());
                 System.out.println("Salsa Parser Version " + SalsaCompiler.VERSION + ":  Encountered errors during parse.");
@@ -67,13 +72,13 @@ PARSER_BEGIN(SalsaParser)
         }
 
         static void jjtreeOpenNodeScope(SimpleNode n) {
-//            System.out.println(getDepth() + "Opening node: " + SalsaParserTreeConstants.jjtNodeName[n.id]);
-//            depth++;
+            //            System.out.println(getDepth() + "Opening node: " + SalsaParserTreeConstants.jjtNodeName[n.id]);
+            //            depth++;
         }
 
         static void jjtreeCloseNodeScope(SimpleNode n) {
-//            depth--;
-//            System.out.println(getDepth() + "Closing node: " + SalsaParserTreeConstants.jjtNodeName[n.id]);
+            //            depth--;
+            //            System.out.println(getDepth() + "Closing node: " + SalsaParserTreeConstants.jjtNodeName[n.id]);
         }
     }
 PARSER_END(SalsaParser)

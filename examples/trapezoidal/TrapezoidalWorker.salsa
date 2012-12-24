@@ -25,7 +25,7 @@ behavior TrapezoidalWorker {
 
 //            The compiler doesn't print an error for the following and it should as there are two message passes there and they are
 //            being assigned to a non-token:
-//            partialIntegral += trapezoidWidth * (self<-f(right) + self<-f(left)) / 2.0;
+            partialIntegral += trapezoidWidth * (self<-f(right) + self<-f(left)) / 2.0;
 
             //The following gives an ugly parser error which doesn't explain the problem:
             //Also, if doing slc *.salsa, it looks like the error is coming from the TrapezoidalMaster,
@@ -33,7 +33,7 @@ behavior TrapezoidalWorker {
 //            partialIntegral += trapezoidWidth * (f(right) + f(left)) / 2.0;
 
             //The following works:
-            partialIntegral += trapezoidWidth * (self.f(right) + self.f(left)) / 2.0;
+//            partialIntegral += trapezoidWidth * (self.f(right) + self.f(left)) / 2.0;
         }
 
         System.out.println("Partial integral: " + partialIntegral);
