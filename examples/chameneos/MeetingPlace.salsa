@@ -10,6 +10,14 @@ behavior MeetingPlace {
 	Colour first_colour;
 
 	MeetingPlace(String[] arguments) {
+        if (arguments.length != 1) {
+            System.err.println("Error running Chameneos Redux example, invalid arguments.");
+            System.err.println("Usage:");
+            System.err.println("\tjava salsa_lite.examples.chameneos.MeetingPlace <number of meetings>");
+
+            System.exit(1);
+        }
+
 		max_meetings = Integer.parseInt(arguments[0]);
 		meetings = max_meetings;
 
