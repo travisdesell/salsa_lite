@@ -51,4 +51,7 @@ public abstract class Actor implements java.io.Serializable {
 
 	public abstract Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException;
 	
+    public String getMessageInformation(int messageId) {
+        return "Shouldn't be getting message information from the base actor class.";
+    }
 }

@@ -50,10 +50,14 @@ behavior MatrixMultiply {
 //		self<-printMatrix(A) @
 //		self<-printMatrix(B) @
 
-		token double[][] C = self<-matrix_multiply(recursion_depth, A, B) @
-		self<-finished();
 
-//		self<-printMatrix(C);
+        /**
+         * The following causes a Java compilation error because it adds continuation_token to the finished message
+         * instead of C.
+         */
+		token double[][] C = self<-matrix_multiply(recursion_depth, A, B) @
+		self<-finished() @      //This is passing a double[][] instead of an ack to this message handler
+		self<-printMatrix(C);
 	}
 
 	ack finished() {

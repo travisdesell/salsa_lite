@@ -22,6 +22,7 @@ public class CVariableInit extends CErrorInformation {
 	}
 
 	public String toJavaCodeAsToken(String type, boolean is_token_director, boolean is_continuation_director) {
+//        System.err.println("toJavaCodeAsToken for: '" + name + "'");
 		String code = name;
 
         TypeSymbol ts = null;
@@ -43,15 +44,21 @@ public class CVariableInit extends CErrorInformation {
                     SymbolTable.continuationTokenMessage = true;
                 } else if (is_token_director) {
                     previous_token = SymbolTable.isExpressionContinuation;
-                    SymbolTable.isExpressionContinuation= true;
+                    SymbolTable.isExpressionContinuation = true;
                 }
+
                 if (expression.isToken()) {
+//                    System.err.println("setting '" + name + "' equal to token expression");
                     code += " = " + expression.toJavaCode();
                 } else if (is_continuation_director) {
+//                    System.err.println("setting '" + name + "' equal to continuation director");
                     code += " = ContinuationDirector.construct(1, new Object[]{" + expression.toJavaCode() + "})";
                 } else {
+//                    System.err.println("setting '" + name + "' equal to token director");
                     code += " = TokenDirector.construct(1, new Object[]{" + expression.toJavaCode() + "})";
                 }
+
+                SymbolTable.continuationTokenDirectorName = name;
 
                 if (is_continuation_director) {
                     SymbolTable.continuationTokenMessage = previous_continues;

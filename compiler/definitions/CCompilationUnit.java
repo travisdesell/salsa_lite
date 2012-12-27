@@ -260,8 +260,35 @@ public class CCompilationUnit {
 		return code;
 	}
 
+    public String getPrintMessagesCode(ActorType at) {
+        String code = "";
+
+        code += CIndent.getIndent() + "public String getMessageInformation(int messageId) {\n";
+        code += CIndent.getIndent() + "\tswitch (messageId) {\n";
+
+		for (int i = 0; i < at.message_handlers.size(); i++) {
+			MessageSymbol sm = at.getMessageHandler(i);
+
+            code += CIndent.getIndent() + "\t\tcase " + i + ": return \"" + sm.getLongSignature() + "\";\n";
+        }
+        code += CIndent.getIndent() + "\t}\n";
+        code += CIndent.getIndent() + "\treturn \"No message with specified id.\";\n";
+        code += CIndent.getIndent() + "}\n\n";
+        return code;
+    }
+
 	public String getMessageCode() {
 		String code = "";
+
+        /*
+        code += CIndent.getIndent() + "public static final String[] message_handlers = {";
+		for (int i = 0; i < getMessageHandlers().size(); i++) {
+            code += "\"" + getMessageHandlers().get(i).name + "\""; 
+            if (i != getMessageHandlers().size() - 1) code += ", ";
+        }
+        code += "};\n\n\n";
+        */
+
 		for (int i = 0; i < getMessageHandlers().size(); i++) {
 			CMessageHandler mh = getMessageHandlers().get(i);
 			code += mh.toJavaCode();
@@ -677,6 +704,8 @@ public class CCompilationUnit {
             MessageSymbol ms = new MessageSymbol(i + number_original_messages, self_type, containedMessageHandlers.get(i));
             at.message_handlers.add( ms );
 		}
+
+        code += getPrintMessagesCode(at);
 
         if (isMobile()) {
             SymbolTable.is_mobile_actor = true;

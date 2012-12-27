@@ -368,6 +368,7 @@ public class SymbolTable {
     public static int generated_implicit_tokens = 0;
     public static int generated_expression_directors = 0;
     public static boolean implicitMessage = false;
+    public static String continuationTokenDirectorName = null;
 
     public static void newMessageHandler() {
         scope.joinDirectors = 0;

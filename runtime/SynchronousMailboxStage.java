@@ -93,6 +93,7 @@ public class SynchronousMailboxStage extends Thread {
 				errorMessage.append("\tMessage: " + message + "\n");
 				errorMessage.append("\ttarget: " + message.target + "\n");
 				errorMessage.append("\tmessage_id: " + message.message_id + "\n");
+                errorMessage.append("\tmessage_signature: '" + message.target.getMessageInformation(message.message_id) + "'\n");
 				errorMessage.append("\tmessage_type: " + message.type + "\n");
 				errorMessage.append("\targuments: ");
 				if (message.arguments == null) errorMessage.append("null");

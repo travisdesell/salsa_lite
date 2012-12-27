@@ -35,6 +35,20 @@ public class CMessageHandler extends CErrorInformation {
 		return argument_types;
 	}
 
+    public String toString() {
+        String[] argumentTypes = getArgumentTypes();
+
+        String s = pass_type.name + " " + name + "(";
+        for (int i = 0; i < argumentTypes.length; i++) {
+            s += argumentTypes[i];
+            if (i != argumentTypes.length - 1) s += ", ";
+        }
+
+        s += ")";
+
+        return s;
+    }
+
 	public String toJavaCode() {
 		SymbolTable.currentMessageName = name;
 

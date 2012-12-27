@@ -82,6 +82,17 @@ public class ContinuationDirector extends Director implements java.io.Serializab
         }
     }
 
+    public String getMessageInformation(int messageId) {
+    	switch (messageId) {
+    		case 0: return "java.lang.String [salsa_lite.runtime.Actor].toString()";
+    		case 1: return "int [salsa_lite.runtime.Actor].hashCode()";
+    		case 2: return "ack [salsa_lite.runtime.language.ContinuationDirector].resolve()";
+    		case 3: return "ack [salsa_lite.runtime.language.ContinuationDirector].setMessage(salsa_lite.runtime.Message)";
+    		case 4: return "ack [salsa_lite.runtime.language.ContinuationDirector].forwardTo(salsa_lite.runtime.language.Director)";
+    	}
+    	return "No message with specified id.";
+    }
+
     public ContinuationDirector() { super(); }
     public ContinuationDirector(int stage_id) { super(stage_id); }
 

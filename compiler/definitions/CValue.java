@@ -548,13 +548,34 @@ public class CValue extends CErrorInformation {
                         }
 
                         if (SymbolTable.messageRequiresContinuation) {
-                            code += ", continuation_token";
+//                            System.err.println("MessageRequiresContinuation 1: " + code);
+                            if (SymbolTable.continuationTokenDirectorName != null) {
+                                /*
+                                 * The previous expression was a named token, and this continues from it, so we need
+                                 * to specify the name of that token as the continuation token.
+                                 */
+                                code += ", " + SymbolTable.continuationTokenDirectorName;
+                            } else {
+                                code += ", continuation_token";
+                            }
+
                             SymbolTable.messageRequiresContinuation = false;    //so we only use the continuation once
                         }
                         code += "}";
 
                     } else if (SymbolTable.messageRequiresContinuation) {
-                        code += ", continuation_token";
+//                        System.err.println("MessageRequiresContinuation 2: " + code);
+
+                        if (SymbolTable.continuationTokenDirectorName != null) {
+                            /*
+                             * The previous expression was a named token, and this continues from it, so we need
+                             * to specify the name of that token as the continuation token.
+                             */
+                            code += ", " + SymbolTable.continuationTokenDirectorName;
+                        } else {
+                            code += ", continuation_token";
+                        }
+
                         SymbolTable.messageRequiresContinuation = false;    //so we only use the continuation once
                     }
 
@@ -568,6 +589,10 @@ public class CValue extends CErrorInformation {
                     }
 
                     code += ")";
+
+                    SymbolTable.continuationTokenDirectorName = null;   //If the continuation director was a named token in a previous statement,
+                                                                        //Even if we didn't use it, set this to null so we don't use it in a future
+                                                                        //message when we're not supposed to.
 
                     if (joinDirector != null && !SymbolTable.messageContinues) {
                         code += ";\n";
