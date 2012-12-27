@@ -1,4 +1,4 @@
-module examples.matrixmultiply;
+import salsa_lite.runtime.io.StandardOutput;
 
 behavior MatrixMultiply {
 	/**
@@ -12,12 +12,10 @@ behavior MatrixMultiply {
 	 *		u = cf+dh
 	 */
 
-	public long time;
+    MatrixMultiply() {
+    }
 
-	public MatrixMultiply() {
-	}
-
-	public void act(String[] arguments) {
+	MatrixMultiply(String[] arguments) {
 		if (arguments.length != 2) {
 			System.err.println("Usage: java examples.matrixmultiply.MatrixMultiply <matrix_size> <recursion_depth>");
 			System.err.println("\tNote: matrix_size must be a power of 2: 1024, 2048, 4096, 8192, 16384...2^N");
@@ -27,7 +25,7 @@ behavior MatrixMultiply {
 
 		int matrix_size = Integer.parseInt(arguments[0]);
 		int recursion_depth = Integer.parseInt(arguments[1]);
-		int number_actors = (int)Math.pow(8,recursion_depth);
+		int number_actors = (int)Math.pow(8.0, (double)recursion_depth);
 
 		double[][] A = new double[matrix_size][matrix_size];
 		for (int i = 0; i < matrix_size; i++) {
@@ -35,6 +33,7 @@ behavior MatrixMultiply {
 				A[i][j] = Math.random();
 			}
 		}
+
 		double[][] B = new double[matrix_size][matrix_size];
 		for (int i = 0; i < matrix_size; i++) {
 			for (int j = 0; j < matrix_size; j++) {
@@ -45,22 +44,23 @@ behavior MatrixMultiply {
 		System.out.println("Number of actors: " + number_actors);
 		System.out.println("Matrix size: " + matrix_size + " x " + matrix_size);
 
+//      standardOutput = new StandardOutput();
 //		standardOutput<-println("Number of actors: " + number_actors) @
 //		standardOutput<-println("Matrix size: " + matrix_size + " x " + matrix_size) @
-//		printMatrix(A) @
-//		printMatrix(B) @
-		token C = matrix_multiply(recursion_depth, A, B) @
-		finished();
-			
-//		printMatrix(C);
-		time = System.currentTimeMillis();
+//		self<-printMatrix(A) @
+//		self<-printMatrix(B) @
+
+		token double[][] C = self<-matrix_multiply(recursion_depth, A, B) @
+		self<-finished();
+
+//		self<-printMatrix(C);
 	}
 
-	public void finished() {
-		System.err.println("Multiplied in: " + (System.currentTimeMillis()-time));
+	ack finished() {
+		System.exit(0);
 	}
 
-	public double[][] getSection(double[][] matrix, int x, int x_max, int y, int y_max) {
+	double[][] getSection(double[][] matrix, int x, int x_max, int y, int y_max) {
 		int x_length = x_max - x;
 		int y_length = y_max - y;
 		double[][] result = new double[x_length][y_length];
@@ -70,32 +70,33 @@ behavior MatrixMultiply {
 				result[i][j] = matrix[x+i][x+j];
 			}
 		}
-		return result;
+
+		pass result;
 	}
 
-	public double[][] matrix_multiply(int depth, double[][] A, double[][] B) {
+	double[][] matrix_multiply(int depth, double[][] A, double[][] B) {
 		/**
 		 *	Check to see if matrices are square
 		 */
 		if (A.length != A[0].length) {
-			standardOutput<-println("Matrix A not square: ") @
-			printMatrix(A);
+			new StandardOutput()<-println("Matrix A not square: ") @
+			self<-printMatrix(A);
 		}
 		if (B.length != B[0].length) {
-			standardOutput<-println("Matrix B not square: ") @
-			printMatrix(B);
+			new StandardOutput()<-println("Matrix B not square: ") @
+			self<-printMatrix(B);
 		}
 		if ((A.length%2 != 0) || (A[0].length%2 != 0)) {
-			standardOutput<-println("Matrix A not even: ") @
-			printMatrix(A);
+			new StandardOutput()<-println("Matrix A not even: ") @
+			self<-printMatrix(A);
 		}
 		if ((B.length%2 != 0) || (B[0].length%2 != 0)) {
-			standardOutput<-println("Matrix B not even: ") @
-			printMatrix(B);
+			new StandardOutput()<-println("Matrix B not even: ") @
+			self<-printMatrix(B);
 		}
 
 
-		if (depth == 0) multiply(A, B) @ currentContinuation;
+		if (depth == 0) pass self<-multiply(A, B);
 		else {
 			depth--;
 
@@ -103,37 +104,38 @@ behavior MatrixMultiply {
 			for (int i = 0; i < 8; i++) {
 				workers[i] = new MatrixMultiply();
 			}
-			token a = getSection(A, 0, A.length/2, 0, A.length/2);
-			token b = getSection(A, A.length/2, A.length, 0, A.length/2);
-			token c = getSection(A, 0, A.length/2, A.length/2, A.length);
-			token d = getSection(A, A.length/2, A.length, A.length/2, A.length);
 
-			token e = getSection(B, 0, A.length/2, 0, A.length/2);
-			token f = getSection(B, A.length/2, A.length, 0, A.length/2);
-			token g = getSection(B, 0, A.length/2, A.length/2, A.length);
-			token h = getSection(B, A.length/2, A.length, A.length/2, A.length);
+			token double[][] a = self<-getSection(A, 0, A.length/2, 0, A.length/2);
+			token double[][] b = self<-getSection(A, A.length/2, A.length, 0, A.length/2);
+			token double[][] c = self<-getSection(A, 0, A.length/2, A.length/2, A.length);
+			token double[][] d = self<-getSection(A, A.length/2, A.length, A.length/2, A.length);
 
-			token ae =	workers[0]<-multiply(a, e);
-			token bg =	workers[1]<-multiply(b, g);
-			token r =	workers[1]<-add(ae, bg);
+			token double[][] e = self<-getSection(B, 0, A.length/2, 0, A.length/2);
+			token double[][] f = self<-getSection(B, A.length/2, A.length, 0, A.length/2);
+			token double[][] g = self<-getSection(B, 0, A.length/2, A.length/2, A.length);
+			token double[][] h = self<-getSection(B, A.length/2, A.length, A.length/2, A.length);
 
-			token af =	workers[2]<-multiply(a, f);
-			token bh =	workers[3]<-multiply(b, h);
-			token s =	workers[3]<-add(af, bh);
+			token double[][] ae =	workers[0]<-multiply(a, e);
+			token double[][] bg =	workers[1]<-multiply(b, g);
+			token double[][] r =	workers[1]<-add(ae, bg);
 
-			token ce =	workers[4]<-multiply(c, e);
-			token cg =	workers[5]<-multiply(c, g);
-			token t =	workers[5]<-add(cg, ce);
+			token double[][] af =	workers[2]<-multiply(a, f);
+			token double[][] bh =	workers[3]<-multiply(b, h);
+			token double[][] s =	workers[3]<-add(af, bh);
 
-			token cf =	workers[6]<-multiply(c, f);
-			token dh =	workers[7]<-multiply(d, h);
-			token u =	workers[7]<-add(cf, dh);
+			token double[][] ce =	workers[4]<-multiply(c, e);
+			token double[][] cg =	workers[5]<-multiply(c, g);
+			token double[][] t =	workers[5]<-add(cg, ce);
 
-			compose(r, s, t, u) @ currentContinuation;
+			token double[][] cf =	workers[6]<-multiply(c, f);
+			token double[][] dh =	workers[7]<-multiply(d, h);
+			token double[][] u =	workers[7]<-add(cf, dh);
+
+			pass self<-compose(r, s, t, u);
 		}
 	}
-	
-	public void printMatrix(double[][] m) {
+
+	ack printMatrix(double[][] m) {
 		System.err.println("Matrix:");
 		for (int i = 0; i < m.length; i++) {
 			System.err.print("[ ");
@@ -142,20 +144,20 @@ behavior MatrixMultiply {
 			}
 			System.err.println("]");
 		}
-		standardOutput<-println();
+		System.err.println();
 	}
 
-	public double[][] add(double[][] a, double[][] b) {
+	double[][] add(double[][] a, double[][] b) {
 		double[][] result = new double[a.length][a.length];
 		for (int i = 0; i < a.length; i++) {
 			for (int j = 0; j < a.length; j++) {
 				result[i][j] = a[i][j] + b[i][j];
 			}
 		}
-		return result;
+		pass result;
 	}
 
-	public double[][] multiply(double[][] a, double[][] b) {
+	double[][] multiply(double[][] a, double[][] b) {
 		double[][] result = new double[a.length][a.length];
 
 		for (int i = 0; i < a.length; i++) {
@@ -167,10 +169,10 @@ behavior MatrixMultiply {
 				}
 			}
 		}
-		return result;
+		pass result;
 	}
 
-	public double[][] compose(double[][] r, double[][] s, double[][] t, double[][] u) {
+	double[][] compose(double[][] r, double[][] s, double[][] t, double[][] u) {
 		double[][] result = new double[r.length*2][r.length*2];
 
 		for (int i = 0; i < r.length; i++) {
@@ -193,6 +195,7 @@ behavior MatrixMultiply {
 				result[i][j] = r[i-r.length][j-r.length];
 			}
 		}
-		return result;
+
+		pass result;
 	}
 }
