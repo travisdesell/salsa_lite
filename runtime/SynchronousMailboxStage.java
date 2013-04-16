@@ -89,11 +89,11 @@ public class SynchronousMailboxStage extends Thread {
                 //Don't need to do anything here, the message was sent to another theater.
 
 			} catch (Exception exception) {
-                StringBuilder errorMessage = new StringBuilder("Message processing exception:\n");
-				errorMessage.append("\tMessage: " + message + "\n");
+                StringBuilder errorMessage = new StringBuilder("Exception occurred while processing message:\n");
+                errorMessage.append("\tmessage signature: '" + message.target.getMessageInformation(message.message_id) + "'\n");
+				errorMessage.append("\tmessage contents: " + message + "\n");
 				errorMessage.append("\ttarget: " + message.target + "\n");
 				errorMessage.append("\tmessage_id: " + message.message_id + "\n");
-                errorMessage.append("\tmessage_signature: '" + message.target.getMessageInformation(message.message_id) + "'\n");
 				errorMessage.append("\tmessage_type: " + message.type + "\n");
 				errorMessage.append("\targuments: ");
 				if (message.arguments == null) errorMessage.append("null");

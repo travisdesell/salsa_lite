@@ -44,6 +44,6 @@ public class Message implements java.io.Serializable {
     public String toString() {
         String argString = "null";
         if (arguments != null) argString = Arrays.toString(arguments);
-        return String.format("message[target: %s, id: %d, " + argString + ", continuationDirector: %s]", target, message_id, continuationDirector);
+        return String.format("message[target: %s, id: %d, arguments: " + argString + ", continuationDirector: %s]", target, message_id, continuationDirector);
     }
 }

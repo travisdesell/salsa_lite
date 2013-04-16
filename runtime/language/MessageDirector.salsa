@@ -76,6 +76,8 @@ behavior MessageDirector extends SynchronizationDirector {
         self.message = message;
         self.required_tokens = 1;
 
+        System.out.println("made a message director with just a value director: " + message_target);
+
         //a position of -1 specifies that the token will fill in the message target
         message_target<-addDirector(self, -1);
     }
@@ -89,6 +91,8 @@ behavior MessageDirector extends SynchronizationDirector {
 	MessageDirector(Message message, ContinuationDirector input_continuation, ValueDirector message_target) {
         self.message = message;
         self.required_tokens = 2;
+
+        System.out.println("made a message director with an input continuation: " + input_continuation + " and a value director: " + message_target);
 
         //a position of -1 specifies that the token will fill in the message target
         message_target<-addDirector(self, -1);

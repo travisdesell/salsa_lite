@@ -6,7 +6,6 @@ behavior ThreadRing {
     
     ThreadRing(int id) {
         self.id = id;
-//        System.out.println("created threadring: " + id);
     }
 
     ThreadRing(String[] args) {
@@ -43,7 +42,6 @@ behavior ThreadRing {
             System.out.println(id);
             System.exit(0);
         } else {
-//          System.out.println("id: " + id + ", hop: " + value);
             value--;
             next<-forwardMessage(value);
         }

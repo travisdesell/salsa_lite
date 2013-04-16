@@ -87,6 +87,18 @@ Notable changes from SALSA 1.x and before:
             
 
 BUGS:
+    *   *NEW* - It's possible to write something like:
+        ack m() {
+            a<-m1() @
+            b<-m2() @
+        }
+        Without the compiler throwing an error. It should not be possible to continue to nothing.
+    *   *NEW* - It's possible to do:
+        ack m() {
+            System.out.println("blah") @
+            ...
+        }
+        it's should not be possible to continue from a non-message send.
     *   Type checking for generics may not completely work not sure about things like <? super Something> and <T, E extends T, F extends E>.
     *   Syntax for generic methods needs to be added.
     *   Get interfaces working correctly.  They need special messages that know they were sent using an interface, so they invoke the correct message handler.
