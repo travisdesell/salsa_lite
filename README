@@ -87,6 +87,7 @@ Notable changes from SALSA 1.x and before:
             
 
 BUGS:
+    *   If a non-remote/mobile actor creates a mobile actor the initialize() method of the TransportService never gets called, so there's no server socket open to receive messages back from it.
     *   *NEW* - It's possible to write something like:
         ack m() {
             a<-m1() @
