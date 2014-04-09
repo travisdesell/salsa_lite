@@ -33,6 +33,7 @@ public class SymbolTable {
 
     public static boolean isExpressionContinuation = false;
     public static boolean is_mobile_actor = false;
+    public static boolean is_remote_actor = false;
 
     public static boolean isActor(String name) throws SalsaNotFoundException {
         try {

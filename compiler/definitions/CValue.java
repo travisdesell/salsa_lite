@@ -248,19 +248,33 @@ public class CValue extends CErrorInformation {
 
 		if (literal != null) {
             if (literal.value.equals("self")) {
+                String code_part = "";
                 try {
-                    code += "((" + SymbolTable.getVariableType("self") + ")";
+                    code_part += "((" + SymbolTable.getVariableType("self");
+                    if (SymbolTable.is_mobile_actor || SymbolTable.is_remote_actor) {
+                        code_part += ".State";
+                    }
+                    code_part += ")";
+
                 } catch (SalsaNotFoundException snfe) {
                     CompilerErrors.printErrorMessage("[CValue.toJavaCode]: Error looking up type of 'self'. " + snfe.toString(), literal);
                     throw new RuntimeException(snfe);
                 }
 
-                code += "this)";
+                code_part += "this)";
                 if (modifications.size() == 0 || (modifications.size() > 0 && modifications.get(0) instanceof CMessageSend)) {
                     if (SymbolTable.is_mobile_actor) {
-                        code += ".getStage().message.target";        //kind of a hack, so that a mobile actor state doesn't need to have a self reference
+                        code_part += ".getStage().message.target";        //kind of a hack, so that a mobile actor state doesn't need to have a self reference
+                        try {
+                            code_part = "((" + SymbolTable.getVariableType("self") + ")" + code_part + ")";
+                        } catch (SalsaNotFoundException snfe) {
+                            CompilerErrors.printErrorMessage("[CValue.toJavaCode]: Error looking up type of 'self'. " + snfe.toString(), literal);
+                            throw new RuntimeException(snfe);
+                        }
                     }
                 }
+
+                code += code_part;
 
             } else if (literal.value.equals("parent")) {
                 if (modifications.size() > 0 && modifications.get(0) instanceof CMessageSend) {

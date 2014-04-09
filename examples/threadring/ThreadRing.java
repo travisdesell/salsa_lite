@@ -24,6 +24,7 @@ import salsa_lite.runtime.language.exceptions.ConstructorNotFoundException;
 /****** END SALSA LANGUAGE IMPORTS ******/
 
 import salsa_lite.runtime.language.JoinDirector;
+import salsa_lite.runtime.StageService;
 
 public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Serializable {
 
@@ -43,12 +44,12 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
         RemoteReference(int hashCode, String host, int port) { this.hashCode = hashCode; this.host = host; this.port = port; }
 
         public Object invokeMessage(int messageId, Object[] arguments) throws RemoteMessageException, TokenPassException, MessageHandlerNotFoundException {
-            TransportService.sendMessageToRemote(host, port, this.stage.message);
+            TransportService.sendMessageToRemote(host, port, this.getStage().message);
             throw new RemoteMessageException();
         }
 
         public void invokeConstructor(int messageId, Object[] arguments) throws RemoteMessageException, ConstructorNotFoundException {
-            TransportService.sendMessageToRemote(host, port, this.stage.message);
+            TransportService.sendMessageToRemote(host, port, this.getStage().message);
             throw new RemoteMessageException();
         }
 
@@ -79,6 +80,16 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
         }
     }
 
+    public String getMessageInformation(int messageId) {
+    	switch (messageId) {
+    		case 0: return "java.lang.String [salsa_lite.runtime.Actor].toString()";
+    		case 1: return "int [salsa_lite.runtime.Actor].hashCode()";
+    		case 2: return "ack [ThreadRing].setNextThread(ThreadRing)";
+    		case 3: return "ack [ThreadRing].forwardMessage(int)";
+    	}
+    	return "No message with specified id.";
+    }
+
     public ThreadRing() { super(); }
     public ThreadRing(int stage_id) { super(stage_id); }
 
@@ -105,7 +116,7 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
     }
 
     public void construct(int id) {
-        this.id = id;
+        ((ThreadRing)this).id = id;
     }
 
     public void construct(String[] args) {
@@ -121,7 +132,7 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
         ThreadRing next = null;
         ThreadRing previous = first;
         for (int i = 1; i < threadCount; i++) {
-            next = ThreadRing.construct(0, new Object[]{i + 1});
+            next = ThreadRing.construct(0, new Object[]{i + 1}, -1);
             ContinuationDirector continuation_token = StageService.sendContinuationMessage(previous, 2 /*setNextThread*/, new Object[]{next});
             StageService.sendMessage(jd, 2 /*join*/, null, continuation_token);
             previous = next;
@@ -136,7 +147,7 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
 
 
     public void setNextThread(ThreadRing next) {
-        this.next = next;
+        ((ThreadRing)this).next = next;
     }
 
     public void forwardMessage(int value) {
@@ -164,7 +175,7 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
 
     public static ThreadRing construct(int constructor_id, Object[] arguments, int target_stage_id) {
         ThreadRing actor = new ThreadRing(target_stage_id);
-        actor.stage.putMessageInMailbox(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));
+        actor.getStage().putMessageInMailbox(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));
         return actor;
     }
 

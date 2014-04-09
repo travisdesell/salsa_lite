@@ -4,6 +4,7 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
+//import java.util.concurrent.ConcurrentLinkedQueue;
 
 import salsa_lite.runtime.language.exceptions.TokenPassException;
 import salsa_lite.runtime.language.exceptions.RemoteMessageException;
@@ -16,6 +17,7 @@ import salsa_lite.runtime.language.exceptions.ConstructorNotFoundException;
 public class SynchronousMailboxStage extends Thread {
 
 	private LinkedList<Message> mailbox;
+//	private ConcurrentLinkedQueue<Message> mailbox;
 	private int id;
 
     public final int getStageId() {
@@ -25,7 +27,25 @@ public class SynchronousMailboxStage extends Thread {
 	public SynchronousMailboxStage(int id) {
 		this.id = id;
 		mailbox = new LinkedList<Message>();
+//		mailbox = new ConcurrentLinkedQueue<Message>();
 	}
+
+
+    /*
+   	public final void putMessageInMailbox(Message message) {
+		mailbox.add(message);
+	}
+
+	private final Message getMessage() {
+        Message message = mailbox.poll();
+
+		while (message == null) {
+            message = mailbox.poll();
+		}
+
+		return message;
+	}
+    */
 
 	public final synchronized void putMessageInMailbox(Message message) {
 		mailbox.add(message);
@@ -44,6 +64,7 @@ public class SynchronousMailboxStage extends Thread {
 		}
 		return mailbox.removeFirst();
 	}
+
 
 	public Message message;
 	public final void run() {

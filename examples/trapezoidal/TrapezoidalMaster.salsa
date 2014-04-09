@@ -1,6 +1,3 @@
-import salsa_lite.language.JoinDirector;
-import salsa_lite.runtime.io.StandardOutput;
-
 /* TrapezoidalMaster.salsa -- Parallel Trapezoidal Rule
  *
  * Input: 	Optinal. a and b, the left and right endpoints of the integral.n the number of trapezoids.
@@ -19,6 +16,10 @@ import salsa_lite.runtime.io.StandardOutput;
  * Note:  f(x) is hardwired.
  *
  */
+
+import salsa_lite.language.JoinDirector;
+import salsa_lite.runtime.io.StandardOutput;
+
 behavior TrapezoidalMaster {
 
     double integral;
