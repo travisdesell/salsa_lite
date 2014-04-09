@@ -100,7 +100,7 @@ public class CCompilationUnit {
 
 			code += "import " + import_string + ";\n";
 
-            System.err.println("LOADING NEW: '" + import_string + "' FROM " + module_string + " " + getName());
+//            System.err.println("LOADING NEW: '" + import_string + "' FROM " + module_string + " " + getName());
 
             try {
                 if (import_declaration.is_object) {
