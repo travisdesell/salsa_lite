@@ -34,7 +34,7 @@ public class LocalActorRegistry {
 //        System.err.println("adding entry[" + hashCode + "]: " + actor);
 
         if (serializedActors[hashCode % Hashing.numberRegistries].get(hashCode) != null) {
-            System.err.println("actor registry error, overwriting registry entry: " + hashCode);
+            System.err.println("actor registry error, overwriting registry entry: " + hashCode + " actor: " + actor);
         }
         serializedActors[hashCode % Hashing.numberRegistries].put(hashCode, actor);
     }

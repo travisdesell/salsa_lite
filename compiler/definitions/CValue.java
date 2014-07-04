@@ -251,7 +251,8 @@ public class CValue extends CErrorInformation {
                 String code_part = "";
                 try {
                     code_part += "((" + SymbolTable.getVariableType("self");
-                    if (SymbolTable.is_mobile_actor || SymbolTable.is_remote_actor) {
+//                    if (SymbolTable.is_mobile_actor || SymbolTable.is_remote_actor) {
+                    if (SymbolTable.is_mobile_actor) {  //pretty sure remote actors don't have a State
                         code_part += ".State";
                     }
                     code_part += ")";
