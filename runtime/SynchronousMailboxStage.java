@@ -47,27 +47,58 @@ public class SynchronousMailboxStage extends Thread {
 	}
     */
 
-	public final synchronized void putMessageInMailbox(Message message) {
-		mailbox.add(message);
-		notify();
+    /*
+	public final void putMessageInMailbox(Message message) {
+        synchronized (mailbox) {
+            mailbox.add(message);
+            mailbox.notify();
+        }
 	}
 
+	private final Message getMessage() {
+        Message message = null;
+        synchronized (mailbox) {
+            if (mailbox.isEmpty()) {
+                try {
+                    mailbox.wait();
+                } catch (InterruptedException e) {
+                    System.err.println("Stage Error:");
+                    System.err.println("\tInterruptedException in getMessage(): " + e);
+                    System.exit(0);
+                }
+            }
+		    message = mailbox.removeFirst();
+        }
+        return message;
+	}
+    */
+	public final synchronized void putMessageInMailbox(Message message) {
+        mailbox.add(message);
+        notify();
+    }
+
 	private final synchronized Message getMessage() {
-		if (mailbox.isEmpty()) {
-			try {
-				wait();
-			} catch (InterruptedException e) {
-				System.err.println("Stage Error:");
-				System.err.println("\tInterruptedException in getMessage(): " + e);
-				System.exit(0);
-			}
-		}
-		return mailbox.removeFirst();
+        Message message = null;
+
+        while (mailbox.isEmpty()) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                System.err.println("Stage Error:");
+                System.err.println("\tInterruptedException in getMessage(): " + e);
+                System.exit(0);
+            }
+        }
+        message = mailbox.removeFirst();
+
+        return message;
 	}
 
 
 	public Message message;
 	public final void run() {
+//        System.out.println("starting stage with id: " + id);
+
 		Object result;
 
 		while (true) {
