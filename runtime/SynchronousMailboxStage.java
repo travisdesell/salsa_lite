@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 //import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import salsa_lite.runtime.language.exceptions.TokenPassException;
 import salsa_lite.runtime.language.exceptions.RemoteMessageException;
@@ -17,8 +18,10 @@ import salsa_lite.runtime.language.exceptions.ConstructorNotFoundException;
 public class SynchronousMailboxStage extends Thread {
 
 	private LinkedList<Message> mailbox;
+//  private final LinkedBlockingQueue<Message> mailbox;
 //	private ConcurrentLinkedQueue<Message> mailbox;
 	private int id;
+
 
     public final int getStageId() {
         return id;
@@ -27,57 +30,40 @@ public class SynchronousMailboxStage extends Thread {
 	public SynchronousMailboxStage(int id) {
 		this.id = id;
 		mailbox = new LinkedList<Message>();
+//      mailbox = new LinkedBlockingQueue<Message>();
 //		mailbox = new ConcurrentLinkedQueue<Message>();
 	}
 
-
     /*
-   	public final void putMessageInMailbox(Message message) {
-		mailbox.add(message);
-	}
+    public final void putMessageInMailbox(Message message) {
+        try {
+            mailbox.put(message);
+        } catch (InterruptedException e) {
+            System.err.println("Stage Error:");
+            System.err.println("\tInterruptedException in putMessageInMailbox(): " + e);
+            System.exit(0);
+        }
+    }
 
-	private final Message getMessage() {
-        Message message = mailbox.poll();
-
-		while (message == null) {
-            message = mailbox.poll();
-		}
-
-		return message;
-	}
+    private final Message getMessage() {
+        Message result = null;
+        try {
+            result = mailbox.take();
+        } catch (InterruptedException e) {
+            System.err.println("Stage Error:");
+            System.err.println("\tInterruptedException in getMessage(): " + e);
+            System.exit(0);
+        }
+        return result;
+    }
     */
 
-    /*
-	public final void putMessageInMailbox(Message message) {
-        synchronized (mailbox) {
-            mailbox.add(message);
-            mailbox.notify();
-        }
-	}
-
-	private final Message getMessage() {
-        Message message = null;
-        synchronized (mailbox) {
-            if (mailbox.isEmpty()) {
-                try {
-                    mailbox.wait();
-                } catch (InterruptedException e) {
-                    System.err.println("Stage Error:");
-                    System.err.println("\tInterruptedException in getMessage(): " + e);
-                    System.exit(0);
-                }
-            }
-		    message = mailbox.removeFirst();
-        }
-        return message;
-	}
-    */
-	public final synchronized void putMessageInMailbox(Message message) {
+    public final synchronized void putMessageInMailbox(Message message) {
         mailbox.add(message);
         notify();
     }
 
-	private final synchronized Message getMessage() {
+    private final synchronized Message getMessage() {
         Message message = null;
 
         while (mailbox.isEmpty()) {
