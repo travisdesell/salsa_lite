@@ -675,8 +675,10 @@ public class SymbolTable {
             localActorType = new ActorType(runtimeModule + ".Actor", SymbolTable.getTypeSymbol("Object"));
             MessageSymbol toStringMessage = new MessageSymbol(0, "toString", localActorType, SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{});
             MessageSymbol hashCodeMessage = new MessageSymbol(1, "hashCode", localActorType, SymbolTable.getTypeSymbol("int"), new TypeSymbol[]{});
+            MessageSymbol getStageIdMessage = new MessageSymbol(2, "getStageId", localActorType, SymbolTable.getTypeSymbol("int"), new TypeSymbol[]{});
             localActorType.message_handlers.add(toStringMessage);
             localActorType.message_handlers.add(hashCodeMessage);
+            localActorType.message_handlers.add(getStageIdMessage);
 
             FieldSymbol stageField = new FieldSymbol(localActorType, "stage", SymbolTable.getTypeSymbol("Stage"));
             localActorType.fields.add(stageField);

@@ -116,14 +116,14 @@ public class SynchronousMailboxStage extends Thread {
 						StageService.sendMessage(message.continuationDirector, 2 /*setValue*/, new Object[]{message.target});
 						break;
 
-					default:
-						System.err.println("Unknown message type: " + message.type);
-						return;
-				}
-			} catch (TokenPassException tpe) {
-				//Don't need to do anything here.
-				
-			} catch (RemoteMessageException exception) {
+                    default:
+                        System.err.println("Unknown message type: " + message.type);
+                        return;
+                }
+            } catch (TokenPassException tpe) {
+                //Don't need to do anything here.
+
+            } catch (RemoteMessageException exception) {
                 //Don't need to do anything here, the message was sent to another theater.
 
 			} catch (Exception exception) {

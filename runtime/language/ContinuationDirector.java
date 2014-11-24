@@ -86,9 +86,10 @@ public class ContinuationDirector extends Director implements java.io.Serializab
     	switch (messageId) {
     		case 0: return "java.lang.String [salsa_lite.runtime.Actor].toString()";
     		case 1: return "int [salsa_lite.runtime.Actor].hashCode()";
-    		case 2: return "ack [salsa_lite.runtime.language.ContinuationDirector].resolve()";
-    		case 3: return "ack [salsa_lite.runtime.language.ContinuationDirector].setMessage(salsa_lite.runtime.Message)";
-    		case 4: return "ack [salsa_lite.runtime.language.ContinuationDirector].forwardTo(salsa_lite.runtime.language.Director)";
+    		case 2: return "int [salsa_lite.runtime.Actor].getStageId()";
+    		case 3: return "ack [salsa_lite.runtime.language.ContinuationDirector].resolve()";
+    		case 4: return "ack [salsa_lite.runtime.language.ContinuationDirector].setMessage(salsa_lite.runtime.Message)";
+    		case 5: return "ack [salsa_lite.runtime.language.ContinuationDirector].forwardTo(salsa_lite.runtime.language.Director)";
     	}
     	return "No message with specified id.";
     }
@@ -105,9 +106,10 @@ public class ContinuationDirector extends Director implements java.io.Serializab
         switch(messageId) {
             case 0: return toString();
             case 1: return hashCode();
-            case 2: resolve(); return null;
-            case 3: setMessage( (Message)arguments[0] ); return null;
-            case 4: forwardTo( (Director)arguments[0] ); return null;
+            case 2: return getStageId();
+            case 3: resolve(); return null;
+            case 4: setMessage( (Message)arguments[0] ); return null;
+            case 5: forwardTo( (Director)arguments[0] ); return null;
             default: throw new MessageHandlerNotFoundException(messageId, arguments);
         }
     }
@@ -139,7 +141,7 @@ public class ContinuationDirector extends Director implements java.io.Serializab
         }
 
         if (currentContinuation != null) {
-            StageService.sendMessage(currentContinuation, 2 /*resolve*/, null);
+            StageService.sendMessage(currentContinuation, 3 /*resolve*/, null);
         } 
     }
 
@@ -158,7 +160,7 @@ public class ContinuationDirector extends Director implements java.io.Serializab
             currentContinuation = (ContinuationDirector)director;
         }
         else {
-            StageService.sendMessage(((ContinuationDirector)director), 2 /*resolve*/, null);
+            StageService.sendMessage(((ContinuationDirector)director), 3 /*resolve*/, null);
         }
 
     }
