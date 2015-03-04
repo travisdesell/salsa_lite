@@ -84,8 +84,9 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
     	switch (messageId) {
     		case 0: return "java.lang.String [salsa_lite.runtime.Actor].toString()";
     		case 1: return "int [salsa_lite.runtime.Actor].hashCode()";
-    		case 2: return "ack [ThreadRing].setNextThread(ThreadRing)";
-    		case 3: return "ack [ThreadRing].forwardMessage(int)";
+    		case 2: return "int [salsa_lite.runtime.Actor].getStageId()";
+    		case 3: return "ack [ThreadRing].setNextThread(ThreadRing)";
+    		case 4: return "ack [ThreadRing].forwardMessage(int)";
     	}
     	return "No message with specified id.";
     }
@@ -101,8 +102,9 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
         switch(messageId) {
             case 0: return toString();
             case 1: return hashCode();
-            case 2: setNextThread( (ThreadRing)arguments[0] ); return null;
-            case 3: forwardMessage( (Integer)arguments[0] ); return null;
+            case 2: return getStageId();
+            case 3: setNextThread( (ThreadRing)arguments[0] ); return null;
+            case 4: forwardMessage( (Integer)arguments[0] ); return null;
             default: throw new MessageHandlerNotFoundException(messageId, arguments);
         }
     }
@@ -133,15 +135,15 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
         ThreadRing previous = first;
         for (int i = 1; i < threadCount; i++) {
             next = ThreadRing.construct(0, new Object[]{i + 1}, -1);
-            ContinuationDirector continuation_token = StageService.sendContinuationMessage(previous, 2 /*setNextThread*/, new Object[]{next});
-            StageService.sendMessage(jd, 2 /*join*/, null, continuation_token);
+            ContinuationDirector continuation_token = StageService.sendContinuationMessage(previous, 3 /*setNextThread*/, new Object[]{next});
+            StageService.sendMessage(jd, 3 /*join*/, null, continuation_token);
             previous = next;
         }
 
-        ContinuationDirector continuation_token = StageService.sendContinuationMessage(next, 2 /*setNextThread*/, new Object[]{first});
-        StageService.sendMessage(jd, 2 /*join*/, null, continuation_token);
-        continuation_token = StageService.sendContinuationMessage(jd, 3 /*resolveAfter*/, new Object[]{threadCount});
-        StageService.sendMessage(first, 3 /*forwardMessage*/, new Object[]{hopCount}, continuation_token);
+        ContinuationDirector continuation_token = StageService.sendContinuationMessage(next, 3 /*setNextThread*/, new Object[]{first});
+        StageService.sendMessage(jd, 3 /*join*/, null, continuation_token);
+        continuation_token = StageService.sendContinuationMessage(jd, 4 /*resolveAfter*/, new Object[]{threadCount});
+        StageService.sendMessage(first, 4 /*forwardMessage*/, new Object[]{hopCount}, continuation_token);
     }
 
 
@@ -157,7 +159,7 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
         }
         else {
             value--;
-            StageService.sendMessage(next, 3 /*forwardMessage*/, new Object[]{value});
+            StageService.sendMessage(next, 4 /*forwardMessage*/, new Object[]{value});
         }
 
     }

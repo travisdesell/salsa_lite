@@ -11,6 +11,9 @@ import salsa_lite.runtime.language.TokenDirector;
 import salsa_lite.runtime.language.ValueDirector;
 
 public class StageService {
+    public final static int CONTINUATION_SET_MESSAGE_ID = 4;
+    public final static int DIRECTOR_SET_VALUE_ID = 3;
+
 	public final static int number_stages;
 	public final static SynchronousMailboxStage[] stages;
 
@@ -66,7 +69,7 @@ public class StageService {
 
 	public final static void sendMessage(Actor target, int message_id, Object[] arguments, ContinuationDirector input_continuation) {
 		Message input_message = new Message(Message.SIMPLE_MESSAGE, target, message_id, arguments);
-		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 3 /*setMessage()*/, new Object[]{input_message}));
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, CONTINUATION_SET_MESSAGE_ID, new Object[]{input_message}));
 	}
 
 	public final static void sendMessage(Actor target, int message_id, Object[] arguments, Director[] input_continuations) {
@@ -133,14 +136,14 @@ public class StageService {
         if (currentContinuation == null) return;
 
 //      token<-forwardTo(currentContinuation);
-        token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, token, 4 /*forwardTo*/, new Object[]{currentContinuation}, null));
+        token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, token, 5 /*forwardTo*/, new Object[]{currentContinuation}, null));
     }
 
     public final static void passToken(ContinuationDirector token, Director currentContinuation) {
         if (currentContinuation == null) return;
 
 //      token<-forwardTo(currentContinuation);
-        token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, token, 4 /*forwardTo*/, new Object[]{currentContinuation}, null));
+        token.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, token, 5 /*forwardTo*/, new Object[]{currentContinuation}, null));
     }
 
 	/**
@@ -155,7 +158,7 @@ public class StageService {
 	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, ContinuationDirector input_continuation, Director currentContinuation) {
         int messageType = (currentContinuation == null) ? Message.SIMPLE_MESSAGE : Message.TOKEN_MESSAGE;
         Message input_message = new Message(messageType, target, message_id, arguments, currentContinuation);
-		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 3 /*setMessage()*/, new Object[]{input_message}));
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, CONTINUATION_SET_MESSAGE_ID, new Object[]{input_message}));
 	}
 
 	public final static void sendPassMessage(Actor target, int message_id, Object[] arguments, Director[] input_continuations, Director currentContinuation) {
@@ -237,7 +240,7 @@ public class StageService {
 		ContinuationDirector output_continuation = ContinuationDirector.construct(0 /*construct()*/, null, target.getStageId());
 
 		Message input_message = new Message(Message.CONTINUATION_MESSAGE, target, message_id, arguments, output_continuation);
-		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 3 /*setMessage()*/, new Object[]{input_message}));
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, CONTINUATION_SET_MESSAGE_ID, new Object[]{input_message}));
 
 		return output_continuation;
 	}
@@ -352,7 +355,7 @@ public class StageService {
 		TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target.getStageId());
 
 		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
-		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 3 /*setMessage()*/, new Object[]{input_message}));
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, CONTINUATION_SET_MESSAGE_ID, new Object[]{input_message}));
 
 		return output_continuation;
 	}
@@ -468,7 +471,7 @@ public class StageService {
 		ImplicitTokenDirector output_continuation = ImplicitTokenDirector.construct(0 /*construct()*/, null, target.getStageId());
 
 		Message input_message = new Message(Message.TOKEN_MESSAGE, target, message_id, arguments, output_continuation);
-		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, 3 /*setMessage()*/, new Object[]{input_message}));
+		input_continuation.stage.putMessageInMailbox(new Message(Message.SIMPLE_MESSAGE, input_continuation, CONTINUATION_SET_MESSAGE_ID, new Object[]{input_message}));
 
 		return output_continuation;
 	}

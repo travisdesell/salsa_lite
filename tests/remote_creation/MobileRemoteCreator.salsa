@@ -5,14 +5,17 @@ import object java.util.ArrayList;
 behavior MobileRemoteCreator extends MobileActor {
 
     StandardOutput origin_output;
+    StandardOutput creation_output;
 
     ack go() {
         new StandardOutput()<-println("Hello from: " + self.getName() + "!") @
-        origin_output<-println("Remote hello from: " + self.getName() + "!");
+        origin_output<-println("Remote hello from: " + self.getName() + "!") @
+        creation_output<-println("Hello (where created) from: " + self.getName() + "!");
     }
 
     MobileRemoteCreator(StandardOutput origin_output) {
         self.origin_output = origin_output;
+        creation_output = new StandardOutput();
     }
 
     MobileRemoteCreator(String[] arguments) {
@@ -32,11 +35,25 @@ behavior MobileRemoteCreator extends MobileActor {
         }
 
         for (int i = 0; i < hosts.size(); i++) {
-            token MobileRemoteCreator rc = new MobileRemoteCreator(new StandardOutput()) called ("rc_" + i) using (ns) at (hosts.get(i), ports.get(i)) on (3);
+            String next_host;
+            int next_port;
+
+            if (i == hosts.size() - 1) {
+                next_host = hosts.get(0);
+                next_port = ports.get(0);
+            } else {
+                next_host = hosts.get(i+1);
+                next_port = ports.get(i+1);
+            }
+
+            token MobileRemoteCreator rc = new MobileRemoteCreator(new StandardOutput()) called ("rc_" + i) using (ns) at (hosts.get(i), ports.get(i)) on (0);
             rc<-go() @
             rc<-migrate(self.getHost(), self.getPort()) @
             rc<-go() @
-            new StandardOutput()<-println("finished go() at remote theater then migrate and go back to local theater.");
+            new StandardOutput()<-println("finished go() at remote theater then migrate and go back to local theater.") @
+            rc<-migrate(next_host, next_port) @
+            rc<-go() @
+            new StandardOutput()<-println("finished migrate to local theater then out to next theater.");
 //            new MobileRemoteCreator(new StandardOutput()) called ("mrc_" + i) using (ns) at (hosts.get(i), ports.get(i))<-go();
         }
     }

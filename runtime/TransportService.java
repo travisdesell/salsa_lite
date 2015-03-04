@@ -82,14 +82,14 @@ public class TransportService {
 
     public static final void sendMessageToRemote(String host, int port, Message message) {
         OutgoingTheaterConnection out = getSocket(host, port);
-        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, out, 2 /*send*/, new Object[]{message}));
+        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, out, 3 /*send*/, new Object[]{message}));
 
 //        System.err.println("sending remote message to [" + host + " : " + port + "]: " + message);
     }
 
     public static final void createRemotely(String host, int port, Object remoteCreator) {
         OutgoingTheaterConnection out = getSocket(host, port);
-        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, out, 4 /*createRemotely*/, new Object[]{remoteCreator}));
+        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, out, 5 /*createRemotely*/, new Object[]{remoteCreator}));
 
 //        System.err.println("sending createRemotely to [" + host + " : " + port + "]: " + remoteCreator);
     }
@@ -99,7 +99,7 @@ public class TransportService {
         actor.port = port;
 
         OutgoingTheaterConnection out = getSocket(host, port);
-        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, out, 3 /*migrate*/, new Object[]{actor}));
+        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, out, 4 /*migrate*/, new Object[]{actor}));
 
 //        System.err.println("migrating actor to [" + host + " : " + port + "]: " + actor.hashCode());
     }

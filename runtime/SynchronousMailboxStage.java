@@ -83,7 +83,7 @@ public class SynchronousMailboxStage extends Thread {
 
 	public Message message;
 	public final void run() {
-//        System.out.println("starting stage with id: " + id);
+        //System.out.println("starting stage with id: " + id);
 
 		Object result;
 
@@ -91,7 +91,7 @@ public class SynchronousMailboxStage extends Thread {
 			message = getMessage();
 
 			try {
-//                System.err.println("invoking message: " + message);
+                //System.err.println("invoking message: " + message);
 				switch (message.type) {
 					case Message.CONSTRUCT_MESSAGE:
 						message.target.invokeConstructor(message.message_id, message.arguments);
@@ -103,17 +103,17 @@ public class SynchronousMailboxStage extends Thread {
 
 					case Message.CONTINUATION_MESSAGE:
 						message.target.invokeMessage(message.message_id, message.arguments);
-						StageService.sendMessage(message.continuationDirector, 2 /*resolve*/, null); 
+						StageService.sendMessage(message.continuationDirector, 3 /*resolve*/, null); 
 						break;
 
 					case Message.TOKEN_MESSAGE:
 						result = message.target.invokeMessage(message.message_id, message.arguments);
-						StageService.sendMessage(message.continuationDirector, 2 /*setValue*/, new Object[]{result});
+						StageService.sendMessage(message.continuationDirector, 3 /*setValue*/, new Object[]{result});
 						break;
 
                     case Message.CONSTRUCT_CONTINUATION_MESSAGE:
 						message.target.invokeConstructor(message.message_id, message.arguments);
-						StageService.sendMessage(message.continuationDirector, 2 /*setValue*/, new Object[]{message.target});
+						StageService.sendMessage(message.continuationDirector, 3 /*setValue*/, new Object[]{message.target});
 						break;
 
                     default:

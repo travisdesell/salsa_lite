@@ -723,7 +723,7 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "    if (entry instanceof State) {\n";
             code += CIndent.getIndent() + "        return ((State)entry).invokeMessage(messageId, arguments);\n";
             code += CIndent.getIndent() + "    } else {\n";
-            code += CIndent.getIndent() + "        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, ((OutgoingTheaterConnection)entry), 2 /*send*/, new Object[]{this.getStage().message}));\n";
+            code += CIndent.getIndent() + "        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, ((OutgoingTheaterConnection)entry), 3 /*send*/, new Object[]{this.getStage().message}));\n";
             code += CIndent.getIndent() + "        throw new RemoteMessageException();\n";
             code += CIndent.getIndent() + "    }\n";
             code += CIndent.getIndent() + "}\n";
@@ -737,7 +737,7 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "    if (entry instanceof State) {\n";
             code += CIndent.getIndent() + "        ((State)entry).invokeConstructor(messageId, arguments);\n";
             code += CIndent.getIndent() + "    } else {\n";
-            code += CIndent.getIndent() + "        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, ((OutgoingTheaterConnection)entry), 2 /*send*/, new Object[]{this.getStage().message}));\n";
+            code += CIndent.getIndent() + "        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, ((OutgoingTheaterConnection)entry), 3 /*send*/, new Object[]{this.getStage().message}));\n";
             code += CIndent.getIndent() + "        throw new RemoteMessageException();\n";
             code += CIndent.getIndent() + "    }\n";
             code += CIndent.getIndent() + "}\n\n\n";

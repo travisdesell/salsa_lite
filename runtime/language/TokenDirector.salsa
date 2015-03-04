@@ -33,7 +33,7 @@ behavior TokenDirector extends ValueDirector {
 
             //need to do this explicitly so the runtime doesn't add a deep copy (which is unnecessary)
             //director<-setValue(position, value);
-            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 2 /*setValue*/, new Object[]{position, value}));
+            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 3 /*setValue*/, new Object[]{position, value}));
 		}
 
         if (currentContinuation != null) currentContinuation<-setValue(value);
@@ -46,7 +46,7 @@ behavior TokenDirector extends ValueDirector {
 		} else {
             //need to do this explicitly so the runtime doesn't add a deep copy (which is unnecessary)
             //director<-setValue(position, value);
-            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 2 /*setValue*/, new Object[]{position, value}));
+            StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, director, 3 /*setValue*/, new Object[]{position, value}));
 		}
 	}
 
