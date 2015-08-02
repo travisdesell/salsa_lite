@@ -82,9 +82,28 @@ public class ObjectType extends TypeSymbol {
 
         if (!copy.isGeneric()) throw new SalsaNotFoundException(module, name, "Tried to replace generics on non generic-class: " + copy.getLongSignature());
 
+        //System.err.println(name + " parsing generics for: '" + genericTypesString + "'");
+        /*
+        if (genericTypesString.equals("<T>") && declaredGenericTypes.size() == 2 && declaredGenericTypes.get(0).equals("T") && declaredGenericTypes.get(1).equals("java.util.stream.Stream<T>")) {
+            System.err.println("FIXING BUG??");
+            genericTypesString = "<T, java.util.stream.Stream<T>>";
+        }
+        */
+
         ArrayList<TypeSymbol> instantiatedGenericTypes = parseGenerics(genericTypesString, declaredGenericTypes, true);
+        //System.err.println(name + " parsed generics for: '" + genericTypesString + "'");
 
         if (instantiatedGenericTypes.size() != declaredGenericTypes.size()) {
+            System.err.println("instantiatedGenericTypes.size() != declaredGenericTypes.size()");
+            System.err.println("genericTypesString: " + genericTypesString);
+            System.err.println("\tinstantiatedGenericTypes:");
+            for (TypeSymbol igt : instantiatedGenericTypes) System.err.println("\t\t" + igt);
+            System.err.println("\tdeclaredGenericTypes:");
+            for (String dgt : declaredGenericTypes) {
+                System.err.println("\t\t" + dgt);
+                System.err.println("\t\t\tGetting ObjectType: " + new ObjectType(dgt));
+            }
+
             throw new SalsaNotFoundException(module, name, "Wrong number of generic parameters. instantiated " + instantiatedGenericTypes.toString() + ", declared " + declaredGenericTypes.toString() + ". generic object");
         }
 
