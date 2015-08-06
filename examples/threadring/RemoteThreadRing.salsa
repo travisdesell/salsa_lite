@@ -1,31 +1,32 @@
 import salsa_lite.language.JoinDirector;
 import object salsa_lite.runtime.StageService;
 
-behavior ThreadRing {
-    ThreadRing next;
+behavior RemoteThreadRing extends RemoteActor {
+    RemoteThreadRing next;
     int id;
     
-    ThreadRing(int id) {
+    RemoteThreadRing(int id) {
         self.id = id;
     }
 
-    ThreadRing(String[] args) {
+    RemoteThreadRing(String[] args) {
         if (args.length != 2) {
-            System.out.println("Usage: java ThreadRing <threadCount> <hopCount>");
+            System.out.println("Usage: java RemoteThreadRing <threadCount> <hopCount>");
             pass;
         }
 
         int threadCount = Integer.parseInt(args[0]);
         int hopCount = Integer.parseInt(args[1]);
 
-        //ThreadRing first = new ThreadRing(1) called ("threadring_1");
-        ThreadRing first = new ThreadRing(1) on (1);
+        RemoteThreadRing first = new RemoteThreadRing(1) called ("threadring_1");
+        //RemoteThreadRing first = new RemoteThreadRing(1) called ("threadring_1") on (1);
         JoinDirector jd = new JoinDirector();
 
-        ThreadRing next = null;
-        ThreadRing previous = first;
+        RemoteThreadRing next = null;
+        RemoteThreadRing previous = first;
         for (int i = 1; i < threadCount; i++) {
-            next = new ThreadRing(i + 1) on (i + 1);
+            next = new RemoteThreadRing(i + 1) called("threadring_" + (i+1));
+            //next = new RemoteThreadRing(i + 1) called("threadring_" + (i+1)) on (i+1);
             previous<-setNextThread(next) @ jd<-join();
             previous = next;
         }
@@ -35,7 +36,7 @@ behavior ThreadRing {
         first<-forwardMessage(hopCount);
     }
 
-    ack setNextThread(ThreadRing next) {
+    ack setNextThread(RemoteThreadRing next) {
         self.next = next;
     }
 

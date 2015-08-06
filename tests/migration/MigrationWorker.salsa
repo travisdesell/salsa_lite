@@ -4,6 +4,10 @@ behavior MigrationWorker extends MobileActor {
 		System.out.println("created migration worker: " + self.getHost() + ":" + self.getPort() + "/" + self.getName());
 	}
 
+    ack printStatus() {
+        System.out.println("migration worker now at: " + self.getHost() + ":" + self.getPort() + "/" + self.getName());
+    }
+
 	ack completedMigration() {
 		System.out.println(self.getName() + " completed migration!");
 	}

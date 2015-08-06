@@ -22,6 +22,12 @@ public class SynchronousMailboxStage extends Thread {
 //	private ConcurrentLinkedQueue<Message> mailbox;
 	private int id;
 
+    private long uniqueNamesGenerated = 0;
+    public String getUniqueName() {
+        return TransportService.getHost() + ":" + TransportService.getPort() + "/" + id + "/" + (++uniqueNamesGenerated);
+    }
+
+
 
     public final int getStageId() {
         return id;

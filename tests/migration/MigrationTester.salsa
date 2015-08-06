@@ -30,8 +30,7 @@ behavior MigrationTester extends RemoteActor {
 		self<-getTheaters(args[0]) @
 		self<-create_actors(number_workers) @
 		self<-migrate_actors(number_migrations) @
-		new StandardOutput()<-println("Migration test with " + number_workers + " actors and " + number_migrations + " completed.") @
-        self<-finish();
+		new StandardOutput()<-println("Migration test with " + number_workers + " actors and " + number_migrations + " migrations completed.");
 	}
 
     ack finish() {
@@ -79,8 +78,12 @@ behavior MigrationTester extends RemoteActor {
         JoinDirector jd = new JoinDirector();
         for (int i = 0; i < number_migrations; i++) {
             int target = (int)(hosts.size() * Math.random());
+            int target_worker = (int)(workers.length * Math.random());
 
-            workers[ (int)(workers.length * Math.random()) ]<-migrate(hosts.get(target), ports.get(target)) @ jd<-join();
+            new StandardOutput()<-println("Migrating worker: " + workers[ target_worker ]<-getName() + " to " + hosts.get(target) + ":" + ports.get(target)) @
+            workers[ target_worker ]<-migrate(hosts.get(target), ports.get(target)) @ 
+            workers[ target_worker ]<-printStatus() @
+            jd<-join();
         }
 
         jd<-resolveAfter(number_migrations) @

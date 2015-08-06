@@ -656,6 +656,8 @@ public class SymbolTable {
             ObjectType stageType = new ObjectType(runtimeModule + ".Stage");
             FieldSymbol messageField = new FieldSymbol(stageType, "message", SymbolTable.getTypeSymbol("Message"));
             stageType.fields.add(messageField);
+            MethodSymbol getUniqueNameMethod = new MethodSymbol(0, stageServiceType, "getUniqueName", SymbolTable.getTypeSymbol("String"), new TypeSymbol[]{}, true);
+            stageType.method_handlers.add(getUniqueNameMethod);
             knownTypes.put( stageType.getLongSignature(), stageType );
             namespace.put( stageType.getName(), stageType.getLongSignature() );
             addVariableType("Stage", "Stage", false, true);
