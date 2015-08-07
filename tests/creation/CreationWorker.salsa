@@ -1,0 +1,6 @@
+behavior CreationWorker {
+
+    CreationWorker(Creator creator) {
+        creator<-worker_ack();
+    }
+}

@@ -25,7 +25,7 @@ behavior NameServer extends RemoteActor {
         String name = actor.getName();
         if (!entries.containsKey(name)) {
             entries.put(name, actor);
-            //System.err.println("[nameserver: " + self.getName() + "] PUT " + name + " -- " + actor);
+            System.err.println("[nameserver: " + self.getName() + "] PUT " + name + " -- " + actor);
         } else {
             MobileActor entry = entries.get(name);
             System.err.println("Error: trying to put an actor on the NameServer when it already exists.");

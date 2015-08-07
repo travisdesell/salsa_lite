@@ -920,10 +920,22 @@ public class CCompilationUnit {
 
         if (isMobile()) {
             code += CIndent.getIndent() + "public void migrate(String host, int port) {\n";
+            code += CIndent.getIndent() + "    int hashCode = this.hashCode();\n";
             code += CIndent.getIndent() + "    if (! (host.equals(TransportService.getHost()) && port == TransportService.getPort()) ) {\n";
-            code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getStateLock(this.hashCode())) {\n";
-            code += CIndent.getIndent() + "            MobileActorRegistry.updateStateEntry(this.hashCode(), TransportService.getSocket(host, port));\n";
-            code += CIndent.getIndent() + "        }\n";
+            code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getStateLock(hashCode)) {\n";
+            code += CIndent.getIndent() + "            MobileActorRegistry.updateStateEntry(hashCode, TransportService.getSocket(host, port));\n";
+            code += CIndent.getIndent() + "        }\n\n";
+
+            code += CIndent.getIndent() + "        " + actor_name + " actor;\n";
+            code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getReferenceLock(hashCode)) {\n";
+            code += CIndent.getIndent() + "            actor = (" + actor_name + ")MobileActorRegistry.getReferenceEntry(hashCode);\n";
+            code += CIndent.getIndent() + "            if (actor == null) {\n";
+            code += CIndent.getIndent() + "                actor = new " + actor_name + "(getName(), getNameServer(), getLastKnownHost(), getLastKnownPort());\n";
+            code += CIndent.getIndent() + "                MobileActorRegistry.addReferenceEntry(hashCode, actor);\n";
+            code += CIndent.getIndent() + "            }\n";
+            code += CIndent.getIndent() + "        }\n\n";
+
+            code += CIndent.getIndent() + "        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, getNameServer(), 5 /*update*/, new Object[]{actor}));\n";
             code += CIndent.getIndent() + "        TransportService.migrateActor(host, port, this);\n";
             code += CIndent.getIndent() + "    }\n";
             code += CIndent.getIndent() + "}\n\n";
