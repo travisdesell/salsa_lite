@@ -176,11 +176,28 @@ public abstract class TypeSymbol implements Comparable<TypeSymbol> {
         ArrayList<TypeSymbol> instantiatedGenericTypes = new ArrayList<TypeSymbol>();
 
         genericTypesString = genericTypesString.substring(1, genericTypesString.length() - 1);
-//        System.err.println("PARSING GENERICS: < " + genericTypesString + " >");
+        //System.err.println("POST SUBSTRING: PARSING GENERICS: < " + genericTypesString + " >");
+        //System.err.println("declared generic types:");
+        //for (String dgt : declaredGenericTypes) System.err.println("\t" + dgt);
+
+        /**
+         * Instead of iterating over the tokens in the genericTypesString,
+         * need to iterate over the declaredGenericTypes, then need to 
+         * match and see if the generic types string can be resolved
+         * to each declaredGenericType.
+         */
 
         StringTokenizer st = new StringTokenizer(genericTypesString, ",");
+        int count = 0;
+
+        if (st.countTokens() != declaredGenericTypes.size()) {
+            //System.err.println("number of tokens in tokenizer != declaredGenericTypes.size()");
+        }
+
         while (st.hasMoreTokens()) {
             String generic_type = st.nextToken();
+            //System.err.println("current generic_type: " + generic_type + ", count: " + count + " of " + st.countTokens() + " tokens.");
+
             if (generic_type.charAt(0) == ' ') generic_type = generic_type.substring(1, generic_type.length());
 
             int j;
@@ -191,7 +208,7 @@ public abstract class TypeSymbol implements Comparable<TypeSymbol> {
             }
 
             if (bracket_count > 0) {
-//                System.err.println("generic_type: " + generic_type);
+                //System.err.println("generic_type: " + generic_type);
                 int nextIndex = generic_type.indexOf(">");
                 if (nextIndex > 0) {
                     generic_type += st.nextToken(">") + ">";
@@ -202,7 +219,7 @@ public abstract class TypeSymbol implements Comparable<TypeSymbol> {
                     generic_type += st.nextToken(">") + ">";
                     bracket_count--;
                 }
-//                System.err.println("generic_type: " + generic_type + ", nextIndex: " + nextIndex);
+                //System.err.println("generic_type: " + generic_type + ", nextIndex: " + nextIndex);
             }
 
             /**
@@ -229,7 +246,7 @@ public abstract class TypeSymbol implements Comparable<TypeSymbol> {
                 }
             }
 
-//            System.err.println("genericTypesString: " + genericTypesString + " -- token: " + generic_type);
+            //System.err.println("genericTypesString: " + genericTypesString + " -- token: " + generic_type);
 
             TypeSymbol ts = null;
             if (fromObject) {

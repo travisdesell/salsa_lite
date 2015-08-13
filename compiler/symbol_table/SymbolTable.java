@@ -153,7 +153,9 @@ public class SymbolTable {
         }
 
         if (!genericDeclarations.equals("")) {
+            //System.err.println("replacing generics on: '" + name + "', genericDeclarations: '" + genericDeclarations + "'");
             knownType = knownType.copy().replaceGenerics(genericDeclarations);
+            //System.err.println("finished replacing generics on: '" + name + "'");
         }
 
         if (!arrayDims.equals("")) {
@@ -218,7 +220,7 @@ public class SymbolTable {
 
         if (knownTypes.get(name) != null) return (ObjectType)knownTypes.get(name);
 
-//        System.err.println("importing object: " + name);
+        //System.err.println("importing object: " + name);
 
         ObjectType objectType = new ObjectType(name);
         knownTypes.put(objectType.getLongSignature(), objectType);
@@ -523,7 +525,7 @@ public class SymbolTable {
             importDefaultObject("java.lang.Byte", true);
             importDefaultObject("java.lang.Character", true);
             importDefaultObject("java.lang.Class", false);
-    //        importDefaultObject("java.lang.ClassLoader", false);
+            //        importDefaultObject("java.lang.ClassLoader", false);
             importDefaultObject("java.lang.Compiler", false);
             importDefaultObject("java.lang.Double", true);
             importDefaultObject("java.lang.Enum", false);
@@ -534,8 +536,8 @@ public class SymbolTable {
             importDefaultObject("java.lang.Math", false);
             importDefaultObject("java.lang.Number", true);
             importDefaultObject("java.lang.Package", false);
-    //        importDefaultObject("java.lang.Process", false);
-    //        importDefaultObject("java.lang.ProcessBuilder", false);
+            //        importDefaultObject("java.lang.Process", false);
+            //        importDefaultObject("java.lang.ProcessBuilder", false);
             importDefaultObject("java.lang.Runtime", false);
             importDefaultObject("java.lang.RuntimePermission", false);
             importDefaultObject("java.lang.SecurityManager", false);
@@ -545,16 +547,16 @@ public class SymbolTable {
             importDefaultObject("java.lang.String", true);
             importDefaultObject("java.lang.StringBuffer", false);
             importDefaultObject("java.lang.System", false);
-    //        importDefaultObject("java.lang.Thread", false);
-    //        importDefaultObject("java.lang.ThreadGroup", false);
-    //        importDefaultObject("java.lang.ThreadLocal", false);
+            //        importDefaultObject("java.lang.Thread", false);
+            //        importDefaultObject("java.lang.ThreadGroup", false);
+            //        importDefaultObject("java.lang.ThreadLocal", false);
             importDefaultObject("java.lang.Throwable", false);
             importDefaultObject("java.lang.Void", false);
 
             /**
              * Import enums from java.lang
              */
-    //        importDefaultObject("java.lang.Thread.State", false);
+            //        importDefaultObject("java.lang.Thread.State", false);
 
             /**
              * Import exceptions from java.lang
@@ -610,7 +612,7 @@ public class SymbolTable {
             importDefaultObject("java.lang.UnsupportedClassVersionError", false);
             importDefaultObject("java.lang.VerifyError", false);
             importDefaultObject("java.lang.VirtualMachineError", false);
-        
+
             /**
              *  Make sure the actor is in the correct file
              */

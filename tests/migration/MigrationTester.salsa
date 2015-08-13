@@ -7,7 +7,7 @@ import object java.io.FileReader;
 import object java.util.StringTokenizer;
 import object java.util.ArrayList;
 
-behavior MigrationTester {
+behavior MigrationTester extends RemoteActor {
 	ArrayList<String> hosts = new ArrayList<String>();
 	ArrayList<Integer> ports = new ArrayList<Integer>();
 	NameServer nameserver;
@@ -18,7 +18,7 @@ behavior MigrationTester {
 		if (args.length != 3) {
 			System.err.println("Incorrect arguments.");
 			System.err.println("Usage:");
-			System.err.println("\tjava MigrationTester <theaters & nameserver file> <number_workers> <number_migrations>");
+			System.err.println("\tjava MigrationTester <theaters file> <number_workers> <number_migrations>");
 			System.exit(0);
 		}
 
@@ -30,19 +30,23 @@ behavior MigrationTester {
 		self<-getTheaters(args[0]) @
 		self<-create_actors(number_workers) @
 		self<-migrate_actors(number_migrations) @
-		new StandardOutput()<-println("Migration test with " + number_workers + " actors and " + number_migrations + " completed.");
+		new StandardOutput()<-println("Migration test with " + number_workers + " actors and " + number_migrations + " completed.") @
+        self<-finish();
 	}
+
+    ack finish() {
+        System.exit(0);
+    }
 
 	ack getTheaters(String theater_file) {
 		try {   
 			BufferedReader in = new BufferedReader(new FileReader(theater_file));
-			String line = in.readLine();
+			String line;
 
-			ArrayList<String> theaters = new ArrayList<String>();
 			while ((line = in.readLine()) != null) {
                 StringTokenizer st = new StringTokenizer(line, ":");
 
-				theaters.add(st.nextToken());
+				hosts.add(st.nextToken());
                 ports.add(Integer.parseInt(st.nextToken()));
 			}
 		} catch (Exception e) {
@@ -55,11 +59,21 @@ behavior MigrationTester {
 	ack create_actors(int number_workers) {
 		workers = new MigrationWorker[number_workers];
 
+        JoinDirector jd = new JoinDirector();
 		for (int i = 0; i < number_workers; i++) {
 			int target = (int)(hosts.size() * Math.random());
-			workers[i] = new MigrationWorker() called ("worker_" + i) using (nameserver) at (hosts.get(target), ports.get(target));
+
+            token MigrationWorker w = new MigrationWorker() called ("worker_" + i) using (nameserver) at (hosts.get(target), ports.get(target));
+            self<-set_worker( i, w ) @
+            jd<-join();
 		}
+        jd<-resolveAfter(number_workers) @
+        pass;
 	}
+
+    ack set_worker(int i, MigrationWorker migration_worker) {
+        workers[i] = migration_worker;
+    }
 
 	ack migrate_actors(int number_migrations) {
         JoinDirector jd = new JoinDirector();
