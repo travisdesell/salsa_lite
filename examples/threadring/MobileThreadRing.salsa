@@ -1,31 +1,34 @@
 import salsa_lite.language.JoinDirector;
 import object salsa_lite.runtime.StageService;
 
-behavior ThreadRing {
-    ThreadRing next;
+behavior MobileThreadRing extends MobileActor {
+    MobileThreadRing next;
     int id;
     
-    ThreadRing(int id) {
+    MobileThreadRing(int id) {
         self.id = id;
     }
 
-    ThreadRing(String[] args) {
+    MobileThreadRing(String[] args) {
         if (args.length != 2) {
-            System.out.println("Usage: java ThreadRing <threadCount> <hopCount>");
+            System.out.println("Usage: java MobileThreadRing <threadCount> <hopCount>");
             pass;
         }
 
         int threadCount = Integer.parseInt(args[0]);
         int hopCount = Integer.parseInt(args[1]);
 
-        //ThreadRing first = new ThreadRing(1) called ("threadring_1");
-        ThreadRing first = new ThreadRing(1) on (1);
+        NameServer nameserver = new NameServer() called ("ns1");
+
+        MobileThreadRing first = new MobileThreadRing(1) called ("threadring_1") using (nameserver);
+        //MobileThreadRing first = new MobileThreadRing(1) called ("threadring_1") on (1);
         JoinDirector jd = new JoinDirector();
 
-        ThreadRing next = null;
-        ThreadRing previous = first;
+        MobileThreadRing next = null;
+        MobileThreadRing previous = first;
         for (int i = 1; i < threadCount; i++) {
-            next = new ThreadRing(i + 1) on (i + 1);
+            next = new MobileThreadRing(i + 1) called("threadring_" + (i+1)) using (nameserver);
+            //next = new MobileThreadRing(i + 1) called("threadring_" + (i+1)) on (i+1);
             previous<-setNextThread(next) @ jd<-join();
             previous = next;
         }
@@ -35,7 +38,7 @@ behavior ThreadRing {
         first<-forwardMessage(hopCount);
     }
 
-    ack setNextThread(ThreadRing next) {
+    ack setNextThread(MobileThreadRing next) {
         self.next = next;
     }
 

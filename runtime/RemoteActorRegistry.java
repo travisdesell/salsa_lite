@@ -14,22 +14,22 @@ public class RemoteActorRegistry {
     }
 
     public final static Object getLock(int hashCode) {
-        return serializedActors[hashCode % Hashing.numberRegistries];
+        return serializedActors[Math.abs(hashCode % Hashing.numberRegistries)];
     }
 
     public final static RemoteActor getEntry(int hashCode) {
-        return serializedActors[hashCode % Hashing.numberRegistries].get(hashCode);
+        return serializedActors[Math.abs(hashCode % Hashing.numberRegistries)].get(hashCode);
     }
 
     public final static RemoteActor removeEntry(int hashCode) {
         System.err.println("removing entry[" + hashCode + "]: " + serializedActors[hashCode %Hashing.numberRegistries].get(hashCode));
-        return serializedActors[hashCode % Hashing.numberRegistries].remove(hashCode);
+        return serializedActors[Math.abs(hashCode % Hashing.numberRegistries)].remove(hashCode);
     }
 
     public final static void addEntry(int hashCode, RemoteActor actor) {
-        if (serializedActors[hashCode % Hashing.numberRegistries].get(hashCode) != null) {
+        if (serializedActors[Math.abs(hashCode % Hashing.numberRegistries)].get(hashCode) != null) {
             System.err.println("remote actor regsitry error, overwriting registry entry: " + hashCode);
         }
-        serializedActors[hashCode % Hashing.numberRegistries].put(hashCode, actor);
+        serializedActors[Math.abs(hashCode % Hashing.numberRegistries)].put(hashCode, actor);
     }
 }

@@ -34,7 +34,7 @@ public class StageService {
 	}
 
 	public final static SynchronousMailboxStage getStage() {
-		return stages[Math.abs((int)Math.random() % stages.length)];
+		return stages[Math.abs((int)(Math.random() % stages.length))];
 	}
 
 	public final static SynchronousMailboxStage getStage(Actor target) {

@@ -1,0 +1,34 @@
+behavior RemoteFibonacci extends RemoteActor {
+	int n;
+
+	RemoteFibonacci(int n) {
+		self.n = n;
+	}
+
+	RemoteFibonacci(String[] arguments) {
+		n = Integer.parseInt(arguments[0]);
+
+		self<-finish( self<-compute() );
+	}
+
+	int compute() {
+		if (n == 0)         pass 0;
+		else if (n <= 2)    pass 1;
+		else                {
+            /*
+            String name1 = self.stage.getUniqueName();
+            String name2 = self.stage.getUniqueName();
+            System.out.println("n1: " + name1);
+            System.out.println("n2: " + name2);
+
+            pass (new RemoteFibonacci(n-1) called (name1))<-compute() + (new RemoteFibonacci(n-2) called (name2))<-compute();
+            */
+            pass (new RemoteFibonacci(n-1) called ( self.stage.getUniqueName() ))<-compute() + (new RemoteFibonacci(n-2) called ( self.stage.getUniqueName() ))<-compute();
+        }
+	}
+
+	ack finish(int value) {
+		System.out.println(value);
+        System.exit(0);
+	}
+}

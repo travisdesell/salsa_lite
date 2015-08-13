@@ -1,0 +1,31 @@
+behavior RemoteCreator extends RemoteActor {
+    int acks_received;
+	int number_workers;
+
+	RemoteCreator(String[] arguments) {
+		self.acks_received = 0;
+		self.number_workers = Integer.parseInt(arguments[0]);
+
+        if (arguments.length > 1) {
+            String host = arguments[1];
+            int port = Integer.parseInt(arguments[2]);
+
+            for (int i = 0; i < number_workers; i++) {
+                new RemoteCreationWorker(self) called ("w_" + i) at (host, port);
+            }
+        } else {
+            for (int i = 0; i < number_workers; i++) {
+                new RemoteCreationWorker(self) called ("w_" + i);
+            }
+        }
+	}
+
+    ack worker_ack() {
+        self.acks_received++;
+
+        if (self.acks_received == self.number_workers) {
+            System.out.println(self.acks_received + " acknowledgements received!");
+            System.exit(0);
+        }
+	}
+}

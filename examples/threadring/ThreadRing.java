@@ -129,12 +129,12 @@ public class ThreadRing extends salsa_lite.runtime.Actor implements java.io.Seri
         
         int threadCount = Integer.parseInt(args[0]);
         int hopCount = Integer.parseInt(args[1]);
-        ThreadRing first = ThreadRing.construct(0, new Object[]{1});
+        ThreadRing first = ThreadRing.construct(0, new Object[]{1}, 1);
         JoinDirector jd = JoinDirector.construct(0, null);
         ThreadRing next = null;
         ThreadRing previous = first;
         for (int i = 1; i < threadCount; i++) {
-            next = ThreadRing.construct(0, new Object[]{i + 1}, -1);
+            next = ThreadRing.construct(0, new Object[]{i + 1}, i + 1);
             ContinuationDirector continuation_token = StageService.sendContinuationMessage(previous, 3 /*setNextThread*/, new Object[]{next});
             StageService.sendMessage(jd, 3 /*join*/, null, continuation_token);
             previous = next;
