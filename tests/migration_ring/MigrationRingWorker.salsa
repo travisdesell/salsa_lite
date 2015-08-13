@@ -1,0 +1,31 @@
+import object java.util.ArrayList;
+
+behavior MigrationRingWorker extends MobileActor {
+
+    int number_migrations;
+    MigrationRing master;
+
+    ArrayList<String> hosts;
+    ArrayList<Integer> ports;
+
+    MigrationRingWorker(MigrationRing master, int number_migrations, ArrayList<String> hosts, ArrayList<Integer> ports) {
+        self.master = master;
+        self.number_migrations = number_migrations;
+        self.hosts = hosts;
+        self.ports = ports;
+
+        self<-go();
+    }
+
+    ack go() {
+        number_migrations--;
+
+        if (number_migrations == 0) {
+            master<-worker_finished();
+        } else {
+            //System.out.println("migrating to " + hosts.get(number_migrations % hosts.size()) + ":" + ports.get(number_migrations % ports.size()));
+            self<-migrate(hosts.get(number_migrations % hosts.size()), ports.get(number_migrations % ports.size())) @
+            self<-go();
+        }
+    }
+}

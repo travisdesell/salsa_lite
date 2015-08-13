@@ -1,0 +1,44 @@
+behavior RemotePingPong extends RemoteActor {
+
+    RemotePingPong other;
+
+    RemotePingPong(RemotePingPong other) {
+        self.other = other;
+    }
+
+	RemotePingPong(String[] arguments) {
+		int number_messages = Integer.parseInt(arguments[0]);
+
+        String host = arguments[1];
+        int port = Integer.parseInt(arguments[2]);
+
+        token RemotePingPong other = new RemotePingPong(self) called ("rpc") at (host, port);
+        self<-set_other(other, number_messages);
+    }
+
+    ack set_other(RemotePingPong other, int number_messages) {
+        self.other = other;
+       
+        self.other<-pong(number_messages);
+    }
+
+    ack pong(int number_messages) {
+        //System.err.println("received pong: " + number_messages);
+        number_messages--;
+
+        other<-ping(number_messages);
+    }
+
+    ack ping(int number_messages) {
+        //System.err.println("received ping: " + number_messages);
+        number_messages--;
+
+        if (number_messages <= 0) {
+            System.out.println("finished!");
+            System.exit(0);
+        } else {
+            other<-pong(number_messages);
+        }
+    }
+
+}

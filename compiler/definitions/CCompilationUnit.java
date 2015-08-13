@@ -481,33 +481,35 @@ public class CCompilationUnit {
                  *  Remote and Mobile actors should already be in the ActorRegistry
                  */
                 code += CIndent.getIndent() + "public Object writeReplace() throws java.io.ObjectStreamException {\n";
-                code += CIndent.getIndent() + "    return new Serialized" + tmp_name + "( this.getName(), this.getNameServer(), this.getLastKnownHost(), this.getLastKnownPort());\n";
+                code += CIndent.getIndent() + "    return new Serialized" + tmp_name + "( this.getName(), this.getNameServerName(), this.getNameServerHost(), this.getNameServerPort(), this.getLastKnownHost(), this.getLastKnownPort());\n";
                 code += CIndent.getIndent() + "}\n\n";
 
                 code += CIndent.getIndent() + "public static class Serialized" + tmp_name + " implements java.io.Serializable {\n";
                 code += CIndent.getIndent() + "    String name;\n";
                 code += CIndent.getIndent() + "    String lastKnownHost;\n";
                 code += CIndent.getIndent() + "    int lastKnownPort;\n\n";
-                code += CIndent.getIndent() + "    NameServer nameserver;\n\n";
+                code += CIndent.getIndent() + "    String nameserverName;\n";
+                code += CIndent.getIndent() + "    String nameserverHost;\n";
+                code += CIndent.getIndent() + "    int nameserverPort;\n\n";
 
-                code += CIndent.getIndent() + "    Serialized" + tmp_name + "(String name, NameServer nameserver, String lastKnownHost, int lastKnownPort) { this.name = name; this.nameserver = nameserver; this.lastKnownHost = lastKnownHost; this.lastKnownPort = lastKnownPort; }\n\n";
+                code += CIndent.getIndent() + "    Serialized" + tmp_name + "(String name, String nameserverName, String nameserverHost, int nameserverPort, String lastKnownHost, int lastKnownPort) { this.name = name; this.nameserverName = nameserverName; this.nameserverHost = nameserverHost; this.nameserverPort = nameserverPort; this.lastKnownHost = lastKnownHost; this.lastKnownPort = lastKnownPort; }\n\n";
 
                 code += CIndent.getIndent() + "    public Object readResolve() throws java.io.ObjectStreamException {\n";
-                code += CIndent.getIndent() + "        int hashCode = Hashing.getHashCodeFor(name, nameserver.getName(), nameserver.getHost(), nameserver.getPort());\n\n";
+                code += CIndent.getIndent() + "        int hashCode = Hashing.getHashCodeFor(name, nameserverName, nameserverHost, nameserverPort);\n\n";
 
-                 code += CIndent.getIndent() + "            synchronized (MobileActorRegistry.getStateLock(hashCode)) {\n";
-                 code += CIndent.getIndent() + "                Actor entry = MobileActorRegistry.getStateEntry(hashCode);\n";
-                 code += CIndent.getIndent() + "                if (entry == null) {\n";
-                 code += CIndent.getIndent() + "                    MobileActorRegistry.addStateEntry(hashCode, TransportService.getSocket(lastKnownHost, lastKnownPort));\n";
-                 code += CIndent.getIndent() + "                }\n";
-                 code += CIndent.getIndent() + "            }\n\n";
+                 code += CIndent.getIndent() + "       synchronized (MobileActorRegistry.getStateLock(hashCode)) {\n";
+                 code += CIndent.getIndent() + "            Actor entry = MobileActorRegistry.getStateEntry(hashCode);\n";
+                 code += CIndent.getIndent() + "            if (entry == null) {\n";
+                 code += CIndent.getIndent() + "                MobileActorRegistry.addStateEntry(hashCode, TransportService.getSocket(lastKnownHost, lastKnownPort));\n";
+                 code += CIndent.getIndent() + "            }\n";
+                 code += CIndent.getIndent() + "        }\n\n";
 
 
                 code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getReferenceLock(hashCode)) {\n";
                 code += CIndent.getIndent() + "            " + tmp_name + " actor = (" + tmp_name +")MobileActorRegistry.getReferenceEntry(hashCode);\n";
 //                code += CIndent.getIndent() + "            System.err.println(\"DESERIALIZING A REFERENCE TO A MOBILE ACTOR: \" + hashCode + \" -- \" + lastKnownHost + \":\" + lastKnownPort + \"/\" + name + \" -- got: \" + actor + \" -- type: " + tmp_name + "\");\n";
                 code += CIndent.getIndent() + "            if (actor == null) {\n";
-                code += CIndent.getIndent() + "                " + tmp_name + " remoteReference = new " + tmp_name + "(name, nameserver, lastKnownHost, lastKnownPort);\n";
+                code += CIndent.getIndent() + "                " + tmp_name + " remoteReference = new " + tmp_name + "(name, nameserverName, nameserverHost, nameserverPort, lastKnownHost, lastKnownPort);\n";
                 code += CIndent.getIndent() + "                MobileActorRegistry.addReferenceEntry(hashCode, remoteReference);\n";
                 code += CIndent.getIndent() + "                return remoteReference;\n";
                 code += CIndent.getIndent() + "            } else {\n";
@@ -743,13 +745,13 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "}\n\n\n";
 
             if (!isStaged()) {
-                code += CIndent.getIndent() + "public " + tmp_name + "(String name, NameServer nameserver) { super(name, nameserver); }\n";
+                code += CIndent.getIndent() + "public " + tmp_name + "(String name, String nameserverName, String nameserverHost, int nameserverPort) { super(name, nameserverName, nameserverHost, nameserverPort); }\n";
             } else {
                 code += CIndent.getIndent() + "public " + tmp_name + "() { super(-1 /*-1 means new stage*/); }\n";
             }
-            code += CIndent.getIndent() + "public " + tmp_name + "(String name, NameServer nameserver, int stage_id) { super(name, nameserver, stage_id); }\n";
-            code += CIndent.getIndent() + "public " + tmp_name + "(String name, NameServer nameserver, String lastKnownHost, int lastKnownPort) { super(name, nameserver, lastKnownHost, lastKnownPort); }\n\n";
-            code += CIndent.getIndent() + "public " + tmp_name + "(String name, NameServer nameserver, String lastKnownHost, int lastKnownPort, int stage_id) { super(name, nameserver, lastKnownHost, lastKnownPort, stage_id); }\n\n";
+            code += CIndent.getIndent() + "public " + tmp_name + "(String name, String nameserverName, String nameserverHost, int nameserverPort, int stage_id) { super(name, nameserverName, nameserverHost, nameserverPort, stage_id); }\n";
+            code += CIndent.getIndent() + "public " + tmp_name + "(String name, String nameserverName, String nameserverHost, int nameserverPort, String lastKnownHost, int lastKnownPort) { super(name, nameserverName, nameserverHost, nameserverPort, lastKnownHost, lastKnownPort); }\n\n";
+            code += CIndent.getIndent() + "public " + tmp_name + "(String name, String nameserverName, String nameserverHost, int nameserverPort, String lastKnownHost, int lastKnownPort, int stage_id) { super(name, nameserverName, nameserverHost, nameserverPort, lastKnownHost, lastKnownPort, stage_id); }\n\n";
 
             int act_constructor = behavior_declaration.getActConstructor();
             if (act_constructor >= 0) {
@@ -773,7 +775,7 @@ public class CCompilationUnit {
                 code += CIndent.getIndent() + "        String nameserver_host = nameserver_info.substring(0,colon_index);\n";
                 code += CIndent.getIndent() + "        int nameserver_port = Integer.parseInt(nameserver_info.substring(colon_index + 1, slash_index));\n";
                 code += CIndent.getIndent() + "        String nameserver_name = nameserver_info.substring(slash_index + 1, nameserver_info.length());\n";
-                code += CIndent.getIndent() + "        " + tmp_name + ".construct(" + act_constructor + ", new Object[]{arguments}, name, NameServer.getRemoteReference(nameserver_name, nameserver_host, nameserver_port));\n";
+                code += CIndent.getIndent() + "        " + tmp_name + ".construct(" + act_constructor + ", new Object[]{arguments}, name, nameserver_name, nameserver_host, nameserver_port);\n";
                 code += CIndent.getIndent() + "    } catch (Exception e) {\n";
                 code += CIndent.getIndent() + "        System.err.println(\"Error in format of -Dusing system property, needs to be 'nameserver_host:nameserver_port/nameserver_name'.\");\n";
                 code += CIndent.getIndent() + "        e.printStackTrace();\n";
@@ -782,36 +784,36 @@ public class CCompilationUnit {
                 code += CIndent.getIndent() + "}\n\n";
             }
 
-            code += CIndent.getIndent() + "public static " + tmp_name + " construct(int constructor_id, Object[] arguments, String name, NameServer nameserver) {\n";
-            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver);\n";
-            code += CIndent.getIndent() + "    State state = new State(name, nameserver, actor.getStageId());\n\n";
-            code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, nameserver, 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
+            code += CIndent.getIndent() + "public static " + tmp_name + " construct(int constructor_id, Object[] arguments, String name, String nameserverName, String nameserverHost, int nameserverPort) {\n";
+            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserverName, nameserverHost, nameserverPort);\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserverName, nameserverHost, nameserverPort, actor.getStageId());\n\n";
+            code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, NameServer.getRemoteReference(nameserverName, nameserverHost, nameserverPort), 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
             code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
             code += CIndent.getIndent() + "    return actor;\n";
             code += CIndent.getIndent() + "}\n\n";
 
-            code += CIndent.getIndent() + "public static " + tmp_name + " construct(int constructor_id, Object[] arguments, String name, NameServer nameserver, int target_stage_id) {\n";
-            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, target_stage_id);\n";
-            code += CIndent.getIndent() + "    State state = new State(name, nameserver, target_stage_id);\n\n";
-            code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, nameserver, 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
+            code += CIndent.getIndent() + "public static " + tmp_name + " construct(int constructor_id, Object[] arguments, String name, String nameserverName, String nameserverHost, int nameserverPort, int target_stage_id) {\n";
+            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserverName, nameserverHost, nameserverPort, target_stage_id);\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserverName, nameserverHost, nameserverPort, target_stage_id);\n\n";
+            code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, NameServer.getRemoteReference(nameserverName, nameserverHost, nameserverPort), 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
             code += CIndent.getIndent() + "    actor.getStage().putMessageInMailbox(new Message(Message.CONSTRUCT_MESSAGE, actor, constructor_id, arguments));\n";
             code += CIndent.getIndent() + "    return actor;\n";
             code += CIndent.getIndent() + "}\n\n\n";
 
-            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, NameServer nameserver) {\n";
-            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver);\n";
-            code += CIndent.getIndent() + "    State state = new State(name, nameserver, actor.getStageId());\n\n";
-            code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, nameserver, 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
+            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, String nameserverName, String nameserverHost, int nameserverPort) {\n";
+            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserverName, nameserverHost, nameserverPort);\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserverName, nameserverHost, nameserverPort, actor.getStageId());\n\n";
+            code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, NameServer.getRemoteReference(nameserverName, nameserverHost, nameserverPort), 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
             code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);\n";
             code += CIndent.getIndent() + "    Message input_message = new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
             code += CIndent.getIndent() + "    MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions});\n";
             code += CIndent.getIndent() + "    return output_continuation;\n";
             code += CIndent.getIndent() + "}\n\n";
 
-            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, NameServer nameserver, int target_stage_id) {\n";
-            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, target_stage_id);\n";
-            code += CIndent.getIndent() + "    State state = new State(name, nameserver, target_stage_id);\n\n";
-            code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, nameserver, 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
+            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, String nameserverName, String nameserverHost, int nameserverPort, int target_stage_id) {\n";
+            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserverName, nameserverHost, nameserverPort, target_stage_id);\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserverName, nameserverHost, nameserverPort, target_stage_id);\n\n";
+            code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, NameServer.getRemoteReference(nameserverName, nameserverHost, nameserverPort), 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
             code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage_id);\n";
             code += CIndent.getIndent() + "    Message input_message = new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
             code += CIndent.getIndent() + "    MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage_id);\n";
@@ -820,62 +822,62 @@ public class CCompilationUnit {
 
             //remote creation construct methods
             //need one for host port and no tokens, one for host port stage and no tokens, one for host port and tokens and one for host port stage and tokens
-            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, String name, NameServer nameserver, String host, int port) {\n";
-            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, host, port);\n";
-            code += CIndent.getIndent() + "    State state = new State(name, nameserver, host, port, actor.getStageId());\n\n";
+            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, String name, String nameserverName, String nameserverHost, int nameserverPort, String host, int port) {\n";
+            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserverName, nameserverHost, nameserverPort, host, port);\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserverName, nameserverHost, nameserverPort, host, port, actor.getStageId());\n\n";
             code += CIndent.getIndent() + "    if (! (host.equals(TransportService.getHost()) && port == TransportService.getPort()) ) {\n";
             code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getStateLock(actor.hashCode())) {\n";
             code += CIndent.getIndent() + "            MobileActorRegistry.updateStateEntry(actor.hashCode(), TransportService.getSocket(host, port));\n";
             code += CIndent.getIndent() + "        }\n";
             code += CIndent.getIndent() + "        TransportService.migrateActor(host, port, state);\n";
             code += CIndent.getIndent() + "    }\n\n";
-            code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, nameserver, 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
+            code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, NameServer.getRemoteReference(nameserverName, nameserverHost, nameserverPort), 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
             code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);\n";
             code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation));\n";
             code += CIndent.getIndent() + "    return output_continuation;\n";
             code += CIndent.getIndent() + "}\n\n";
 
-            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, String name, NameServer nameserver, String host, int port, int target_stage_id) {\n";
-            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, host, port, target_stage_id);\n";
-            code += CIndent.getIndent() + "    State state = new State(name, nameserver, host, port, target_stage_id);\n\n";
+            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, String name, String nameserverName, String nameserverHost, int nameserverPort, String host, int port, int target_stage_id) {\n";
+            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserverName, nameserverHost, nameserverPort, host, port, target_stage_id);\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserverName, nameserverHost, nameserverPort, host, port, target_stage_id);\n\n";
             code += CIndent.getIndent() + "    if (! (host.equals(TransportService.getHost()) && port == TransportService.getPort()) ) {\n";
             code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getStateLock(actor.hashCode())) {\n";
             code += CIndent.getIndent() + "            MobileActorRegistry.updateStateEntry(actor.hashCode(), TransportService.getSocket(host, port));\n";
             code += CIndent.getIndent() + "        }\n";
             code += CIndent.getIndent() + "        TransportService.migrateActor(host, port, state);\n";
             code += CIndent.getIndent() + "    }\n\n";
-            code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, nameserver, 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
+            code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, NameServer.getRemoteReference(nameserverName, nameserverHost, nameserverPort), 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
             code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);\n";
             code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation));\n";
             code += CIndent.getIndent() + "    return output_continuation;\n";
             code += CIndent.getIndent() + "}\n\n";
 
-            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, NameServer nameserver, String host, int port) {\n";
-            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, host, port);\n";
-            code += CIndent.getIndent() + "    State state = new State(name, nameserver, host, port, actor.getStageId());\n\n";
+            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, String nameserverName, String nameserverHost, int nameserverPort, String host, int port) {\n";
+            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserverName, nameserverHost, nameserverPort, host, port);\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserverName, nameserverHost, nameserverPort, host, port, actor.getStageId());\n\n";
             code += CIndent.getIndent() + "    if (! (host.equals(TransportService.getHost()) && port == TransportService.getPort()) ) {\n";
             code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getStateLock(actor.hashCode())) {\n";
             code += CIndent.getIndent() + "            MobileActorRegistry.updateStateEntry(actor.hashCode(), TransportService.getSocket(host, port));\n";
             code += CIndent.getIndent() + "        }\n";
             code += CIndent.getIndent() + "        TransportService.migrateActor(host, port, state);\n";
             code += CIndent.getIndent() + "    }\n\n";
-            code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, nameserver, 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
+            code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, NameServer.getRemoteReference(nameserverName, nameserverHost, nameserverPort), 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
             code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null);\n";
             code += CIndent.getIndent() + "    Message input_message = new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
             code += CIndent.getIndent() + "    MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions});\n";
             code += CIndent.getIndent() + "    return output_continuation;\n";
             code += CIndent.getIndent() + "}\n\n";
 
-            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, NameServer nameserver, String host, int port, int target_stage_id) {\n";
-            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserver, host, port, target_stage_id);\n";
-            code += CIndent.getIndent() + "    State state = new State(name, nameserver, host, port, target_stage_id);\n\n";
+            code += CIndent.getIndent() + "public static TokenDirector construct(int constructor_id, Object[] arguments, int[] token_positions, String name, String nameserverName, String nameserverHost, int nameserverPort, String host, int port, int target_stage_id) {\n";
+            code += CIndent.getIndent() + "    " + tmp_name + " actor = new " + tmp_name + "(name, nameserverName, nameserverHost, nameserverPort, host, port, target_stage_id);\n";
+            code += CIndent.getIndent() + "    State state = new State(name, nameserverName, nameserverHost, nameserverPort, host, port, target_stage_id);\n\n";
             code += CIndent.getIndent() + "    if (! (host.equals(TransportService.getHost()) && port == TransportService.getPort()) ) {\n";
             code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getStateLock(actor.hashCode())) {\n";
             code += CIndent.getIndent() + "            MobileActorRegistry.updateStateEntry(actor.hashCode(), TransportService.getSocket(host, port));\n";
             code += CIndent.getIndent() + "        }\n";
             code += CIndent.getIndent() + "        TransportService.migrateActor(host, port, state);\n";
             code += CIndent.getIndent() + "    }\n\n";
-            code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, nameserver, 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
+            code += CIndent.getIndent() + "    StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, NameServer.getRemoteReference(nameserverName, nameserverHost, nameserverPort), 4 /*put*/, new Object[]{actor})); //register the actor with the name server. \n\n";
             code += CIndent.getIndent() + "    TokenDirector output_continuation = TokenDirector.construct(0 /*construct()*/, null, target_stage_id);\n";
             code += CIndent.getIndent() + "    Message input_message = new Message(Message.CONSTRUCT_CONTINUATION_MESSAGE, actor, constructor_id, arguments, output_continuation);\n";
             code += CIndent.getIndent() + "    MessageDirector md = MessageDirector.construct(3, new Object[]{input_message, arguments, token_positions}, target_stage_id);\n";
@@ -894,13 +896,13 @@ public class CCompilationUnit {
 
         if (isMobile()) {
             if (!isStaged()) {
-                code += CIndent.getIndent() + "public State(String name, NameServer nameserver) { super(name, nameserver); }\n";
+                code += CIndent.getIndent() + "public State(String name, String nameserverName, String nameserverHost, int nameserverPort) { super(name, nameserverName, nameserverHost, nameserverPort); }\n";
             } else {
-                code += CIndent.getIndent() + "public State(String name, NameServer nameserver) { super(name, nameserver, -1 /*-1 means new stage*/); }\n";
+                code += CIndent.getIndent() + "public State(String name, String nameserverName, String nameserverHost, int nameserverPort) { super(name, nameserverName, nameserverHost, nameserverPort, -1 /*-1 means new stage*/); }\n";
             }
-            code += CIndent.getIndent() + "public State(String name, NameServer nameserver, int stage_id) { super(name, nameserver, stage_id); }\n\n";
-            code += CIndent.getIndent() + "public State(String name, NameServer nameserver, String host, int port) { super(name, nameserver, host, port); }\n\n";
-            code += CIndent.getIndent() + "public State(String name, NameServer nameserver, String host, int port, int stage_id) { super(name, nameserver, host, port, stage_id); }\n\n";
+            code += CIndent.getIndent() + "public State(String name, String nameserverName, String nameserverHost, int nameserverPort, int stage_id) { super(name, nameserverName, nameserverHost, nameserverPort, stage_id); }\n\n";
+            code += CIndent.getIndent() + "public State(String name, String nameserverName, String nameserverHost, int nameserverPort, String host, int port) { super(name, nameserverName, nameserverHost, nameserverPort, host, port); }\n\n";
+            code += CIndent.getIndent() + "public State(String name, String nameserverName, String nameserverHost, int nameserverPort, String host, int port, int stage_id) { super(name, nameserverName, nameserverHost, nameserverPort, host, port, stage_id); }\n\n";
         } else if (isRemote()) {
             if (!isStaged()) {
                 code += CIndent.getIndent() + "public " + actor_name + "(String name) { super(name); }\n";
@@ -930,7 +932,7 @@ public class CCompilationUnit {
             code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getReferenceLock(hashCode)) {\n";
             code += CIndent.getIndent() + "            actor = (" + actor_name + ")MobileActorRegistry.getReferenceEntry(hashCode);\n";
             code += CIndent.getIndent() + "            if (actor == null) {\n";
-            code += CIndent.getIndent() + "                actor = new " + actor_name + "(getName(), getNameServer(), getLastKnownHost(), getLastKnownPort());\n";
+            code += CIndent.getIndent() + "                actor = new " + actor_name + "(getName(), getNameServerName(), getNameServerHost(), getNameServerPort(), getLastKnownHost(), getLastKnownPort());\n";
             code += CIndent.getIndent() + "                MobileActorRegistry.addReferenceEntry(hashCode, actor);\n";
             code += CIndent.getIndent() + "            }\n";
             code += CIndent.getIndent() + "        }\n\n";

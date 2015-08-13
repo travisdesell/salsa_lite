@@ -175,7 +175,8 @@ public class CAllocation extends CVariableInit {
                         }
 
                         if (nameserver_expression != null) {
-                            code += ", " + nameserver_expression.toJavaCode();
+                            String ns_code = "(" + nameserver_expression.toJavaCode() + ")";
+                            code += ", " + ns_code + ".getName(), " + ns_code + ".getHost(), " + ns_code + ".getPort()";
                         }
 
                         if (host_expression != null) {
