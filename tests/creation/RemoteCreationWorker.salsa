@@ -1,6 +1,0 @@
-behavior RemoteCreationWorker extends RemoteActor {
-
-    RemoteCreationWorker(RemoteCreator creator) {
-        creator<-worker_ack();
-    }
-}

@@ -1,9 +1,0 @@
-behavior MigrateCreationWorker extends MobileActor {
-
-    MigrateCreationWorker() {
-    }
-
-    ack send_ack(MigrateCreator mc) {
-        mc<-worker_ack();
-    }
-}

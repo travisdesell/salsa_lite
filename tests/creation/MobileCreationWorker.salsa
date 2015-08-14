@@ -1,6 +1,0 @@
-behavior MobileCreationWorker extends MobileActor {
-
-    MobileCreationWorker(MobileCreator creator) {
-        creator<-worker_ack();
-    }
-}
