@@ -1,0 +1,86 @@
+import salsa_lite.runtime.wwc.NameServer;
+import salsa_lite.runtime.io.StandardOutput;
+import salsa_lite.language.JoinDirector;
+
+import object java.io.BufferedReader;
+import object java.io.FileReader;
+import object java.util.StringTokenizer;
+import object java.util.ArrayList;
+
+behavior MobileTheaterRings extends RemoteActor {
+    int number_rings;
+    int number_hops;
+
+	ArrayList<String> hosts = new ArrayList<String>();
+	ArrayList<Integer> ports = new ArrayList<Integer>();
+	NameServer nameserver;
+
+	MobileTheaterRings(String[] args) {
+		if (args.length != 3) {
+			System.err.println("Incorrect arguments.");
+			System.err.println("Usage:");
+			System.err.println("\tjava MobileTheaterRings <theaters file> <number_rings> <number_hops>");
+			System.exit(0);
+		}
+
+		number_rings = Integer.parseInt(args[1]);
+		number_hops = Integer.parseInt(args[2]);
+
+        nameserver = new NameServer() called ("nameserver");
+
+		self<-getTheaters(args[0]) @
+		self<-create_actors();
+	}
+
+    ack worker_finished() {
+        number_rings--;
+
+        if (number_rings == 0) {
+            System.err.println("Finished!");
+            System.exit(0);
+        }
+    }
+
+	ack getTheaters(String theater_file) {
+		try {   
+			BufferedReader in = new BufferedReader(new FileReader(theater_file));
+			String line;
+
+			while ((line = in.readLine()) != null) {
+                StringTokenizer st = new StringTokenizer(line, ":");
+
+				hosts.add(st.nextToken());
+                ports.add(Integer.parseInt(st.nextToken()));
+			}
+		} catch (Exception e) {
+			System.err.println("Error reading theaters file: " + e);
+			e.printStackTrace();
+            System.exit(0);
+		}       
+	}        
+
+    ack create_actors() {
+        for (int i = 0; i < number_rings; i++) {
+            token MobileTheaterRingWorker first = new MobileTheaterRingWorker(self) called ("worker_" + i + "_0") using (nameserver) at (hosts.get(0), ports.get(0));
+
+            token MobileTheaterRingWorker previous = first;
+
+            token MobileTheaterRingWorker current = null;
+
+            JoinDirector jd = new JoinDirector();
+
+            for (int j = 1; j < hosts.size(); j++) {
+                current = new MobileTheaterRingWorker(self) called ("worker_" + i + "_" + j) using (nameserver) at (hosts.get(j), ports.get(j));
+                previous<-set_next(current) @
+                jd<-join();
+                previous = current;
+            }
+
+            current<-set_next(first) @
+            jd<-join();
+
+            jd<-resolveAfter(hosts.size()) @
+            first<-go(number_hops);
+        }
+    }
+}

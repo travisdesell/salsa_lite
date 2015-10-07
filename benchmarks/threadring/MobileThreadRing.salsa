@@ -1,0 +1,54 @@
+import salsa_lite.language.JoinDirector;
+import object salsa_lite.runtime.StageService;
+
+behavior MobileThreadRing extends MobileActor {
+    MobileThreadRing next;
+    int id;
+    
+    MobileThreadRing(int id) {
+        self.id = id;
+    }
+
+    MobileThreadRing(String[] args) {
+        if (args.length != 2) {
+            System.out.println("Usage: java MobileThreadRing <threadCount> <hopCount>");
+            pass;
+        }
+
+        int threadCount = Integer.parseInt(args[0]);
+        int hopCount = Integer.parseInt(args[1]);
+
+        NameServer nameserver = new NameServer() called ("ns1");
+
+        MobileThreadRing first = new MobileThreadRing(1) called ("threadring_1") using (nameserver);
+        //MobileThreadRing first = new MobileThreadRing(1) called ("threadring_1") on (1);
+        JoinDirector jd = new JoinDirector();
+
+        MobileThreadRing next = null;
+        MobileThreadRing previous = first;
+        for (int i = 1; i < threadCount; i++) {
+            next = new MobileThreadRing(i + 1) called("threadring_" + (i+1)) using (nameserver);
+            //next = new MobileThreadRing(i + 1) called("threadring_" + (i+1)) on (i+1);
+            previous<-setNextThread(next) @ jd<-join();
+            previous = next;
+        }
+        next<-setNextThread(first) @ jd<-join();
+
+        jd<-resolveAfter(threadCount) @
+        first<-forwardMessage(hopCount);
+    }
+
+    ack setNextThread(MobileThreadRing next) {
+        self.next = next;
+    }
+
+    ack forwardMessage(int value) {
+        if (value == 0) {
+            System.out.println(id);
+            System.exit(0);
+        } else {
+            value--;
+            next<-forwardMessage(value);
+        }
+    }
+}
