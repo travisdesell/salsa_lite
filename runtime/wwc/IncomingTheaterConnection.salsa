@@ -11,13 +11,19 @@ behavior IncomingTheaterConnection implements StagedActor {
     Socket socket = null;
     ObjectInputStream in = null;
 
+    String sourceHost;
+    int sourcePort;
+
     IncomingTheaterConnection(Socket socket) {
         self.socket = socket;
         try {
             in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
 //            in = new ObjectInputStream(socket.getInputStream());
 
-            System.err.println("made new incoming theater connection from: " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
+            sourceHost = socket.getInetAddress().getHostAddress();
+            sourcePort = socket.getPort();
+
+            System.err.println("made new incoming theater connection from: " + sourceHost + ":" + sourcePort);
         } catch (IOException ioe) {
             StringBuffer sb = new StringBuffer();
             sb.append("Error in IncomingTheaterConnection, IOException: " + ioe + "\n");
@@ -62,6 +68,13 @@ behavior IncomingTheaterConnection implements StagedActor {
             pass;
         }
 
+        /**
+
+            Check and see if a message arrives for an actor that hasn't made it here yet.
+
+        */
+
+
         if (o instanceof RemoteActor) {
 //            System.err.println("RECEIVED A REMOTE ACTOR WITH HASHCODE: " + o.hashCode());
 
@@ -77,6 +90,23 @@ behavior IncomingTheaterConnection implements StagedActor {
         } else if (o instanceof Message) {
             //check to see if the target actor is here
 
+            /*
+            if (message.target instanceof MobileActor) {
+
+                if (awaitingMobileUpdateAck.get(message.target.hashCode()) == null) {
+                    synchronized (MobileActorRegistry.getStateLock(message.target.hashCode())) {
+                        if (MobileActorRegistry.get(message.target.hashCode()) instanceof OutgoingTheaterConnection) {
+                            //the mobile actor was not here
+                            awaitingMobileUpdateAck.put(message.target.hashcode(), new Object());
+
+                            source<-updateMobileActorLocation(message.target) @
+                            self<-updateMobileActorAcknowledgement(message.target);
+                        }
+                    }
+                }
+            }
+            */
+
             StageService.sendMessage((Message)o);
 
 //            System.err.println("IncomingTheaterConnection received a message: " + o);
@@ -91,5 +121,9 @@ behavior IncomingTheaterConnection implements StagedActor {
         }
 
         self<-listen();
+    }
+
+    ack updateMobileActorAcknowledgement(Actor a) {
+        awaitingMobileUpdateAck.remove(a.hashCode());
     }
 }

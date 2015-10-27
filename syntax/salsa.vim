@@ -47,7 +47,7 @@ syn keyword salsaTypedef		this super
 syn keyword salsaOperator	new instanceof
 syn keyword salsaType		boolean char byte short int long float double
 syn keyword salsaType		ack
-syn keyword salsaStatement	return
+syn keyword salsaStatement	return pass
 syn keyword salsaStorageClass	static synchronized transient volatile final strictfp serializable
 syn keyword salsaExceptions	throw try catch finally
 syn keyword salsaAssert		assert

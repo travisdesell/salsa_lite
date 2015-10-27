@@ -18,13 +18,14 @@ behavior ThreadRing {
         int threadCount = Integer.parseInt(args[0]);
         int hopCount = Integer.parseInt(args[1]);
 
-        //ThreadRing first = new ThreadRing(1) called ("threadring_1");
+        //ThreadRing first = new ThreadRing(1);
         ThreadRing first = new ThreadRing(1) on (1);
         JoinDirector jd = new JoinDirector();
 
         ThreadRing next = null;
         ThreadRing previous = first;
         for (int i = 1; i < threadCount; i++) {
+            //next = new ThreadRing(i + 1);
             next = new ThreadRing(i + 1) on (i + 1);
             previous<-setNextThread(next) @ jd<-join();
             previous = next;
