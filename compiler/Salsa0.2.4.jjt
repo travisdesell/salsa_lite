@@ -1164,6 +1164,7 @@ CArguments Arguments() : {
 
 CAllocation Allocation() : {
     CAllocation allocation = new CAllocation();
+    CExpression expression;
     CArguments arguments;
     CName type;
     CPrimitiveType ptype;
@@ -1174,8 +1175,34 @@ CAllocation Allocation() : {
          (
             t = "new"
             type = Name()
-            arguments = Arguments()                 { allocation.arguments = arguments.arguments; }
-            [ BindDeclaration(allocation) ]         { allocation.type = type; }
+            arguments = Arguments()                 { allocation.arguments = arguments.arguments;
+                                                      allocation.type = type; }
+            //[ BindDeclaration(allocation) ]         { allocation.type = type; }
+            [
+                "called" "("
+                    expression = Expression()                   { allocation.called_expression = expression; }
+                ")"
+            ]
+
+            [
+                "using" "("
+                    expression = Expression()               { allocation.nameserver_expression = expression; }
+                ")"
+            ]
+
+            [
+                "at" "("
+                    expression = Expression()               { allocation.host_expression = expression; }
+                    ","
+                    expression = Expression()               { allocation.port_expression = expression; }
+                ")"
+            ]
+
+            [
+                "on" "("
+                expression = Expression()               { allocation.stage_expression = expression; }
+                ")"
+            ]
           )
         | (    
             t = "new"                               { allocation.initLineAndColumn(t); }
@@ -1224,10 +1251,6 @@ void BindDeclaration(CAllocation allocation) : {
             expression = Expression()               { allocation.stage_expression = expression; }
             ")"
         ]
-    ) | (
-    "on" "("
-        expression = Expression()               { allocation.stage_expression = expression; }
-    ")"
     )
 }
 

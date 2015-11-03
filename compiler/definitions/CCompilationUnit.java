@@ -759,13 +759,16 @@ public class CCompilationUnit {
                 code += CIndent.getIndent() + "    TransportService.initialize();\n";
                 code += CIndent.getIndent() + "    String name = System.getProperty(\"called\");\n";
                 code += CIndent.getIndent() + "    String nameserver_info = System.getProperty(\"using\");\n";
-                code += CIndent.getIndent() + "    if (name == null || nameserver_info == null) {\n";
-                code += CIndent.getIndent() + "        System.err.println(\"Error starting " + tmp_name + ": to run a mobile actor you must specify a name with the '-Dcalled=<name>' system property and a namesever with the '-Dusing=\\\"<nameserver_host>:<nameserver_port>/<nameserver_name>\\\"' system property.\");\n";
-                code += CIndent.getIndent() + "        System.err.println(\"usage: (port is optional and 4040 by default)\");\n";
+                code += CIndent.getIndent() + "    if (name == null) {\n";
+                code += CIndent.getIndent() + "        name = \"runtime/startup_actor\";\n";
+                code += CIndent.getIndent() + "    }\n\n";
+                code += CIndent.getIndent() + "    if (nameserver_info == null) {\n";
+                code += CIndent.getIndent() + "        System.err.println(\"Error starting " + tmp_name + ": to run a mobile actor you must specify a namesever with the '-Dusing=\\\"<nameserver_host>:<nameserver_port>/<nameserver_name>\\\"' system property.\");\n";
+                code += CIndent.getIndent() + "        System.err.println(\"usage: (port is optional and 4040 by default, name is optional and 'runtime/startup_actor' by default)\");\n";
                 if (getModule() == null) {
-                    code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dcalled=\\\"<name>\\\" -Dusing=\\\"nameserver_host:nameserver_port/nameserver_name\\\" [-Dport=4040] " + tmp_name + "\");\n";
+                    code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dusing=\\\"nameserver_host:nameserver_port/nameserver_name\\\" [-Dport=4040] " + tmp_name + "\");\n";
                 } else {
-                    code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dcalled=\\\"<name>\\\" [-Dport=4040] " + getModule() + "." + tmp_name + "\");\n";
+                    code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dusing=\\\"nameserver_host:nameserver_port/nameserver_name\\\" [-Dport=4040] " + getModule() + "." + tmp_name + "\");\n";
                 }
                 code += CIndent.getIndent() + "        System.exit(0);\n";
                 code += CIndent.getIndent() + "    }\n";
