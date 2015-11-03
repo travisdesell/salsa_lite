@@ -2,14 +2,16 @@ import object java.util.ArrayList;
 
 behavior MigrationRingWorker extends MobileActor {
 
+    int id;
     int number_migrations;
     MigrationRing master;
 
     ArrayList<String> hosts;
     ArrayList<Integer> ports;
 
-    MigrationRingWorker(MigrationRing master, int number_migrations, ArrayList<String> hosts, ArrayList<Integer> ports) {
+    MigrationRingWorker(MigrationRing master, int id, int number_migrations, ArrayList<String> hosts, ArrayList<Integer> ports) {
         self.master = master;
+        self.id = id;
         self.number_migrations = number_migrations;
         self.hosts = hosts;
         self.ports = ports;
@@ -19,6 +21,7 @@ behavior MigrationRingWorker extends MobileActor {
 
     ack go() {
         number_migrations--;
+        System.out.println("MigrationRingWorker " + id + " has " + number_migrations + " left!");
 
         if (number_migrations == 0) {
             master<-worker_finished();

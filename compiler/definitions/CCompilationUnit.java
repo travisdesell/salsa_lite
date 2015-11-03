@@ -921,24 +921,37 @@ public class CCompilationUnit {
         }
 
         if (isMobile()) {
-            code += CIndent.getIndent() + "public void migrate(String host, int port) {\n";
-            code += CIndent.getIndent() + "    int hashCode = this.hashCode();\n";
+            code += CIndent.getIndent() + "public void migrate(String host, int port) throws TokenPassException {\n";
             code += CIndent.getIndent() + "    if (! (host.equals(TransportService.getHost()) && port == TransportService.getPort()) ) {\n";
+            code += CIndent.getIndent() + "        int hashCode = this.hashCode();\n\n";
+
+            code += CIndent.getIndent() + "        OutgoingTheaterConnection out = TransportService.getSocket(host, port);\n";
             code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getStateLock(hashCode)) {\n";
-            code += CIndent.getIndent() + "            MobileActorRegistry.updateStateEntry(hashCode, TransportService.getSocket(host, port));\n";
+            code += CIndent.getIndent() + "            MobileActorRegistry.updateStateEntry(hashCode, out);\n";
             code += CIndent.getIndent() + "        }\n\n";
 
             code += CIndent.getIndent() + "        " + actor_name + " actor;\n";
             code += CIndent.getIndent() + "        synchronized (MobileActorRegistry.getReferenceLock(hashCode)) {\n";
             code += CIndent.getIndent() + "            actor = (" + actor_name + ")MobileActorRegistry.getReferenceEntry(hashCode);\n";
             code += CIndent.getIndent() + "            if (actor == null) {\n";
-            code += CIndent.getIndent() + "                actor = new " + actor_name + "(getName(), getNameServerName(), getNameServerHost(), getNameServerPort(), getLastKnownHost(), getLastKnownPort());\n";
-            code += CIndent.getIndent() + "                MobileActorRegistry.addReferenceEntry(hashCode, actor);\n";
+                        /*  
+                        actor = new MigrationRingWorker(getName(), getNameServerName(), getNameServerHost(), getNameServerPort(), getLastKnownHost(), getLastKnownPort());
+                        MobileActorRegistry.addReferenceEntry(hashCode, actor);
+                        */
+            code += CIndent.getIndent() + "                //The reference actor to this actor should never be null\n";
+            code += CIndent.getIndent() + "                System.err.println(\"Reference stub actor to a migrating mobile actor state was null, this should never happen.\");\n";
+            code += CIndent.getIndent() + "                System.exit(1);\n";
             code += CIndent.getIndent() + "            }\n";
             code += CIndent.getIndent() + "        }\n\n";
 
-            code += CIndent.getIndent() + "        StageService.sendMessage(new Message(Message.SIMPLE_MESSAGE, getNameServer(), 5 /*update*/, new Object[]{actor}));\n";
-            code += CIndent.getIndent() + "        TransportService.migrateActor(host, port, this);\n";
+            code += CIndent.getIndent() + "        this.host = host;\n";
+            code += CIndent.getIndent() + "        this.port = port;\n\n";
+
+            code += CIndent.getIndent() + "        //getNameServer()<-update(self) @\n";
+            code += CIndent.getIndent() + "        //out<-migrate(this) @ pass;\n";
+            code += CIndent.getIndent() + "        ContinuationDirector continuation_token = StageService.sendContinuationMessage(getNameServer(), 5 /*update*/, new Object[]{actor});\n";
+            code += CIndent.getIndent() + "        StageService.sendPassMessage(out, 4 /*migrate*/, new Object[]{this}, continuation_token, this.getStage().message.continuationDirector);\n";
+            code += CIndent.getIndent() + "        throw new TokenPassException();\n";
             code += CIndent.getIndent() + "    }\n";
             code += CIndent.getIndent() + "}\n\n";
         }
@@ -965,18 +978,21 @@ public class CCompilationUnit {
                     code += CIndent.getIndent() + "public static void main(String[] arguments) {\n";
                     if (isRemote()) {
                         code += CIndent.getIndent() + "    TransportService.initialize();\n";
-                        code += CIndent.getIndent() + "    String name = System.getProperty(\"called\");\n";
-                        code += CIndent.getIndent() + "    if (name == null) {\n";
-                        code += CIndent.getIndent() + "        System.err.println(\"Error starting " + actor_name + ": to run a remote actor you must specify a name with the '-Dcalled=<name>' system property.\");\n";
-                        code += CIndent.getIndent() + "        System.err.println(\"usage: (port is optional and 4040 by default)\");\n";
-                        if (getModule() != null) {
-                            code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dcalled=\\\"<name>\\\" [-Dport=4040] " + getModule() + "." + actor_name + "\");\n";
-                        } else {
-                            code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dcalled=\\\"<name>\\\" [-Dport=4040] " + actor_name + "\");\n";
+
+                        if (!(actor_name.equals("Theater") && module_string.equals("salsa_lite.runtime.wwc"))) {
+                            code += CIndent.getIndent() + "    String name = System.getProperty(\"called\");\n";
+                            code += CIndent.getIndent() + "    if (name == null) {\n";
+                            code += CIndent.getIndent() + "        System.err.println(\"Error starting " + actor_name + ": to run a remote actor you must specify a name with the '-Dcalled=<name>' system property.\");\n";
+                            code += CIndent.getIndent() + "        System.err.println(\"usage: (port is optional and 4040 by default)\");\n";
+                            if (getModule() != null) {
+                                code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dcalled=\\\"<name>\\\" [-Dport=4040] " + getModule() + "." + actor_name + "\");\n";
+                            } else {
+                                code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dcalled=\\\"<name>\\\" [-Dport=4040] " + actor_name + "\");\n";
+                            }
+                            code += CIndent.getIndent() + "        System.exit(0);\n";
+                            code += CIndent.getIndent() + "    }\n";
+                            code += CIndent.getIndent() + "    " + actor_name + ".construct(" + act_constructor + ", new Object[]{arguments}, name);\n";
                         }
-                        code += CIndent.getIndent() + "        System.exit(0);\n";
-                        code += CIndent.getIndent() + "    }\n";
-                        code += CIndent.getIndent() + "    " + actor_name + ".construct(" + act_constructor + ", new Object[]{arguments}, name);\n";
                     } else {
                         code += CIndent.getIndent() + "    " + actor_name + ".construct(" + act_constructor + ", new Object[]{arguments});\n";
                     }

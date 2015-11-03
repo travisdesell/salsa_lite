@@ -36,6 +36,8 @@ behavior MigrationRing extends RemoteActor {
     ack worker_finished() {
         number_workers--;
 
+        System.out.println(number_workers + " remaining!");
+
         if (number_workers == 0) {
             System.err.println("Finished!");
             System.exit(0);
@@ -64,7 +66,7 @@ behavior MigrationRing extends RemoteActor {
 		for (int i = 0; i < number_workers; i++) {
 			int target = (int)(hosts.size() * Math.random());
 
-            MigrationRingWorker w = new MigrationRingWorker(self, number_migrations, hosts, ports) called ("worker_" + i) using (nameserver);
+            MigrationRingWorker w = new MigrationRingWorker(self, i, number_migrations, hosts, ports) called ("worker_" + i) using (nameserver);
 		}
 	}
 }

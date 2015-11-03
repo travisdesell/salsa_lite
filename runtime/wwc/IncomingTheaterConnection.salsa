@@ -96,7 +96,10 @@ behavior IncomingTheaterConnection implements StagedActor {
                 if (awaitingMobileUpdateAck.get(message.target.hashCode()) == null) {
                     synchronized (MobileActorRegistry.getStateLock(message.target.hashCode())) {
                         if (MobileActorRegistry.get(message.target.hashCode()) instanceof OutgoingTheaterConnection) {
-                            //the mobile actor was not here
+                            //received a message to a mobile actor who was not here, the source
+                            //theater of this message needs to update it's reference to where this
+                            //theater knows the actor's location is
+
                             awaitingMobileUpdateAck.put(message.target.hashcode(), new Object());
 
                             source<-updateMobileActorLocation(message.target) @
@@ -123,7 +126,9 @@ behavior IncomingTheaterConnection implements StagedActor {
         self<-listen();
     }
 
+    /*
     ack updateMobileActorAcknowledgement(Actor a) {
         awaitingMobileUpdateAck.remove(a.hashCode());
     }
+    */
 }
