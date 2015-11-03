@@ -83,16 +83,10 @@ public class ObjectType extends TypeSymbol {
         if (!copy.isGeneric()) throw new SalsaNotFoundException(module, name, "Tried to replace generics on non generic-class: " + copy.getLongSignature());
 
         //System.err.println(name + " parsing generics for: '" + genericTypesString + "'");
-        /*
-        if (genericTypesString.equals("<T>") && declaredGenericTypes.size() == 2 && declaredGenericTypes.get(0).equals("T") && declaredGenericTypes.get(1).equals("java.util.stream.Stream<T>")) {
-            System.err.println("FIXING BUG??");
-            genericTypesString = "<T, java.util.stream.Stream<T>>";
-        }
-        */
-
         ArrayList<TypeSymbol> instantiatedGenericTypes = parseGenerics(genericTypesString, declaredGenericTypes, true);
         //System.err.println(name + " parsed generics for: '" + genericTypesString + "'");
 
+        /*
         if (instantiatedGenericTypes.size() != declaredGenericTypes.size()) {
             System.err.println("instantiatedGenericTypes.size() != declaredGenericTypes.size()");
             System.err.println("genericTypesString: " + genericTypesString);
@@ -101,13 +95,15 @@ public class ObjectType extends TypeSymbol {
             System.err.println("\tdeclaredGenericTypes:");
             for (String dgt : declaredGenericTypes) {
                 System.err.println("\t\t" + dgt);
-                System.err.println("\t\t\tGetting ObjectType: " + new ObjectType(dgt));
+                //System.err.println("\t\t\tGetting ObjectType: " + new ObjectType(dgt));
             }
 
-            throw new SalsaNotFoundException(module, name, "Wrong number of generic parameters. instantiated " + instantiatedGenericTypes.toString() + ", declared " + declaredGenericTypes.toString() + ". generic object");
+            //throw new SalsaNotFoundException(module, name, "Wrong number of generic parameters. instantiated " + instantiatedGenericTypes.toString() + ", declared " + declaredGenericTypes.toString() + ". generic object");
         }
+        */
 
         for (int i = 0; i < instantiatedGenericTypes.size(); i++) {
+            //System.out.println("Setting declaredGenericTypes[" + i + "]: " + declaredGenericTypes.get(i) + " to instantiated generic type[" + i + "]: " + instantiatedGenericTypes.get(i).getLongSignature());
 //            if (SymbolTable.isGeneric(instantiatedGenericTypes.get(i).getLongSignature())) {
 //                copy.declaredGenericTypes.set(i, instantiatedGenericTypes.get(i).getLongSignature());
 //            }
@@ -132,10 +128,12 @@ public class ObjectType extends TypeSymbol {
         for (int i = 0; i < copy.fields.size(); i++)             copy.fields.set(i, copy.fields.get(i).replaceGenerics(declaredGenericTypes, instantiatedGenericTypes));
         for (int i = 0; i < copy.method_handlers.size(); i++)    copy.method_handlers.set(i, copy.method_handlers.get(i).replaceGenerics(declaredGenericTypes, instantiatedGenericTypes));
 
-//        System.err.println("replaced generics for " + copy.getLongSignature());
-//        System.err.println("\tfields: " + copy.fields.toString());
-//        System.err.println("\tconstructors: " + copy.constructors.toString());
-//        System.err.println("\tmethod_handlers: " + copy.method_handlers.toString());
+        /*
+        System.err.println("replaced generics for " + copy.getLongSignature());
+        System.err.println("\tfields: " + copy.fields.toString());
+        System.err.println("\tconstructors: " + copy.constructors.toString());
+        System.err.println("\tmethod_handlers: " + copy.method_handlers.toString());
+        */
 
         return copy;
     }
@@ -204,10 +202,14 @@ public class ObjectType extends TypeSymbol {
             FieldSymbol fs = new FieldSymbol(this, fv[i]);
             fields.add( fs );
 
+            /*
             if (isEnum) {
-                SymbolTable.addGlobalVariableType(fs.getName(), fs.getType().getLongSignature(), false, true);
+                SymbolTable.addVariableType(fs.getName(), fs.getType().getLongSignature(), false, true);
+//                SymbolTable.addGlobalVariableType(fs.getName(), fs.getType().getLongSignature(), false, true);
 //                System.err.println("Added variable: " + fs.getName() + ", type: " + fs.getType().getLongSignature());
             }
+            */
+
 //            if (isEnum) {
 //                System.err.println("Field type is: " + fs.getType());
 //            }
