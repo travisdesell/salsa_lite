@@ -7,7 +7,7 @@ behavior NameServer extends RemoteActor {
     HashMap<String,MobileActor> entries = new HashMap<String,MobileActor>();
 
     NameServer() {
-        System.err.println("NameServer running at host[" + TransportService.getHost() + "], port[" + TransportService.getPort() + "], name[" + System.getProperty("called") + "], hashCode: " + self.hashCode());
+        System.err.println("NameServer running at host[" + TransportService.getHost() + "], port[" + TransportService.getPort() + "], name[" + self.getName() + "], hashCode: " + self.hashCode());
     }
 
     NameServer(String[] arguments) {

@@ -18,17 +18,17 @@ behavior MobileThreadRing extends MobileActor {
         int threadCount = Integer.parseInt(args[0]);
         int hopCount = Integer.parseInt(args[1]);
 
-        NameServer nameserver = new NameServer();
+        //NameServer nameserver = new NameServer();
 
-        MobileThreadRing first = new MobileThreadRing(1) using (nameserver);
-        //MobileThreadRing first = new MobileThreadRing(1) called ("threadring_1") on (1);
+        MobileThreadRing first = new MobileThreadRing(1);
+        //MobileThreadRing first = new MobileThreadRing(1) called ("threadring_1") using (nameserver) on (1);
         JoinDirector jd = new JoinDirector();
 
         MobileThreadRing next = null;
         MobileThreadRing previous = first;
         for (int i = 1; i < threadCount; i++) {
-            next = new MobileThreadRing(i + 1) using (nameserver);
-            //next = new MobileThreadRing(i + 1) called("threadring_" + (i+1)) on (i+1);
+            next = new MobileThreadRing(i + 1);
+            //next = new MobileThreadRing(i + 1) called("threadring_" + (i+1)) using (nameserver) on (i+1);
             previous<-setNextThread(next) @ jd<-join();
             previous = next;
         }

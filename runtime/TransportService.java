@@ -20,6 +20,7 @@ public class TransportService {
     public static final int getPort() { return port; }
     public static final String getHost() { return host; }
     public static ServerSocket serverSocket;
+    public static NameServer nameServer;
 
     private static final HashMap<Integer,OutgoingTheaterConnection> outgoingSockets = new HashMap<Integer,OutgoingTheaterConnection>();
 
@@ -62,6 +63,11 @@ public class TransportService {
         System.err.println("TransportService started on host [" + host + "] and port [" + port + "]");
 
         Theater.construct(0, new Object[]{}, "runtime/theater");
+        nameServer = NameServer.construct(0, new Object[]{}, "runtime/nameserver");
+    }
+
+    public synchronized static final NameServer getNameServer() {
+        return nameServer;
     }
 
     public synchronized static final OutgoingTheaterConnection getSocket(String host, int port) {

@@ -762,22 +762,34 @@ public class CCompilationUnit {
                 code += CIndent.getIndent() + "    if (name == null) {\n";
                 code += CIndent.getIndent() + "        name = \"runtime/startup_actor\";\n";
                 code += CIndent.getIndent() + "    }\n\n";
-                code += CIndent.getIndent() + "    if (nameserver_info == null) {\n";
-                code += CIndent.getIndent() + "        System.err.println(\"Error starting " + tmp_name + ": to run a mobile actor you must specify a namesever with the '-Dusing=\\\"<nameserver_host>:<nameserver_port>/<nameserver_name>\\\"' system property.\");\n";
-                code += CIndent.getIndent() + "        System.err.println(\"usage: (port is optional and 4040 by default, name is optional and 'runtime/startup_actor' by default)\");\n";
-                if (getModule() == null) {
-                    code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dusing=\\\"nameserver_host:nameserver_port/nameserver_name\\\" [-Dport=4040] " + tmp_name + "\");\n";
-                } else {
-                    code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dusing=\\\"nameserver_host:nameserver_port/nameserver_name\\\" [-Dport=4040] " + getModule() + "." + tmp_name + "\");\n";
-                }
-                code += CIndent.getIndent() + "        System.exit(0);\n";
-                code += CIndent.getIndent() + "    }\n";
                 code += CIndent.getIndent() + "    try {\n";
-                code += CIndent.getIndent() + "        int colon_index = nameserver_info.indexOf(':');\n";
-                code += CIndent.getIndent() + "        int slash_index = nameserver_info.indexOf('/');\n";
-                code += CIndent.getIndent() + "        String nameserver_host = nameserver_info.substring(0,colon_index);\n";
-                code += CIndent.getIndent() + "        int nameserver_port = Integer.parseInt(nameserver_info.substring(colon_index + 1, slash_index));\n";
-                code += CIndent.getIndent() + "        String nameserver_name = nameserver_info.substring(slash_index + 1, nameserver_info.length());\n";
+                code += CIndent.getIndent() + "        String nameserver_host;\n";
+                code += CIndent.getIndent() + "        int nameserver_port;\n";
+                code += CIndent.getIndent() + "        String nameserver_name;\n\n";
+                code += CIndent.getIndent() + "        if (nameserver_info == null) {\n";
+                code += CIndent.getIndent() + "            NameServer nameserver = TransportService.getNameServer();\n";
+                code += CIndent.getIndent() + "            nameserver_name = nameserver.getName();\n";
+                code += CIndent.getIndent() + "            nameserver_host = nameserver.getHost();\n";
+                code += CIndent.getIndent() + "            nameserver_port = nameserver.getPort();\n";
+
+                /*
+                code += CIndent.getIndent() + "            System.err.println(\"Error starting " + tmp_name + ": to run a mobile actor you must specify a namesever with the '-Dusing=\\\"<nameserver_host>:<nameserver_port>/<nameserver_name>\\\"' system property.\");\n";
+                code += CIndent.getIndent() + "            System.err.println(\"usage: (port is optional and 4040 by default, name is optional and 'runtime/startup_actor' by default)\");\n";
+                if (getModule() == null) {
+                    code += CIndent.getIndent() + "            System.err.println(\"\tjava -Dusing=\\\"nameserver_host:nameserver_port/nameserver_name\\\" [-Dport=4040] " + tmp_name + "\");\n";
+                } else {
+                    code += CIndent.getIndent() + "            System.err.println(\"\tjava -Dusing=\\\"nameserver_host:nameserver_port/nameserver_name\\\" [-Dport=4040] " + getModule() + "." + tmp_name + "\");\n";
+                }
+                code += CIndent.getIndent() + "            System.exit(0);\n";
+                */
+
+                code += CIndent.getIndent() + "        } else {\n";
+                code += CIndent.getIndent() + "            int colon_index = nameserver_info.indexOf(':');\n";
+                code += CIndent.getIndent() + "            int slash_index = nameserver_info.indexOf('/');\n";
+                code += CIndent.getIndent() + "            nameserver_host = nameserver_info.substring(0,colon_index);\n";
+                code += CIndent.getIndent() + "            nameserver_port = Integer.parseInt(nameserver_info.substring(colon_index + 1, slash_index));\n";
+                code += CIndent.getIndent() + "            nameserver_name = nameserver_info.substring(slash_index + 1, nameserver_info.length());\n";
+                code += CIndent.getIndent() + "        }\n\n";
                 code += CIndent.getIndent() + "        " + tmp_name + ".construct(" + act_constructor + ", new Object[]{arguments}, name, nameserver_name, nameserver_host, nameserver_port);\n";
                 code += CIndent.getIndent() + "    } catch (Exception e) {\n";
                 code += CIndent.getIndent() + "        System.err.println(\"Error in format of -Dusing system property, needs to be 'nameserver_host:nameserver_port/nameserver_name'.\");\n";

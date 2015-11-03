@@ -78,9 +78,11 @@ public class CAllocation extends CVariableInit {
                             CompilerErrors.printErrorMessage("Cannot create a MobileActor without a name.  Use new " + type.name + "(...) called (<unique mobile actor name)", this);
                         }
                         */
+                        /*
                         if (nameserver_expression == null) {
                             CompilerErrors.printErrorMessage("Cannot create a MobileActor without using a nameserver.  Use new " + type.name + "(...) called ('your_name') using (<nameserver or host, port>)", this);
                         }
+                        */
 
                     } else if (actorType.isSubclassOf(SymbolTable.getTypeSymbol("RemoteActor"))) {
                         /*
@@ -170,21 +172,25 @@ public class CAllocation extends CVariableInit {
                             } else {
                                 code += "new Object[]{" + argument_code + "}";
                             }
-
-                            if (called_expression != null || actorType.isSubclassOf(SymbolTable.getTypeSymbol("MobileActor")) || actorType.isSubclassOf(SymbolTable.getTypeSymbol("RemoteActor"))) code += ", ";
                         }
 
                         if (called_expression != null) {
-                            code += called_expression.toJavaCode();
+                            code += ", " + called_expression.toJavaCode();
                         } else {
                             if (actorType.isSubclassOf(SymbolTable.getTypeSymbol("MobileActor")) || actorType.isSubclassOf(SymbolTable.getTypeSymbol("RemoteActor"))) {
-                                code += "stage.getUniqueName()";
+                                code += ", stage.getUniqueName()";
                             }
                         }
 
                         if (nameserver_expression != null) {
                             String ns_code = "(" + nameserver_expression.toJavaCode() + ")";
                             code += ", " + ns_code + ".getName(), " + ns_code + ".getHost(), " + ns_code + ".getPort()";
+                        } else {
+                            if (actorType.isSubclassOf(SymbolTable.getTypeSymbol("MobileActor"))) {
+                                code += ", TransportService.getNameServer().getName()";
+                                code += ", TransportService.getNameServer().getHost()";
+                                code += ", TransportService.getNameServer().getPort()";
+                            }
                         }
 
                         if (host_expression != null) {
