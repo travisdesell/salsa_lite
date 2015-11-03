@@ -1,0 +1,103 @@
+import salsa_lite.runtime.wwc.NameServer;
+import salsa_lite.runtime.io.StandardOutput;
+import salsa_lite.language.JoinDirector;
+
+import object java.io.BufferedReader;
+import object java.io.FileReader;
+import object java.util.StringTokenizer;
+import object java.util.ArrayList;
+
+behavior RotatingPingPong extends RemoteActor {
+    int number_workers;
+    int number_migrations;
+    int pingpongs_per_migration;
+
+    RotatingPingPongWorker[] workers;
+
+	ArrayList<String> hosts = new ArrayList<String>();
+	ArrayList<Integer> ports = new ArrayList<Integer>();
+
+	RotatingPingPong(String[] args) {
+		if (args.length != 4) {
+			System.err.println("Incorrect arguments.");
+			System.err.println("Usage:");
+			System.err.println("\tjava RotatingPingPong <theaters file> <number_workers> <number_migrations> <pingpongs_per_migration");
+			System.exit(0);
+		}
+
+		number_workers = Integer.parseInt(args[1]);
+		number_migrations = Integer.parseInt(args[2]);
+		pingpongs_per_migration = Integer.parseInt(args[3]);
+
+		self<-getTheaters(args[0]) @
+		self<-create_actors(number_workers) @
+        self<-iterate();
+
+	}
+
+	ack getTheaters(String theater_file) {
+		try {   
+			BufferedReader in = new BufferedReader(new FileReader(theater_file));
+			String line;
+
+			while ((line = in.readLine()) != null) {
+                StringTokenizer st = new StringTokenizer(line, ":");
+
+				hosts.add(st.nextToken());
+                ports.add(Integer.parseInt(st.nextToken()));
+			}
+		} catch (Exception e) {
+			System.err.println("Error reading theaters file: " + e);
+			e.printStackTrace();
+            System.exit(0);
+		}       
+	}        
+
+    ack assign_worker(int i, RotatingPingPongWorker worker) {
+        workers[i] = worker;
+    }
+
+	ack create_actors(int number_workers) {
+        workers = new RotatingPingPongWorker[number_workers];
+
+        JoinDirector jd = new JoinDirector();
+
+		for (int i = 0; i < number_workers; i++) {
+			int target = i % hosts.size();
+
+            //new RotatingPingPongWorker(self, i, target, hosts, ports) called ("worker_" + i) using (nameserver) at (hosts.get[target], ports.get[target]);
+            token RotatingPingPongWorker worker = new RotatingPingPongWorker(self, i, target, hosts, ports) at (hosts.get(target), ports.get(target));
+            self<-assign_worker(i, worker) @ jd<-join();
+		}
+
+        jd<-resolveAfter(number_workers) @
+        pass;
+	}
+
+    int pingpong_rounds_finished;
+    ack pong(int worker, int messages_left) {
+        if (messages_left == 0) {
+            pingpong_rounds_finished--;
+            if (pingpong_rounds_finished == 0) {
+                self<-iterate();
+            }
+
+        } else {
+            workers[worker]<-ping(messages_left);
+        }
+    }
+
+    ack iterate() {
+        number_migrations--;
+        if (number_migrations < 0) {
+            System.out.println("Completed!");
+            System.exit(0);
+        }
+
+        pingpong_rounds_finished = number_workers;
+        for (int i = 0; i < number_workers; i++) {
+            workers[i]<-ping(pingpongs_per_migration);
+        }
+    }
+
+}

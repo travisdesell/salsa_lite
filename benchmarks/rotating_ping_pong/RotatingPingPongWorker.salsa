@@ -1,0 +1,34 @@
+import object java.util.ArrayList;
+
+behavior RotatingPingPongWorker extends MobileActor {
+
+    RotatingPingPong master;
+
+    int id;
+    int current_theater;
+    ArrayList<String> hosts;
+    ArrayList<Integer> ports;
+
+    RotatingPingPongWorker(RotatingPingPong master, int id, int current_theater, ArrayList<String> hosts, ArrayList<Integer> ports) {
+        self.master = master;
+        self.id = id;
+        self.current_theater = current_theater;
+        self.hosts = hosts;
+        self.ports = ports;
+    }
+
+    ack ping(int messages_left) {
+        System.out.println("RotatingPingPongWorker " + id + " pong " + messages_left);
+        messages_left--;
+        master<-pong(id, messages_left);
+    }
+
+    ack rotate() {
+        current_theater++;
+        if (current_theater > hosts.size()) current_theater = 0;
+
+        System.out.println("RotatingPingPongWorker " + id + " migrating to " + hosts.get(current_theater) + ":" + ports.get(current_theater));
+
+        pass self<-migrate(hosts.get(current_theater), ports.get(current_theater));
+    }
+}
