@@ -1,5 +1,3 @@
-module salsa_lite.examples.chameneos;
-
 behavior MeetingPlace {
 	boolean did_evens = false;
 	int max_meetings;

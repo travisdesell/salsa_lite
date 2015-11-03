@@ -300,8 +300,9 @@ public class SymbolTable {
         VariableTypeSymbol symbolInScope = scope.getVariableType(name, false);
 
         if (symbolInScope != null) {
-//            if (!symbolInScope.getType().equals( type.getType() )) 
-            throw new VariableDeclarationException(name, type.getType().getLongSignature(), "Conflict of declarations. '" + name + "' already declared in current scope as '" + symbolInScope.getType().getLongSignature() + "', trying to redefine as '" + type.getType().getLongSignature() + "'");
+            if (!symbolInScope.getType().equals( type.getType() )) {
+                throw new VariableDeclarationException(name, type.getType().getLongSignature(), "Conflict of declarations. '" + name + "' already declared in current scope as '" + symbolInScope.getType().getLongSignature() + "', trying to redefine as '" + type.getType().getLongSignature() + "'");
+            }
 
         } else {
             scope.addVariableType(name, type);

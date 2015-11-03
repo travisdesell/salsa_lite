@@ -1,5 +1,3 @@
-module salsa_lite.examples.chameneos;
-
 behavior Chameneos {
 
 	int self_meetings = 0;
