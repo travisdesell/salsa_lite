@@ -73,17 +73,21 @@ public class CAllocation extends CVariableInit {
                     TypeSymbol actorType = SymbolTable.getTypeSymbol(type.name);
 
                     if (actorType.isSubclassOf(SymbolTable.getTypeSymbol("MobileActor"))) {
+                        /*
                         if (called_expression == null) {
                             CompilerErrors.printErrorMessage("Cannot create a MobileActor without a name.  Use new " + type.name + "(...) called (<unique mobile actor name)", this);
                         }
+                        */
                         if (nameserver_expression == null) {
                             CompilerErrors.printErrorMessage("Cannot create a MobileActor without using a nameserver.  Use new " + type.name + "(...) called ('your_name') using (<nameserver or host, port>)", this);
                         }
 
                     } else if (actorType.isSubclassOf(SymbolTable.getTypeSymbol("RemoteActor"))) {
+                        /*
                         if (called_expression == null) {
                             CompilerErrors.printErrorMessage("Cannot create a RemoteActor without a name.  Use new " + type.name + "(...) called (<unique mobile actor name)", this);
                         }
+                        */
 
                     } else {
                         if (nameserver_expression != null) {
@@ -96,7 +100,7 @@ public class CAllocation extends CVariableInit {
                             CompilerErrors.printErrorMessage("Cannot create a LocalActor at a port.", port_expression);
                         }
                     }
-                    
+
                     //cannot put a reference on a particular stage
                     if (remote_reference == true && stage_expression != null) {
                         CompilerErrors.printErrorMessage("Cannot specify the stage for a remote reference, that actor has already been created at a specific stage.", stage_expression);
@@ -167,11 +171,15 @@ public class CAllocation extends CVariableInit {
                                 code += "new Object[]{" + argument_code + "}";
                             }
 
-                            if (called_expression != null) code += ", ";
+                            if (called_expression != null || actorType.isSubclassOf(SymbolTable.getTypeSymbol("MobileActor")) || actorType.isSubclassOf(SymbolTable.getTypeSymbol("RemoteActor"))) code += ", ";
                         }
 
                         if (called_expression != null) {
                             code += called_expression.toJavaCode();
+                        } else {
+                            if (actorType.isSubclassOf(SymbolTable.getTypeSymbol("MobileActor")) || actorType.isSubclassOf(SymbolTable.getTypeSymbol("RemoteActor"))) {
+                                code += "stage.getUniqueName()";
+                            }
                         }
 
                         if (nameserver_expression != null) {

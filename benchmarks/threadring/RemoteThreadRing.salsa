@@ -12,21 +12,21 @@ behavior RemoteThreadRing extends RemoteActor {
     RemoteThreadRing(String[] args) {
         if (args.length != 2) {
             System.out.println("Usage: java RemoteThreadRing <threadCount> <hopCount>");
-            pass;
+            System.exit(1);
         }
 
         int threadCount = Integer.parseInt(args[0]);
         int hopCount = Integer.parseInt(args[1]);
 
-        RemoteThreadRing first = new RemoteThreadRing(1) called ("threadring_1");
-        //RemoteThreadRing first = new RemoteThreadRing(1) called ("threadring_1") on (1);
+        RemoteThreadRing first = new RemoteThreadRing(1);
+        //RemoteThreadRing first = new RemoteThreadRing(1) on (1);
         JoinDirector jd = new JoinDirector();
 
         RemoteThreadRing next = null;
         RemoteThreadRing previous = first;
         for (int i = 1; i < threadCount; i++) {
-            next = new RemoteThreadRing(i + 1) called("threadring_" + (i+1));
-            //next = new RemoteThreadRing(i + 1) called("threadring_" + (i+1)) on (i+1);
+            next = new RemoteThreadRing(i + 1);
+            //next = new RemoteThreadRing(i + 1) on (i+1);
             previous<-setNextThread(next) @ jd<-join();
             previous = next;
         }

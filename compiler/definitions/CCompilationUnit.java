@@ -982,6 +982,7 @@ public class CCompilationUnit {
                         if (!(actor_name.equals("Theater") && module_string.equals("salsa_lite.runtime.wwc"))) {
                             code += CIndent.getIndent() + "    String name = System.getProperty(\"called\");\n";
                             code += CIndent.getIndent() + "    if (name == null) {\n";
+                            /*
                             code += CIndent.getIndent() + "        System.err.println(\"Error starting " + actor_name + ": to run a remote actor you must specify a name with the '-Dcalled=<name>' system property.\");\n";
                             code += CIndent.getIndent() + "        System.err.println(\"usage: (port is optional and 4040 by default)\");\n";
                             if (getModule() != null) {
@@ -990,6 +991,8 @@ public class CCompilationUnit {
                                 code += CIndent.getIndent() + "        System.err.println(\"\tjava -Dcalled=\\\"<name>\\\" [-Dport=4040] " + actor_name + "\");\n";
                             }
                             code += CIndent.getIndent() + "        System.exit(0);\n";
+                            */
+                            code += CIndent.getIndent() + "        name = \"runtime/startup_actor\";\n";
                             code += CIndent.getIndent() + "    }\n";
                             code += CIndent.getIndent() + "    " + actor_name + ".construct(" + act_constructor + ", new Object[]{arguments}, name);\n";
                         }
