@@ -1,0 +1,43 @@
+
+behavior Big{
+    int id;
+    Big  []others;
+    Big (int id){
+        self.id=id;
+    }
+    PingPong(String[] args){
+       int n = Integer.parseInt(args[0]);
+       int p = Integer.parseInt(args[1]);
+       Big [] actors= new Big[p];
+       for (int i=0; i<p; i++){
+          actors[i]=new Big(i)@
+       }
+       for (int i=0; i<p; i++){
+          actors[i]<-setOther(actors)@
+       }
+       for (int i=0; i<p; i++){
+          actors[i]<-send(n);
+       }
+    }
+    ack pingMessage(int id){
+       System.out.println(self.id + ": Ping message from " + id);
+       others[id]<-pongMessage(self.id);
+    }
+    ack pongMessage(int id){
+       System.out.println(self.id + ": Pong message from " + id);
+    }
+    ack setOther(Big [] others){
+       self.others=new Big[others.length];
+       for(int i=0; i<others.length;i++){
+          self.others[i]=others[i];
+       }
+    }
+    ack send(int number){
+       int rNumber;
+       for(int i=0;i<number;i++){
+          rNumber = (int)(Math.random() * others.length);
+          others[rNumber]<-pingMessage(self.id);
+       }
+    }
+    
+}
