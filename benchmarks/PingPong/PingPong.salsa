@@ -8,16 +8,16 @@ behavior PingPong{
        int n = Integer.parseInt(args[0]);
        PingPong ping= new PingPong(1);
        PingPong pong= new PingPong(2);
-       ping<-setOppenent(pong);
-       pong<-setOppenent(ping);
+       ping<-setOppenent(pong)@
+       pong<-setOppenent(ping)@
        ping<-volley(n);
     }
     ack volley(int x){
+
        if(x==0){
           System.exit(0);
        }
        else{
-          System.out.println("Player " + id + ":" + x);
           opponent<-volley(x-1);
        }
     }
