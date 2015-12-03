@@ -1,0 +1,17 @@
+behavior CountingActor{
+   int count;
+   CountingActor(){
+      count=0;
+   }
+   CountingActor(String[] args){
+      int n=Integer.parseInt(args[0]);
+      CountingActor c=new CountingActor();
+      for(int i=0;i<n;i++){
+         c<-increment();
+      }
+   }
+   ack increment(){
+      count++;   
+   }
+
+}
