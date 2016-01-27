@@ -1,43 +1,70 @@
+import salsa_lite.language.JoinDirector;
 
-behavior Big{
+behavior Big {
+    int n_others;
     int id;
-    Big  []others;
-    Big (int id){
-        self.id=id;
+    Big[] others;
+    Big source;
+
+    Big (int id, Big source) {
+        self.id = id;
+        self.source = source;
     }
-    PingPong(String[] args){
-       int n = Integer.parseInt(args[0]);
-       int p = Integer.parseInt(args[1]);
-       Big [] actors= new Big[p];
-       for (int i=0; i<p; i++){
-          actors[i]=new Big(i)@
-       }
-       for (int i=0; i<p; i++){
-          actors[i]<-setOther(actors)@
-       }
-       for (int i=0; i<p; i++){
-          actors[i]<-send(n);
-       }
+
+    Big(String[] args) {
+        int n = Integer.parseInt(args[0]);
+        int p = Integer.parseInt(args[1]);
+        Big [] actors = new Big[p];
+
+        n_others = p;
+
+        for (int i = 0; i < p; i++) {
+            actors[i] = new Big(i, self);
+        }
+
+        JoinDirector jd = new JoinDirector();
+
+        for (int i = 0; i < p; i++) {
+            actors[i]<-setOther(actors) @ jd<-join();
+        }
+
+        token ack finished = jd<-resolveAfter(p);
+
+        for (int i = 0; i < p; i++){
+            actors[i]<-send(n) : waitfor(finished);
+        }
     }
-    ack pingMessage(int id){
-       System.out.println(self.id + ": Ping message from " + id);
-       others[id]<-pongMessage(self.id);
+
+    ack setOther(Big[] others) {
+        self.others = others;
     }
-    ack pongMessage(int id){
-       System.out.println(self.id + ": Pong message from " + id);
-    }
-    ack setOther(Big [] others){
-       self.others=new Big[others.length];
-       for(int i=0; i<others.length;i++){
-          self.others[i]=others[i];
-       }
-    }
+
     ack send(int number){
-       int rNumber;
-       for(int i=0;i<number;i++){
-          rNumber = (int)(Math.random() * others.length);
-          others[rNumber]<-pingMessage(self.id);
-       }
+        int rNumber = (int)(Math.random() * others.length);
+        others[rNumber]<-pingMessage(self.id, number);
     }
-    
+
+    ack pongMessage(int id, int number) {
+        System.out.println(self.id + ": Pong message from " + id + ", number: " + number);
+        number--;
+        if (number > 0) {
+            int rNumber = (int)(Math.random() * others.length);
+            others[rNumber]<-pingMessage(self.id, number);
+        } else {
+            source<-finished();
+        }
+    }
+
+    ack pingMessage(int id, int number) {
+        System.out.println(self.id + ": Ping message from " + id + ", number: " + number);
+        others[id]<-pongMessage(self.id, number);
+    }
+
+    ack finished() {
+        n_others--;
+        if (n_others == 0) {
+            System.exit(0);
+        }
+    }
+
 }
