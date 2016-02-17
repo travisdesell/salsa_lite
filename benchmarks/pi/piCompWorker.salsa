@@ -1,0 +1,27 @@
+module salsa_lite.benchmarks.pi;
+import object java.math.BigDecimal;
+import object java.math.RoundingMode;
+behavior piCompWorker{
+   int id;
+   int scale =100;
+   piCompMaster master;
+   RoundingMode roundMode=RoundingMode.HALF_EVEN;
+   piCompWorker(int n,int id,piCompMaster master){
+      self.id=id;
+      self.master=master;
+      scale = n;
+   }
+   ack work(int k){
+      int ke= 8*k;
+      BigDecimal four = new BigDecimal(4);
+      BigDecimal two =new BigDecimal(2);
+      BigDecimal one =new BigDecimal(1);
+      BigDecimal sixteen =new BigDecimal(16);
+      BigDecimal term = four.divide(new BigDecimal(ke+1),scale,roundMode);
+      term = term.subtract(two.divide(new BigDecimal(ke+4),scale,roundMode));
+      term = term.subtract(one.divide(new BigDecimal(ke+5),scale,roundMode));
+      term = term.subtract(one.divide(new BigDecimal(ke+6),scale,roundMode));
+      term = term.divide(sixteen.pow(k),scale,roundMode);
+      master<-result(term,id);
+   }
+}

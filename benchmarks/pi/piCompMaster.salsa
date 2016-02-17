@@ -1,0 +1,37 @@
+module salsa_lite.benchmarks.pi;
+import salsa_lite.language.JoinDirector;
+import object java.math.BigDecimal;
+import object java.math.RoundingMode; 
+behavior piCompMaster{
+   int numberTermsRequested;
+   int n;
+   BigDecimal result;
+   piCompWorker[] workers;
+   JoinDirector jd = new JoinDirector();   
+   piCompMaster(String[] args){
+      int w=Integer.parseInt(args[0]);
+      n=Integer.parseInt(args[1]);
+      result= new BigDecimal(0);
+      jd = new JoinDirector();
+      workers= new piCompWorker[w];
+      for(int i=0;i<w;i++){
+         workers[i]= new piCompWorker(n,i,self);
+         workers[i]<-work(numberTermsRequested++);
+      }
+      jd<-resolveAfter(w)@self<-finished();
+   }
+   ack result(BigDecimal r, int id){
+      result=result.add(r);
+      if(numberTermsRequested<n){
+         workers[id]<-work(numberTermsRequested++);
+         //System.out.println("Sending work to "+ id);
+      }
+      else{
+         jd<-join();
+      }
+   }
+   ack finished(){
+      System.out.println(result);
+      System.exit(0);
+   }
+}
