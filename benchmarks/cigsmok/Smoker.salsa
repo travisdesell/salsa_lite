@@ -1,0 +1,22 @@
+module salsa_lite.benchmarks.cigsmok;
+behavior Smoker{
+   Arbiter arbiter;
+   int id;
+   Smoker(Arbiter a,int i){
+      id=i;
+      arbiter=a;
+   }
+   ack StartSmoke(long time){
+      System.ouyt.println("I am "+ id +" and I started smoking.")
+      arbiter<-StartedSmoking();
+      try{
+      Thread.sleep(time);
+ 
+      }catch(InterruptedException e){
+         System.out.println(e.getMessage());
+      } 
+   }
+
+
+
+}

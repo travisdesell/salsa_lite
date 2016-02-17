@@ -1,0 +1,32 @@
+module salsa_lite.benchmarks.cigsmok;
+behavior Arbiter{
+   int totalSmoked = 0;
+   int numRounds;
+   int numSmokers = 0;
+   Smoker[] smokers;
+   Arbiter(String[] args){
+      int n=Integer.parseInt(args[0]);
+      int p=Integer.parseInt(args[1]);
+      numRounds=p;
+      numSmokers=n;
+      smokers=new Smoker[n]; 
+      for(int i=0;i<n;i++){
+         smokers[i]=new Smoker(self,i);   
+      }
+      self<-StartedSmoking();
+   }
+   ack StartedSmoking(){
+      if(totalSmoked++==numRounds){
+         System.exit(0);
+      }
+      self<-nextRound();
+   }
+   ack nextRound(){
+     System.out.println("Round "+ totalSmoked+ ":");
+     long r=0; //= (long) Math.random()*1000+10;
+     int rSmoker=(int)( Math.random()*numSmokers);
+     smokers[rSmoker]<-StartSmoke(r);
+   }
+   
+}
+
