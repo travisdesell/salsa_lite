@@ -1,0 +1,31 @@
+module salsa_lite.benchmarks.barber;
+behavior Barber{
+   WaitingRoom theWaitingRoom;
+   Barber(){}
+   Barber (String[] args){
+      int n = Integer.parseInt(args[0]);
+      int w = Integer.parseInt(args[1]);
+      Barber b=new Barber();
+      WaitingRoom wr= new WaitingRoom(w,b);
+      b<-setWaitingRoom(wr);
+      Customer[] tempC= new Customer[n];
+      for(int i=0; i < n; i++){
+         tempC[i]=new Customer(i, wr);
+         tempC[i]<-leave();
+      }   
+   }
+   ack setWaitingRoom(WaitingRoom w){
+      theWaitingRoom=w;
+   }
+   ack cutHair(Customer c){
+      //sleep here?
+      c<-done();
+      theWaitingRoom<-next();  
+   }
+   ack sleep(){
+      System.out.println("Barber Sleeping");
+   }
+   ack exit(){
+      System.exit(0);
+   }
+}

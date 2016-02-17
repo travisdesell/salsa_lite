@@ -1,0 +1,20 @@
+module salsa_lite.benchmarks.barber;
+behavior Customer{
+   int id;
+   WaitingRoom theWaitingRoom;
+   Customer(int i, WaitingRoom room){
+      id=i;
+      theWaitingRoom=room;
+   }
+   ack leave(){
+      //sleep here?
+      theWaitingRoom<-addCustomer(self);
+   } 
+   ack sit(){
+      System.out.println("I am "+ id + " and I am waiting in waiting room");
+   }
+   ack done(){
+      System.out.println("I am "+ id + " and my hair is cut!");
+      //System.exit(0);
+   }
+}

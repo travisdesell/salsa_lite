@@ -1,0 +1,42 @@
+module salsa_lite.benchmarks.barber;
+behavior WaitingRoom{
+   Customer [] waitingRoomChairs;
+   int waitingRoomChairsFull;
+   Barber theBarber;
+   boolean sleepingBarber;
+   WaitingRoom(int numChairs,Barber b){
+      waitingRoomChairsFull=0;
+      waitingRoomChairs= new  Customer[numChairs];
+      theBarber=b;
+      sleepingBarber=true;
+   }
+   ack addCustomer(Customer c){
+      if(waitingRoomChairsFull == waitingRoomChairs.length){
+         c<-leave();
+      }
+      else{
+         waitingRoomChairs[waitingRoomChairsFull] = c;
+         waitingRoomChairsFull++;
+         if(sleepingBarber){
+            sleepingBarber=false;
+            self<-next();
+         }
+         else{
+            c<-sit();
+         }
+      }
+   }
+   ack next(){
+      Customer temp;
+      if(waitingRoomChairsFull!=0){
+         waitingRoomChairsFull--;
+         temp=waitingRoomChairs[waitingRoomChairsFull];
+         waitingRoomChairs[waitingRoomChairsFull]=null;
+         theBarber<-cutHair(temp);
+      }
+      else{
+         theBarber<-sleep();
+         sleepingBarber=true;
+      }
+   }
+}
