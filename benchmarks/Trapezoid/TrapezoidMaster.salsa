@@ -1,0 +1,57 @@
+module salsa_lite.benchmarks.Trapezoid;
+import salsa_lite.language.JoinDirector;
+import salsa_lite.runtime.io.StandardOutput;
+
+behavior TrapezoidMaster {
+
+    double integral;
+
+    double getIntegral() {
+        pass self.integral;
+    }
+
+    ack accumulate(double value) {
+        self.integral += value;
+    }
+
+    TrapezoidMaster(String[] arguments){
+        if (arguments.length != 4) {
+            System.err.println("Error: wrong arguments.");
+            System.err.println("Usage:");
+            System.err.println("\tjava TrapezoidalWorker <left endpoint> <right endpoint> <number of trapezoids> <number of actors>");
+            System.exit(0);
+        }
+
+        double leftEndpoint = Double.parseDouble(arguments[0]);
+        double rightEndpoint = Double.parseDouble(arguments[1]);
+        int numberTrapezoids = Integer.parseInt(arguments[2]);
+        int numberActors = Integer.parseInt(arguments[3]);
+
+        if (numberTrapezoids % numberActors > 0) {
+            System.err.println("Error: number of trapezoids (" + numberTrapezoids + ") is not evenly divisible by number of actors (" + numberActors + ")");
+            System.exit(0);
+        }
+
+        self.integral = 0.0;
+
+        double sliceSize = (rightEndpoint - leftEndpoint) / numberActors;
+        int trapezoidsPerWorker = numberTrapezoids / numberActors;
+
+
+        JoinDirector joinDirector = new JoinDirector();
+        for (int i = 0; i < numberActors; i++) {
+            double left = leftEndpoint + (i * sliceSize);
+            double right = leftEndpoint + ((i + 1) * sliceSize);
+
+            TrapezoidWorker worker = new TrapezoidWorker();
+
+            self<-accumulate( worker<-calculatePartialIntegral(left, right, trapezoidsPerWorker) ) @
+            joinDirector<-join();
+        }
+
+        joinDirector<-resolveAfter(numberActors) @
+        new StandardOutput()<-println("The integral from " + leftEndpoint + " to " + rightEndpoint + " is: " + self<-getIntegral());
+    }
+}
+
+
