@@ -1,25 +1,42 @@
+module salsa_lite.benchmarks.PingPong;
+import salsa_lite.language.JoinDirector;
 behavior PingPong{
     PingPong opponent;
     int id;
+    JoinDirector joinDirector;
     PingPong (int x){
         self.id=x;
     }
     PingPong(String[] args){
-       int n = Integer.parseInt(args[0]);
-       PingPong ping= new PingPong(1);
-       PingPong pong= new PingPong(2);
+       JoinDirector jd= new JoinDirector();
+       PingPong p= new PingPong(1) on (0);
+       long n = Long.parseLong(args[0]);
+       p<-PingPong(n,jd); 
+       jd<-resolveAfter(1)@
+       self<-exit(); 
+    }
+    ack PingPong(long n, JoinDirector jd){
+       //int n = Integer.parseInt(args[0]);
+       joinDirector=jd;
+       PingPong ping= self;
+       PingPong pong= new PingPong(2) on (1);
        ping<-setOppenent(pong)@
        pong<-setOppenent(ping)@
        ping<-volley(n);
     }
-    ack volley(int x){
+    ack volley(long x){
 
        if(x==0){
-          System.exit(0);
+          joinDirector<-join();
+          //System.exit(0);
        }
        else{
+          System.out.println(""+ id+ ":" +x);
           opponent<-volley(x-1);
        }
+    }
+    ack exit(){
+       System.exit(0);
     }
     ack setOppenent(PingPong o){
        opponent=o;
