@@ -1,0 +1,127 @@
+//Import all benchmarks
+import salsa_lite.benchmarks.PingPong.PingPong;
+import salsa_lite.language.JoinDirector;
+import object java.util.Scanner;
+import object java.io.BufferedWriter;
+import object java.io.File;
+import object java.io.FileWriter;
+import object java.io.IOException;
+
+behavior BenchmarkRunner{
+    JoinDirector jd;
+    long numberOfRuns=new Long(10);
+    long startTime=new Long(0);
+    long endTime=new Long(0);
+    long m= new Long(0);
+    double sumTime=0.0;
+    String outFileName="BenchmarkResults.csv";
+    BenchmarkRunner(String[] args){
+       self<-main();
+   }
+   ack main(){
+      Scanner reader = new Scanner(System.in);
+      int nstages=1;
+      int n=0;
+      
+      if(System.getProperty("nstages")!= null){
+         nstages= Integer.parseInt(System.getProperty("nstages"));
+      }
+      System.out.println("This is the SALSA benchmark runner for the Savina Bechmark Suite.");
+      System.out.println("You are running this bechmark on "+ nstages + " stage(s)."); 
+      System.out.println("3- Ping Pong");
+      System.out.println("0- Exit");
+      System.out.println("1- Change number of runs");
+      System.out.println("2- Settings");
+      System.out.print("Enter a selection: ");
+      n = reader.nextInt();
+      if(n==0){
+         System.exit(0);
+      }
+      if(n==1){
+         System.out.print("Number of Runs: ");
+         numberOfRuns = reader.nextInt(); 
+         self<-main();
+      }
+      if(n==2){
+         int t=0;
+         while(true){
+            System.out.println("Settings");
+            System.out.println("0- Back");
+            System.out.println("1- Set Output File Name");
+            if(t==0){
+               break;
+            }
+            if(t==1){
+
+            }
+            else{
+               System.out.println("Menu selection not valid.");
+            }
+          }
+          self<-main();
+      }
+      if(n==3){
+         System.out.print("Number of Pings: ");
+         m = reader.nextInt(); 
+         try{
+            File file = new File(outFileName);
+            FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write("Ping Pong,"+m);
+            bw.close();
+         }catch(IOException e){
+
+         }
+         self<-runBenchmarkPingPong(numberOfRuns);
+      }
+      else{
+         System.out.println("Menu selection not valid.");
+      }
+   }
+   ack runBenchmarkPingPong(long x){
+      if(x>0){
+         jd=new JoinDirector();
+         PingPong benchmark =new PingPong(1) on (0);
+         self<-start()@
+         benchmark<-PingPong(m,jd);
+         jd<-resolveAfter(1)@
+         self<-end()@
+         self<-runBenchmarkPingPong(x-1);
+      }
+      else{
+         self<-finished()@
+         self<-main();
+      }
+   }
+   ack start(){
+      startTime=System.nanoTime();
+   }
+   ack end(){
+      endTime=System.nanoTime();
+      double totalTime = (endTime - startTime) / 1e6;
+      sumTime+=totalTime;
+      try{
+         File file = new File(outFileName);
+         FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+         BufferedWriter bw = new BufferedWriter(fw);
+         bw.write("," + totalTime);
+         bw.close();
+      }catch(IOException e){
+
+      }
+      System.out.println(totalTime);
+      
+   }
+   ack finished(){
+      try{
+         File file = new File(outFileName);
+         FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+         BufferedWriter bw = new BufferedWriter(fw);
+         bw.write("," + sumTime/numberOfRuns +"\n");
+         bw.close();
+      }catch(IOException e){
+
+      }
+      sumTime=0;
+   }
+}
