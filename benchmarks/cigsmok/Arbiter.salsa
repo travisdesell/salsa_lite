@@ -22,8 +22,8 @@ behavior Arbiter{
       self<-nextRound();
    }
    ack nextRound(){
-     System.out.println("Round "+ totalSmoked+ ":");
-     long r=0; //= (long) Math.random()*1000+10;
+     //System.out.println("Round "+ totalSmoked+ ":");
+     long r=new Long(0); //= (long) Math.random()*1000+10;
      int rSmoker=(int)( Math.random()*numSmokers);
      smokers[rSmoker]<-StartSmoke(r);
    }
