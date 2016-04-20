@@ -1,20 +1,30 @@
 module salsa_lite.benchmarks.barber;
+import salsa_lite.language.JoinDirector;
+import object java.lang.Thread;
 behavior Customer{
    int id;
+   JoinDirector jd;
    WaitingRoom theWaitingRoom;
-   Customer(int i, WaitingRoom room){
+   Customer(int i, WaitingRoom room,JoinDirector j){
       id=i;
       theWaitingRoom=room;
+      jd=j;
    }
    ack leave(){
       //sleep here?
+      //try{
+      //   long i=new Long(1000);
+     //    Thread.sleep(i);
+     // } catch(InterruptedException e){
+     //    
+     // }
       theWaitingRoom<-addCustomer(self);
    } 
    ack sit(){
-      System.out.println("I am "+ id + " and I am waiting in waiting room");
+      //System.out.println("I am "+ id + " and I am waiting in waiting room");
    }
    ack done(){
-      System.out.println("I am "+ id + " and my hair is cut!");
-      //System.exit(0);
+      //System.out.println("I am "+ id + " and my hair is cut!");
+      jd<-join();
    }
 }
