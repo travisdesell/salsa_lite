@@ -16,9 +16,8 @@ behavior BenchmarkRunner{
     long numberOfRuns=new Long(10);
     long startTime=new Long(0);
     long endTime=new Long(0);
-    long m= new Long(0);
-    int p= 0;
-    int q=0;
+    int m;
+    int p;
     double sumTime=0.0;
     String outFileName="BenchmarkResults.csv";
     BenchmarkRunner(String[] args){
@@ -45,12 +44,12 @@ behavior BenchmarkRunner{
       if(n==0){
          System.exit(0);
       }
-      else if(n==1){
+      elseif(n==1){
          System.out.print("Number of Runs: ");
          numberOfRuns = reader.nextInt(); 
          self<-main();
       }
-      else if(n==2){
+      elseif(n==2){
          int t=0;
          while(true){
             System.out.println("Settings");
@@ -68,7 +67,7 @@ behavior BenchmarkRunner{
           }
           self<-main();
       }
-      else if(n==3){
+      elseif(n==3){
          System.out.print("Number of Pings: ");
          m = reader.nextInt(); 
          resultList=new ArrayList<Double>();
@@ -83,17 +82,17 @@ behavior BenchmarkRunner{
          }
          self<-runBenchmarkPingPong(numberOfRuns);
       }
-      else if(n==4){
+      elseif(n==4){
          System.out.print(" Number of Actors: ");
-         p = reader.nextInt(); 
+         q = reader.nextInt(); 
          System.out.print(" Number of Pings: ");
-         q = reader.nextInt();
+         p = reader.nextInt();
          resultList=new ArrayList<Double>();
          try{
             File file = new File(outFileName);
             FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
             BufferedWriter bw = new BufferedWriter(fw);
-            bw.write("Big,"+p+","+q);
+            bw.write("Big,"+q+","+p);
             bw.close();
          }catch(IOException e){
 
@@ -109,7 +108,7 @@ behavior BenchmarkRunner{
          jd=new JoinDirector();
          Big benchmark =new Big(1,null) on (0);
          self<-start()@
-         benchmark<-Big(q,p,jd);
+         benchmark<-Big(p,q,jd);
          jd<-resolveAfter(1)@
          self<-end()@
          self<-runBenchmarkBig(x-1);
@@ -124,7 +123,7 @@ behavior BenchmarkRunner{
          jd=new JoinDirector();
          PingPong benchmark =new PingPong(1) on (0);
          self<-start()@
-         benchmark<-PingPong(m,jd);
+         benchmark<-PingPong(m,p,jd);
          jd<-resolveAfter(1)@
          self<-end()@
          self<-runBenchmarkPingPong(x-1);
