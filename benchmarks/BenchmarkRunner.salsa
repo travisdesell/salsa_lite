@@ -1,18 +1,24 @@
 //Import all benchmarks
 import salsa_lite.benchmarks.PingPong.PingPong;
+import salsa_lite.benchmarks.Big.Big;
+import salsa_lite.benchmarks.CountingActor.CountingActor;
+//Import other stuff 
 import salsa_lite.language.JoinDirector;
 import object java.util.Scanner;
 import object java.io.BufferedWriter;
 import object java.io.File;
 import object java.io.FileWriter;
 import object java.io.IOException;
-
+import object java.util.ArrayList; 
 behavior BenchmarkRunner{
     JoinDirector jd;
+    ArrayList<Double> resultList;
     long numberOfRuns=new Long(10);
     long startTime=new Long(0);
     long endTime=new Long(0);
     long m= new Long(0);
+    int p= 0;
+    int q=0;
     double sumTime=0.0;
     String outFileName="BenchmarkResults.csv";
     BenchmarkRunner(String[] args){
@@ -28,8 +34,10 @@ behavior BenchmarkRunner{
       }
       System.out.println("This is the SALSA benchmark runner for the Savina Bechmark Suite.");
       System.out.println("You are running this bechmark on "+ nstages + " stage(s)."); 
-      System.out.println("3- Ping Pong");
       System.out.println("0- Exit");
+      System.out.println("3- Ping Pong");
+      System.out.println("4- Big");
+      System.out.println("5- Counting Actor");
       System.out.println("1- Change number of runs");
       System.out.println("2- Settings");
       System.out.print("Enter a selection: ");
@@ -37,12 +45,12 @@ behavior BenchmarkRunner{
       if(n==0){
          System.exit(0);
       }
-      if(n==1){
+      else if(n==1){
          System.out.print("Number of Runs: ");
          numberOfRuns = reader.nextInt(); 
          self<-main();
       }
-      if(n==2){
+      else if(n==2){
          int t=0;
          while(true){
             System.out.println("Settings");
@@ -60,9 +68,10 @@ behavior BenchmarkRunner{
           }
           self<-main();
       }
-      if(n==3){
+      else if(n==3){
          System.out.print("Number of Pings: ");
          m = reader.nextInt(); 
+         resultList=new ArrayList<Double>();
          try{
             File file = new File(outFileName);
             FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
@@ -74,8 +83,40 @@ behavior BenchmarkRunner{
          }
          self<-runBenchmarkPingPong(numberOfRuns);
       }
+      else if(n==4){
+         System.out.print(" Number of Actors: ");
+         p = reader.nextInt(); 
+         System.out.print(" Number of Pings: ");
+         q = reader.nextInt();
+         resultList=new ArrayList<Double>();
+         try{
+            File file = new File(outFileName);
+            FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write("Big,"+p+","+q);
+            bw.close();
+         }catch(IOException e){
+
+         }
+         self<-runBenchmarkBig(numberOfRuns);
+      }
       else{
          System.out.println("Menu selection not valid.");
+      }
+   }
+   ack runBenchmarkBig(long x){
+      if(x>0){
+         jd=new JoinDirector();
+         Big benchmark =new Big(1,null) on (0);
+         self<-start()@
+         benchmark<-Big(q,p,jd);
+         jd<-resolveAfter(1)@
+         self<-end()@
+         self<-runBenchmarkBig(x-1);
+      }
+      else{
+         self<-finished()@
+         self<-main();
       }
    }
    ack runBenchmarkPingPong(long x){
@@ -100,20 +141,13 @@ behavior BenchmarkRunner{
       endTime=System.nanoTime();
       double totalTime = (endTime - startTime) / 1e6;
       sumTime+=totalTime;
-      try{
-         File file = new File(outFileName);
-         FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
-         BufferedWriter bw = new BufferedWriter(fw);
-         bw.write("," + totalTime);
-         bw.close();
-      }catch(IOException e){
-
-      }
-      System.out.println(totalTime);
-      
+      resultList.add(totalTime);
    }
    ack finished(){
-      try{
+     for(Double i: resultList){
+     
+     }
+     try{
          File file = new File(outFileName);
          FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
          BufferedWriter bw = new BufferedWriter(fw);
