@@ -1,3 +1,4 @@
+module salsa_lite.benchmarks.Big;
 import salsa_lite.language.JoinDirector;
 
 behavior Big {
@@ -5,17 +6,22 @@ behavior Big {
     int id;
     Big[] others;
     Big source;
-
+    JoinDirector jd_runner;
     Big (int id, Big source) {
         self.id = id;
         self.source = source;
     }
-
-    Big(String[] args) {
-        int n = Integer.parseInt(args[0]);
+    Big(String[] args){
+        JoinDirector j=new JoinDirector();
         int p = Integer.parseInt(args[1]);
+        int n = Integer.parseInt(args[0]);
+        self<-Big(n,p,j);
+        j<-resolveAfter(1)@ 
+        self<-exit();
+    }
+    ack Big(int n,int p, JoinDirector j) {
         Big [] actors = new Big[p];
-
+        self.jd_runner=j;
         n_others = p;
 
         for (int i = 0; i < p; i++) {
@@ -45,7 +51,7 @@ behavior Big {
     }
 
     ack pongMessage(int id, int number) {
-        System.out.println(self.id + ": Pong message from " + id + ", number: " + number);
+        //System.out.println(self.id + ": Pong message from " + id + ", number: " + number);
         number--;
         if (number > 0) {
             int rNumber = (int)(Math.random() * others.length);
@@ -56,15 +62,18 @@ behavior Big {
     }
 
     ack pingMessage(int id, int number) {
-        System.out.println(self.id + ": Ping message from " + id + ", number: " + number);
+        //System.out.println(self.id + ": Ping message from " + id + ", number: " + number);
         others[id]<-pongMessage(self.id, number);
     }
 
     ack finished() {
         n_others--;
         if (n_others == 0) {
-            System.exit(0);
+           jd_runner<-join();
         }
+    }
+    ack exit(){
+       System.exit(0);
     }
 
 }
