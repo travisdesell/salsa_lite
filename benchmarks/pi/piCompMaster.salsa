@@ -8,9 +8,16 @@ behavior piCompMaster{
    BigDecimal result;
    piCompWorker[] workers;
    JoinDirector jd = new JoinDirector();   
+   piCompmaster(){}
    piCompMaster(String[] args){
       int w=Integer.parseInt(args[0]);
-      n=Integer.parseInt(args[1]);
+      int r=Integer.parseInt(args[0]);
+      JoinDirector joinRunner=new JoinDirector();
+      self<-piCompMaster(w,r,jd);
+      jd<-resolveAfter(1)@self<-finished();
+   }
+   ack piCompMaster(int w,int n,JoinDirector joinRunner){ 
+      self.n=n;
       result= new BigDecimal(0);
       jd = new JoinDirector();
       workers= new piCompWorker[w];
@@ -18,7 +25,7 @@ behavior piCompMaster{
          workers[i]= new piCompWorker(n,i,self);
          workers[i]<-work(numberTermsRequested++);
       }
-      jd<-resolveAfter(w)@self<-finished();
+      jd<-resolveAfter(w)@joinRunner<-join();
    }
    ack result(BigDecimal r, int id){
       result=result.add(r);

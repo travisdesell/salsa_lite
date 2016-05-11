@@ -1,13 +1,15 @@
 module salsa_lite.benchmarks.cigsmok;
+import salsa_lite.language.JoinDirector;
 behavior Arbiter{
    int totalSmoked = 0;
    int numRounds;
    int numSmokers = 0;
+   JoinDirector jd;
    Smoker[] smokers;
-   Arbiter(String[] args){
-      int n=Integer.parseInt(args[0]);
-      int p=Integer.parseInt(args[1]);
+   Arbiter(){}
+   ack CigSmoker(int n,int p,JoinDirector jd){
       numRounds=p;
+      self.jd=jd;
       numSmokers=n;
       smokers=new Smoker[n]; 
       for(int i=0;i<n;i++){
@@ -15,9 +17,17 @@ behavior Arbiter{
       }
       self<-StartedSmoking();
    }
+   Arbiter(String[] args){
+      int n=Integer.parseInt(args[0]);
+      int p=Integer.parseInt(args[1]);
+      JoinDirector joinRunner=new JoinDirector();
+      self<-CigSmoker(n,p,jd);
+      joinRunner<-resolveAfter(1)@
+      self<-exit();
+   }
    ack StartedSmoking(){
       if(totalSmoked++==numRounds){
-         System.exit(0);
+         jd<-join();
       }
       self<-nextRound();
    }
@@ -27,6 +37,8 @@ behavior Arbiter{
      int rSmoker=(int)( Math.random()*numSmokers);
      smokers[rSmoker]<-StartSmoke(r);
    }
-   
+   ack exit(){
+      System.exit(0);
+   }
 }
 

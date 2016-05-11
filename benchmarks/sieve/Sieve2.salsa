@@ -1,39 +1,32 @@
-module salsa_lite.benchmarks.sieve;
-import salsa_lite.language.JoinDirector;
-behavior Sieve{
+import object salsa_lite.runtime.StageService;
+behavior Sieve2{
    long[] localPrimes;
    int maxLocalPrimes;
    int localPrimeCount;
-   Sieve next; 
-   JoinDirector joinRunner;
-   JoinDirector jd;
-   Sieve(int b, long startingPrime){
+   int nStages;
+   int myStage;
+   Sieve2 next; 
+   Sieve2(int b, long startingPrime, int myStage,int s){
       localPrimes = new long[b];
       localPrimes[0]= startingPrime;
       localPrimeCount=1;
       maxLocalPrimes=b;
       next=null;
+      self.myStage=myStage;
+      nStages=s;
    }
-   Sieve(){}
-   ack Sieve(long n, int b, JoinDirector joinRunner){
-      self.joinRunner=joinRunner;
+   Sieve2(String[] args){
+      long n=Long.parseLong(args[0]);
+      int b=Integer.parseInt(args[1]);
+      int s=Integer.parseInt(args[2]);
+      //System.out.println("2 is prime");
       long j=new Long(2);
-      jd=new JoinDirector();
-      Sieve firstFilter= new Sieve (b,j);
+      Sieve2 firstFilter= new Sieve2 (b,j,0,s) on (0);
       for(long i=new Long(3); i<n;i+=2){
          firstFilter <- process(i); 
       }
       j=new Long(0);
-      jd<-resolveAfter((int)(n-3/2))@
       firstFilter<-exit(j);
-   }
-   Sieve(String[] args){
-      long n=Long.parseLong(args[0]);
-      int b=Integer.parseInt(args[1]);
-      JoinDirector joinRunner= new JoinDirector();
-      self<-Sieve(n,b,joinRunner);
-      joinRunner<-resolveAfter(1)@
-      self<-quit();
    }
    ack process(long i){
       boolean isPrime=true;
@@ -55,11 +48,15 @@ behavior Sieve{
                localPrimeCount += 1;
             }
             else {
-               next = new Sieve(maxLocalPrimes,i);
+               if(myStage!=nStages-1){
+                  next = new Sieve2(maxLocalPrimes,i,myStage+1,nStages) on (myStage+1);
+               }
+               else{
+                  next = new Sieve2(maxLocalPrimes,i,0,nStages) on (0);
+               }
             }
          }
       }
-      jd<-join();
    }
    ack exit(long i){
       if(next!=null){
@@ -68,10 +65,10 @@ behavior Sieve{
       else{
          long total = (i * maxLocalPrimes) + localPrimeCount;
          //System.out.println(total +" primes found.");
-         joinRunner<-join();
+         System.exit(0);
       } 
    }
-   ack quit(){
-      System.exit(0);
+   ack printCount(long count){
+      System.out.println(count);
    }
 }

@@ -19,7 +19,13 @@ behavior PingPong{
        //int n = Integer.parseInt(args[0]);
        joinDirector=jd;
        PingPong ping= self;
-       PingPong pong= new PingPong(2) on (1);
+       PingPong pong;
+       if(System.getProperty("nstages")!= null){
+          pong= new PingPong(2) on (1);
+       }
+       else{
+          pong= new PingPong(2);
+       }
        ping<-setOppenent(pong)@
        pong<-setOppenent(ping)@
        ping<-volley(n);
@@ -31,7 +37,7 @@ behavior PingPong{
           //System.exit(0);
        }
        else{
-          System.out.println(""+ id+ ":" +x);
+          //System.out.println(""+ id+ ":" +x);
           opponent<-volley(x-1);
        }
     }

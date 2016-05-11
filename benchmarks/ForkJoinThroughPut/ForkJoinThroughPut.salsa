@@ -1,33 +1,48 @@
+module salsa_lite.benchmarks.ForkJoinThroughPut;
+import salsa_lite.language.JoinDirector;
 behavior ForkJoinThroughPut{
     int expect;
     int id;
+    JoinDirector allMessagesRecived;
     ForkJoinThroughPut (int id, int expect){
         self.id=id;
         self.expect=expect;
     }
-    ForkJoinThroughPut(String[] args){
-       
-       int k = Integer.parseInt(args[0]);
-       int n = Integer.parseInt(args[1]);
+    ForkJoinThroughPut(){}
+    ack ForkJoinThroughPut(int k,int n,JoinDirector jd){
+       allMessagesRecived=new JoinDirector();
        ForkJoinThroughPut[] array = new ForkJoinThroughPut[k];
        for(int i= 0 ; i<k ; i++){
-          array[i]= new ForkJoinThroughPut(i,n)@
+          array[i]= new ForkJoinThroughPut(i,n);
        }
        for(int i=0 ; i<n ; i++){
           for(int j=0 ; j<k ;j++){
              array[j]<-message();
           }
-       }
+       } 
+       allMessagesRecived<-resolveAfter(k)@
+       jd<-join();
+    }
+    ForkJoinThroughPut(String[] args){
        
-       
+       int k = Integer.parseInt(args[0]);
+       int n = Integer.parseInt(args[1]);
+       JoinDirector joinRunner=new JoinDirector();
+       self<-ForkJoinThroughPut(k,n,joinRunner);
+       joinRunner<-resolveAfter(1)@
+       self<-exit();   
     }
     ack message(){
        self.expect=self.expect-1;
        if(self.expect==0){
-           System.out.println("Id " + self.id + " finished.");   
+           //System.out.println("Id " + self.id + " finished.");   
+           allMessagesRecived<-join();
        }
        else{
-           System.out.println("Id: " + self.id + " Messages left: " +self.expect); 
+           //System.out.println("Id: " + self.id + " Messages left: " +self.expect); 
        }
+    }
+    ack exit(){
+       System.exit(0);
     }
 }

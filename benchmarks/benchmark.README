@@ -1,0 +1,15 @@
+All benchmarks are configured to run from the runner of independently. 
+Building:
+* make sure slc is aliased to salsa compiler
+./build.sh
+
+Cleaning:
+./clean.sh
+
+To run from the runner:
+java benchmarkRunner <name of benchamrk> <parameters>
+
+The benchmmarks-
+-PingPong <number of pings>
+-
+

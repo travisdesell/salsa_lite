@@ -13,7 +13,28 @@ behavior TrapezoidMaster {
     ack accumulate(double value) {
         self.integral += value;
     }
+    ack exit(){
+       System.out.println("The integral is: " + self.integral);
+       System.exit(0);
+    }
+    TrapezoidMaster(){}
+    ack Trapezoid(double leftEndpoint,double rightEndpoint,int numberTrapezoids,int numberActors,JoinDirector jd){
+        self.integral = 0.0;
+        double sliceSize = (rightEndpoint - leftEndpoint) / numberActors;
+        int trapezoidsPerWorker = numberTrapezoids / numberActors;
+        JoinDirector joinDirector = new JoinDirector();
+        for (int i = 0; i < numberActors; i++) {
+            double left = leftEndpoint + (i * sliceSize);
+            double right = leftEndpoint + ((i + 1) * sliceSize);
 
+            TrapezoidWorker worker = new TrapezoidWorker();
+
+            self<-accumulate( worker<-calculatePartialIntegral(left, right, trapezoidsPerWorker) ) @
+            joinDirector<-join();
+        }
+        joinDirector<-resolveAfter(numberActors) @
+        jd<-join();
+    }
     TrapezoidMaster(String[] arguments){
         if (arguments.length != 4) {
             System.err.println("Error: wrong arguments.");
@@ -31,26 +52,9 @@ behavior TrapezoidMaster {
             System.err.println("Error: number of trapezoids (" + numberTrapezoids + ") is not evenly divisible by number of actors (" + numberActors + ")");
             System.exit(0);
         }
-
-        self.integral = 0.0;
-
-        double sliceSize = (rightEndpoint - leftEndpoint) / numberActors;
-        int trapezoidsPerWorker = numberTrapezoids / numberActors;
-
-
-        JoinDirector joinDirector = new JoinDirector();
-        for (int i = 0; i < numberActors; i++) {
-            double left = leftEndpoint + (i * sliceSize);
-            double right = leftEndpoint + ((i + 1) * sliceSize);
-
-            TrapezoidWorker worker = new TrapezoidWorker();
-
-            self<-accumulate( worker<-calculatePartialIntegral(left, right, trapezoidsPerWorker) ) @
-            joinDirector<-join();
-        }
-
-        joinDirector<-resolveAfter(numberActors) @
-        new StandardOutput()<-println("The integral from " + leftEndpoint + " to " + rightEndpoint + " is: " + self<-getIntegral());
+        JoinDirector jd= new JoinDirector();
+        self<-Trapezoid(leftEndpoint,rightEndpoint,numberTrapezoids,numberActors,jd);
+        jd<-resolveAfter(1)@self<-exit();
     }
 }
 

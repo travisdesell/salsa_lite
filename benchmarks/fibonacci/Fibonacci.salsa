@@ -1,3 +1,4 @@
+module salsa_lite.benchmarks.fibonacci;
 behavior Fibonacci {
 	int n;
 

@@ -1,3 +1,4 @@
+module salsa_lite.benchmarks.CountingActor;
 behavior CountingActor{
    int count;
    CountingActor(){

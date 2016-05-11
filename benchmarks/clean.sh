@@ -1,5 +1,6 @@
 #!/bin/bash
-rm *.java *.class
+rm *.java
+rm *.class
 for f in */
 do
    rm $f*.class

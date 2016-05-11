@@ -1,10 +1,14 @@
+module salsa_lite.benchmarks.ForkJoinActorCreation;
+import salsa_lite.language.JoinDirector;
 behavior ForkJoinActorCreation{
     int id;
+    JoinDirector allMessagesRecived;
     ForkJoinActorCreation (int id){
         self.id=id;
     }
-    ForkJoinActorCreation(String[] args){
-       int k = Integer.parseInt(args[0]);
+    ForkJoinActorCreation(){}
+    ack ForkJoinActorCreation(int k, JoinDirector jd){
+       allMessagesRecived= new JoinDirector();
        ForkJoinActorCreation[] array = new ForkJoinActorCreation[k];
        for(int i= 0 ; i<k ; i++){
           array[i]= new ForkJoinActorCreation(i+1)@
@@ -12,9 +16,20 @@ behavior ForkJoinActorCreation{
        for(int i=0 ; i<k ; i++){
              array[i]<-message();
        }
-       
+       allMessagesRecived<-resolveAfter(k);
+       jd<-join();
+    }
+    ForkJoinActorCreation(String[] args){
+       int k = Integer.parseInt(args[0]);
+       JoinDirector jd=new JoinDirector();
+       self<-ForkJoinActorCreation(k,jd);
+       jd<-resolveAfter(1)@
+       self<-exit(); 
     }
     ack message(){
-       System.out.println("Actor number " +id +" complete." );
+       allMessagesRecived<-join();  
+    }
+    ack exit(){
+       System.exit(0);
     }
 }
