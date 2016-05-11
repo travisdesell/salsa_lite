@@ -11,5 +11,13 @@ java benchmarkRunner <name of benchamrk> <parameters>
 
 The benchmmarks-
 -PingPong <number of pings>
--
+-Big <number of pings> <number of actors>
+-Barber <number of chairs> <number of customers>
+-PiComp <number of workers> <precision of pi>
+-Trapezoid <left end point> <right end point> <number of trapezoids> <number of actors>
+-Fibonacci <n>
+-Sieve <max primes per actor> <primes under>
+-CigSmoke <number of smokers> <number of rounds>
+-ForkJoinThroughPut <number of actors> <number of messages>
+-ForkJoinActorCreation <number of actors>
 
