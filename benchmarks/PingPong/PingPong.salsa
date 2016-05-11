@@ -20,7 +20,7 @@ behavior PingPong{
        joinDirector=jd;
        PingPong ping= self;
        PingPong pong;
-       if(System.getProperty("nstages")!= null){
+       if(System.getProperty("nstages")!= null&&Integer.parseInt(System.getProperty("nstages"))>1){
           pong= new PingPong(2) on (1);
        }
        else{
