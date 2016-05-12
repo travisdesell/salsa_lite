@@ -7,9 +7,12 @@ behavior Big {
     Big[] others;
     Big source;
     JoinDirector jd_runner;
-    Big (int id, Big source) {
+    Big (int id, Big source,int n) {
         self.id = id;
         self.source = source;
+        if(n!=0){
+           others=new Big[n];
+        }
     }
     Big(String[] args){
         JoinDirector j=new JoinDirector();
@@ -25,24 +28,27 @@ behavior Big {
         n_others = p;
 
         for (int i = 0; i < p; i++) {
-            actors[i] = new Big(i, self);
+            actors[i] = new Big(i, self,p);
         }
 
         JoinDirector jd = new JoinDirector();
 
         for (int i = 0; i < p; i++) {
-            actors[i]<-setOther(actors) @ jd<-join();
+           for(int u=0;u<p;u++){
+              actors[i]<-setOther(actors[u],u) @ jd<-join();
+           }
         }
-
-        token ack finished = jd<-resolveAfter(p);
-
-        for (int i = 0; i < p; i++){
-            actors[i]<-send(n) : waitfor(finished);
+        p=p*p;
+        jd<-resolveAfter(p)@
+        self<-sendMessages(n,actors);
         }
+    ack sendMessages(int n,Big[] actors){
+      for(int i=0;i<actors.length;i++){
+         actors[i] <-send(n);
+      }
     }
-
-    ack setOther(Big[] others) {
-        self.others = others;
+    ack setOther(Big other,int place) {
+      others[place]=other; 
     }
 
     ack send(int number){
