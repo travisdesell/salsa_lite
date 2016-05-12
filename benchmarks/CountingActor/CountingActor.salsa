@@ -1,18 +1,38 @@
 module salsa_lite.benchmarks.CountingActor;
+import salsa_lite.language.JoinDirector;
 behavior CountingActor{
    int count;
    CountingActor(){
       count=0;
    }
+   ack CountingActor(int n,JoinDirector jd){
+      CountingActor c;
+      JoinDirector ijoin=new JoinDirector();
+      if(System.getProperty("nstages")!= null&&Integer.parseInt(System.getProperty("nstages"))>1){
+          c= new CountingActor() on (1);
+       }
+       else{
+          c= new CountingActor() on (0);
+       }
+      for(int i=0;i<n;i++){
+         c<-increment()@ijoin<-join();
+      }
+      ijoin<-resolveAfter(n)@
+      jd<-join();
+   }
    CountingActor(String[] args){
       int n=Integer.parseInt(args[0]);
-      CountingActor c=new CountingActor();
-      for(int i=0;i<n;i++){
-         c<-increment();
-      }
+      CountingActor c=new CountingActor() on (0);
+      JoinDirector jd= new JoinDirector();
+      c<-CountingActor(n,jd);
+      jd<-resolveAfter(1)@
+      self<-exit();      
    }
    ack increment(){
       count++;   
    }
-
+   ack exit(){
+      System.out.println(count);
+      System.exit(0);
+   }
 }

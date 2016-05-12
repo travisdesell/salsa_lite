@@ -11,12 +11,12 @@ behavior ForkJoinActorCreation{
        allMessagesRecived= new JoinDirector();
        ForkJoinActorCreation[] array = new ForkJoinActorCreation[k];
        for(int i= 0 ; i<k ; i++){
-          array[i]= new ForkJoinActorCreation(i+1)@
+          array[i]= new ForkJoinActorCreation(i+1);
        }
        for(int i=0 ; i<k ; i++){
-             array[i]<-message();
+             array[i]<-message()@ allMessagesRecived<-join();
        }
-       allMessagesRecived<-resolveAfter(k);
+       allMessagesRecived<-resolveAfter(k)@
        jd<-join();
     }
     ForkJoinActorCreation(String[] args){
@@ -27,7 +27,7 @@ behavior ForkJoinActorCreation{
        self<-exit(); 
     }
     ack message(){
-       allMessagesRecived<-join();  
+    //Nothing Here
     }
     ack exit(){
        System.exit(0);

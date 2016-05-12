@@ -4,16 +4,17 @@ behavior ForkJoinThroughPut{
     int expect;
     int id;
     JoinDirector allMessagesRecived;
-    ForkJoinThroughPut (int id, int expect){
+    ForkJoinThroughPut (int id, int expect,JoinDirector allMessagesRecived){
         self.id=id;
         self.expect=expect;
+        self.allMessagesRecived=allMessagesRecived;
     }
     ForkJoinThroughPut(){}
     ack ForkJoinThroughPut(int k,int n,JoinDirector jd){
        allMessagesRecived=new JoinDirector();
        ForkJoinThroughPut[] array = new ForkJoinThroughPut[k];
        for(int i= 0 ; i<k ; i++){
-          array[i]= new ForkJoinThroughPut(i,n);
+          array[i]= new ForkJoinThroughPut(i,n,allMessagesRecived);
        }
        for(int i=0 ; i<n ; i++){
           for(int j=0 ; j<k ;j++){
