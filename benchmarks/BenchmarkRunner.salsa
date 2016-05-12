@@ -11,7 +11,6 @@ import salsa_lite.benchmarks.ForkJoinActorCreation.ForkJoinActorCreation;
 import salsa_lite.benchmarks.cigsmok.Arbiter;
 import salsa_lite.benchmarks.CountingActor.CountingActor;
 
-
 //Import other stuff 
 import salsa_lite.language.JoinDirector;
 import object java.util.Scanner;
@@ -138,6 +137,15 @@ behavior BenchmarkRunner{
                self<-runBenchmarkForkJoinActorCreation(numberOfRuns);
             }
             break;
+        case "CountingActor" : 
+            if(parameter.length!=1){ 
+               System.out.println("Counting Actor usage java bechmarkRunner CountingActor <number of messages>");
+               System.exit(0);
+            }
+            else{
+               self<-runBenchmarkCountingActor(numberOfRuns);
+            }
+            break;
        default: 
                 //SALSA Compiler issue after default the ';' is removed by the SALSA compiler so java will not compile break is the only option
                 break;
@@ -154,9 +162,28 @@ behavior BenchmarkRunner{
       resultList.add(totalTime);
    }
    ack finished(){
+     Double avgTime=0.0;
+     Double temp;
+     for(int j=0;j<resultList.size();j++){
+        for(int i=0;i<resultList.size()-1-j;i++){
+           if(resultList.get(i)>resultList.get(i+1)){
+              temp=resultList.get(i);
+              resultList.set(i,resultList.get(i+1));
+              resultList.set(i+1,temp);
+           }
+        }
+     } 
+     double median= resultList.get((int)(resultList.size()/2));
+     double allowedMin=(1-.2)*median;
+     double allowedMax=(1+.2)*median;
+     int y=0;
      for(Double i: resultList){
-     
+        if(i>=allowedMin && i<=allowedMax){
+           avgTime+=i;
+           y++;
+        }
      }
+     avgTime=avgTime/y;
      try{
          File file = new File(outFileName);
          FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
@@ -165,7 +192,7 @@ behavior BenchmarkRunner{
          for(int x=0;x<parameter.length;x++){
             bw.write("<"+parameter[x]+">");
          }
-         bw.write( "Avg Time: " + sumTime/numberOfRuns +"\n");
+         bw.write( "Avg Time: " + avgTime +"\n");
          bw.close();
       }catch(IOException e){
 
@@ -195,7 +222,7 @@ behavior BenchmarkRunner{
    ack runBenchmarkBig(long x){
       if(x>0){
          jd=new JoinDirector();
-         Big benchmark =new Big(1,null) on (0);
+         Big benchmark =new Big(1,null,0) on (0);
          self<-start()@
          benchmark<-Big(Integer.parseInt(parameter[0]),Integer.parseInt(parameter[1]),jd);
          jd<-resolveAfter(1)@
@@ -245,7 +272,7 @@ behavior BenchmarkRunner{
          benchmark<-Trapezoid(Double.parseDouble(parameter[0]),Double.parseDouble(parameter[1]),Integer.parseInt(parameter[2]),Integer.parseInt(parameter[3]),jd);
          jd<-resolveAfter(1)@
          self<-end()@
-         self<-runBenchmarkPi(x-1);
+         self<-runBenchmarkTrapezoid(x-1);
       }
       else{
          self<-finished()@
@@ -257,9 +284,10 @@ behavior BenchmarkRunner{
          jd=new JoinDirector();
          Fibonacci benchmark =new Fibonacci(Integer.parseInt(parameter[0])) on (0);
          self<-start()@
-         benchmark<-finish(benchmark<-compute())@
+         benchmark<-finish(benchmark<-compute(),jd);
+         jd<-resolveAfter(1)@
          self<-end()@
-         self<-runBenchmarkPi(x-1);
+         self<-runBenchmarkFibonacci(x-1);
       }
       else{
          self<-finished()@
@@ -274,7 +302,7 @@ behavior BenchmarkRunner{
          benchmark<-Sieve(Long.parseLong(parameter[0]),Integer.parseInt(parameter[1]),jd);
          jd<-resolveAfter(1)@
          self<-end()@
-         self<-runBenchmarkPi(x-1);
+         self<-runBenchmarkSieve(x-1);
       }
       else{
          self<-finished()@
@@ -289,7 +317,7 @@ behavior BenchmarkRunner{
          benchmark<-CigSmoker(Integer.parseInt(parameter[0]),Integer.parseInt(parameter[1]),jd);
          jd<-resolveAfter(1)@
          self<-end()@
-         self<-runBenchmarkPi(x-1);
+         self<-runBenchmarkCigSmoke(x-1);
       }
       else{
          self<-finished()@
@@ -304,7 +332,7 @@ behavior BenchmarkRunner{
          benchmark<-ForkJoinThroughPut(Integer.parseInt(parameter[0]),Integer.parseInt(parameter[1]),jd);
          jd<-resolveAfter(1)@
          self<-end()@
-         self<-runBenchmarkPi(x-1);
+         self<-runBenchmarkForkJoinThroughPut(x-1);
       }
       else{
          self<-finished()@
@@ -319,7 +347,22 @@ behavior BenchmarkRunner{
          benchmark<-ForkJoinActorCreation(Integer.parseInt(parameter[0]),jd);
          jd<-resolveAfter(1)@
          self<-end()@
-         self<-runBenchmarkPi(x-1);
+         self<-runBenchmarkForkJoinActorCreation(x-1);
+      }
+      else{
+         self<-finished()@
+         self<-exit();
+      }
+   }
+   ack runBenchmarkCountingActor(long x){
+      if(x>0){
+         jd=new JoinDirector();
+         CountingActor benchmark =new CountingActor() on (0);
+         self<-start()@
+         benchmark<-CountingActor(Integer.parseInt(parameter[0]),jd);
+         jd<-resolveAfter(1)@
+         self<-end()@
+         self<-runBenchmarkCountingActor(x-1);
       }
       else{
          self<-finished()@
